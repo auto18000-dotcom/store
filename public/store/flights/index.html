@@ -7,89 +7,37 @@
 <meta name="description" content="TourGuid doesn't have its own flight booking system yet. For now, search and book flights through our travel partner, Expedia.">
 <meta name="theme-color" content="#1E88E5">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="preload" href="/fonts/inter-800.woff2" as="font" type="font/woff2" crossorigin>
-<style>
-@font-face { font-family: "Inter"; font-style: normal; font-weight: 800; font-display: swap; src: url("/fonts/inter-800.woff2") format("woff2"); }
-
-:root {
-  --bg: #f4f6fa; --panel: #ffffff; --panel2: #eef2f8; --ink: #14213d; --muted: #55627a;
-  --line: #c5cede; --line2: #dfe5ef; --accent: #155eef; --accent-bg: #e6eeff;
-  --ok: #1a7f45; --ok-bg: #e5f5ec; --warn: #9a5b00; --warn-bg: #fff3dc; --r: 4px;
-}
-@media (prefers-color-scheme: dark) {
-  :root { --bg: #0a1020; --panel: #101a30; --panel2: #15213c; --ink: #e6edf9; --muted: #98a8c6;
-    --line: #2c3d63; --line2: #1f2d4b; --accent: #6ea0ff; --accent-bg: #16295a;
-    --ok: #4ad08a; --ok-bg: #0f2a1d; --warn: #ffc25c; --warn-bg: #33270d; }
-}
-* { box-sizing: border-box; }
-html, body { margin: 0; }
-body { background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
-main { max-width: 880px; margin: 0 auto; padding: 20px 20px 64px; }
-a { color: var(--accent); }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-header.top { display: flex; align-items: center; gap: 10px; padding: 16px 20px; max-width: 880px; margin: 0 auto; }
-header.top .logo { width: 26px; height: 26px; color: var(--ink); flex: none; }
-header.top a.home { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--ink); font-weight: 800; font-family: "Inter", system-ui, sans-serif; letter-spacing: -.01em; font-size: 17px; }
-header.top nav { margin-left: auto; font-size: 14px; }
-header.top nav a { color: var(--muted); text-decoration: none; font-weight: 600; }
-header.top nav a:hover { color: var(--accent); }
-.crumb { color: var(--muted); font-size: 13px; margin: 0 0 6px; }
-.crumb a { color: var(--muted); text-decoration: none; } .crumb a:hover { color: var(--accent); }
-h1 { font-family: "Inter", system-ui, sans-serif; font-weight: 800; letter-spacing: -.02em; font-size: clamp(28px, 5vw, 40px); margin: 4px 0 10px; text-wrap: balance; }
-p.lede { color: var(--muted); font-size: 17px; max-width: 62ch; margin: 0 0 28px; }
-.shelves { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
-.shelf { display: block; text-decoration: none; color: inherit; padding: 18px; background: var(--panel); border: 1px solid var(--line2); border-radius: var(--r); transition: border-color .15s, transform .15s; }
-.shelf:hover { border-color: var(--accent); }
-.shelf .ic { width: 30px; height: 30px; color: var(--accent); margin-bottom: 10px; }
-.shelf h2 { margin: 0 0 4px; font-size: 17px; letter-spacing: -.01em; }
-.shelf p { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
-.badge { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: var(--r); }
-.badge.ok { background: var(--ok-bg); color: var(--ok); }
-.badge.soon { background: var(--warn-bg); color: var(--warn); }
-.panel { background: var(--panel); border: 1px solid var(--line2); border-radius: var(--r); padding: 26px; margin-top: 8px; }
-.btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; background: var(--accent); color: #fff; text-decoration: none; font-weight: 700; border-radius: var(--r); font-size: 16px; }
-.btn:hover { filter: brightness(1.08); }
-.disclosure { margin-top: 16px; padding: 12px 14px; background: var(--panel2); border-left: 3px solid var(--accent); border-radius: 0 var(--r) var(--r) 0; font-size: 13.5px; color: var(--muted); max-width: 60ch; }
-ul.expect { padding-left: 20px; color: var(--muted); font-size: 14.5px; }
-ul.expect li { margin: 4px 0; }
-.back { display: inline-block; margin-top: 24px; font-size: 14px; font-weight: 600; text-decoration: none; color: var(--muted); }
-.back:hover { color: var(--accent); }
-.soon-icon { width: 56px; height: 56px; color: var(--muted); opacity: .5; margin-bottom: 6px; }
-footer.foot { max-width: 880px; margin: 0 auto; padding: 0 20px 40px; color: var(--muted); font-size: 12.5px; }
-.prevh { font-family: "Inter", system-ui, sans-serif; font-weight: 800; letter-spacing: -.01em; font-size: 22px; margin: 40px 0 6px; }
-.previewpanel { border-color: var(--warn); background: color-mix(in srgb, var(--warn-bg) 55%, var(--panel)); }
-.searchform { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; align-items: end; }
-.searchform label { display: grid; gap: 4px; font-size: 12.5px; font-weight: 700; color: var(--muted); }
-.searchform input { padding: 9px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--panel); color: var(--ink); font: inherit; font-size: 14px; }
-.search-btn { border: 0; cursor: pointer; padding: 10px 18px; font-size: 14px; }
-#preview-results table.tbl { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-#preview-results th, #preview-results td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line2); }
-#preview-results th { font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
-#preview-results td.price { font-weight: 800; font-variant-numeric: tabular-nums; }
-
-</style>
+<link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/store/store.css">
 </head>
 <body>
-<header class="top">
-<a class="home" href="/"><svg class="logo" aria-hidden="true" focusable="false" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-<g><line x1="-30" y1="330" x2="90" y2="5" stroke="currentColor" stroke-width="14" stroke-linecap="round" opacity=".25"/><path d="M 80 38 L 450 70 Q 270 210, 68 250 Z" fill="#FF9800"/></g>
-<g><line x1="185" y1="495" x2="275" y2="90" stroke="currentColor" stroke-width="14" stroke-linecap="round" opacity=".25"/><path d="M 266 122 L 500 150 Q 380 240, 255 265 Z" fill="#E53935"/></g>
-<g><line x1="20" y1="560" x2="140" y2="235" stroke="currentColor" stroke-width="14" stroke-linecap="round" opacity=".25"/><path d="M 130 268 L 500 300 Q 320 440, 118 480 Z" fill="#66BB6A"/></g>
+<header class="hero sub">
+<div class="wrap hero-bar">
+<a class="brand nav-home" href="/"><svg class="brand-mark" viewBox="0 0 512 512" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+<g><line x1="-30" y1="330" x2="90" y2="5" stroke="#F5F5F5" stroke-width="10" stroke-linecap="round"/><path d="M 80 38 L 450 70 Q 270 210, 68 250 Z" fill="#FF9800"/></g>
+<g><line x1="185" y1="495" x2="275" y2="90" stroke="#F5F5F5" stroke-width="10" stroke-linecap="round"/><path d="M 266 122 L 500 150 Q 380 240, 255 265 Z" fill="#E53935"/></g>
+<g><line x1="20" y1="560" x2="140" y2="235" stroke="#F5F5F5" stroke-width="10" stroke-linecap="round"/><path d="M 130 268 L 500 300 Q 320 440, 118 480 Z" fill="#66BB6A"/></g>
 </svg>TourGuid</a>
 <nav><a href="/store/">Store</a></nav>
-</header>
-<main>
-<p class="crumb"><a href="/store/">Store</a> / Flights</p>
+</div>
+<div class="wrap">
+<p class="crumb-light"><a href="/store/">Store</a> / Flights</p>
 <h1>Flights</h1>
-<p class="lede">TourGuid doesn't have its own flight booking system yet. For now, search and book flights through our travel partner, Expedia.</p>
+<p class="lead">TourGuid doesn't have its own flight booking system yet. For now, search and book flights through our travel partner, Expedia.</p>
+</div>
+</header>
+<main class="wrap">
 <div class="panel">
-  <a class="btn" href="https://www.expedia.com/affiliates/expedia-home.tniWBDr" target="_blank" rel="sponsored noopener noreferrer">Continue to Expedia →</a>
+  <a class="btn btn-solid" href="https://www.expedia.com/affiliates/expedia-home.tniWBDr" target="_blank" rel="sponsored noopener noreferrer">Continue to Expedia →</a>
   <ul class="expect"><li>Search by origin, destination and dates on Expedia</li><li>Compare airlines, times and fares</li><li>Book securely, directly with Expedia</li></ul>
   <div class="disclosure">TourGuid participates in the Expedia affiliate program. If you book after clicking this link, we may earn a commission at no extra cost to you. You'll leave tourguid.net and complete your search and booking on Expedia's own site. This is Expedia's general site for now; a direct flights search is on the way.</div>
 </div>
 
-<h2 class="prevh">Preview: search flights directly on TourGuid</h2>
-<p class="lede" style="margin-bottom:16px;">This is a look at what's coming, not something you can book yet. Every result below is invented for the demo — airlines, times and prices — so try it, but don't trust it.</p>
+<div class="preview-head">
+  <span class="kicker on-light pennant-tag">A look at what's coming</span>
+  <h2>Search flights directly on TourGuid</h2>
+  <p>Not something you can book yet &mdash; every result below is invented for the demo, so try it, but don't trust it.</p>
+</div>
 <div class="panel previewpanel">
   <span class="badge soon" style="margin-bottom:14px;display:inline-block;">Sample data — not bookable</span>
   <form id="preview-search" class="searchform">
@@ -98,14 +46,15 @@ footer.foot { max-width: 880px; margin: 0 auto; padding: 0 20px 40px; color: var
     <datalist id="pf-cities"><option>New York (JFK)</option><option>Los Angeles (LAX)</option><option>Chicago (ORD)</option><option>San Francisco (SFO)</option><option>Paris (CDG)</option><option>London (LHR)</option></datalist>
     <label>Depart<input id="pf-depart" type="date" required></label>
     <label>Travelers<input id="pf-travelers" type="number" min="1" max="9" value="1"></label>
-    <button type="submit" class="btn search-btn">Search (sample)</button>
+    <button type="submit" class="btn btn-solid search-btn">Search (sample)</button>
   </form>
-  <p id="preview-stamp" class="hint" style="margin-top:14px;"></p>
+  <p id="preview-stamp" class="hint"></p>
   <div id="preview-results"></div>
 </div>
 <script src="/store/flights/search.js"></script>
-<a class="back" href="/store/">← Back to Store</a>
+
+<a class="back-link" href="/store/">← Back to Store</a>
 </main>
-<footer class="foot">Prices, availability and offers shown here are provided by our travel partners, not TourGuid.</footer>
+<footer class="foot"><div class="wrap"><p>Prices, availability and offers shown here are provided by our travel partners, not TourGuid. &copy; TourGuid</p></div></footer>
 </body>
 </html>
