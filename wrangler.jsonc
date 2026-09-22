@@ -1,0 +1,27 @@
+{
+  "name": "tourguid-web",
+  "compatibility_date": "2026-09-19",
+
+  // Assets-only, like TourGuid-Control: no Worker script, Cloudflare serves
+  // ./public from its edge. There is no server code and nothing secret here.
+  "assets": {
+    "directory": "./public"
+  },
+
+  // Kept explicitly false, for the reason TourGuid-Control's wrangler.jsonc
+  // gives: adding `routes` silently flips this, so never leave it implicit. It
+  // was true to look at the page on tourguid-web.<account>.workers.dev before
+  // the domain was attached. That address is a duplicate of the public site on
+  // a non-TourGuid hostname (bad for search and for lookalike phishing), so it
+  // is closed now that tourguid.net serves the page.
+  "workers_dev": false,
+  "preview_urls": false,
+
+  // The custom domain, declared here so it lives in version control.
+  // custom_domain: true makes Cloudflare create and own the DNS record, so do
+  // NOT add one by hand first (a pre-existing record fails the deploy).
+  // On 2026-09-20 tourguid.net itself did not resolve at all, so the apex is
+  // free. www.tourguid.net is deliberately not listed: decide whether it
+  // should serve this page or redirect to the apex before adding it.
+  "routes": [{ "pattern": "tourguid.net", "custom_domain": true }]
+}

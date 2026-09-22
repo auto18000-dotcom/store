@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Flights — TourGuid Store</title>
+<meta name="description" content="Flights in the TourGuid Store, coming soon.">
+<meta name="theme-color" content="#1E88E5">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/fonts/inter-800.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+@font-face { font-family: "Inter"; font-style: normal; font-weight: 800; font-display: swap; src: url("/fonts/inter-800.woff2") format("woff2"); }
+
+:root {
+  --bg: #f4f6fa; --panel: #ffffff; --panel2: #eef2f8; --ink: #14213d; --muted: #55627a;
+  --line: #c5cede; --line2: #dfe5ef; --accent: #155eef; --accent-bg: #e6eeff;
+  --ok: #1a7f45; --ok-bg: #e5f5ec; --warn: #9a5b00; --warn-bg: #fff3dc; --r: 4px;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0a1020; --panel: #101a30; --panel2: #15213c; --ink: #e6edf9; --muted: #98a8c6;
+    --line: #2c3d63; --line2: #1f2d4b; --accent: #6ea0ff; --accent-bg: #16295a;
+    --ok: #4ad08a; --ok-bg: #0f2a1d; --warn: #ffc25c; --warn-bg: #33270d; }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+main { max-width: 880px; margin: 0 auto; padding: 20px 20px 64px; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+header.top { display: flex; align-items: center; gap: 10px; padding: 16px 20px; max-width: 880px; margin: 0 auto; }
+header.top .logo { width: 26px; height: 26px; color: var(--ink); flex: none; }
+header.top a.home { display: flex; align-items: center; gap: 8px; text-decoration: none; color: var(--ink); font-weight: 800; font-family: "Inter", system-ui, sans-serif; letter-spacing: -.01em; font-size: 17px; }
+header.top nav { margin-left: auto; font-size: 14px; }
+header.top nav a { color: var(--muted); text-decoration: none; font-weight: 600; }
+header.top nav a:hover { color: var(--accent); }
+.crumb { color: var(--muted); font-size: 13px; margin: 0 0 6px; }
+.crumb a { color: var(--muted); text-decoration: none; } .crumb a:hover { color: var(--accent); }
+h1 { font-family: "Inter", system-ui, sans-serif; font-weight: 800; letter-spacing: -.02em; font-size: clamp(28px, 5vw, 40px); margin: 4px 0 10px; text-wrap: balance; }
+p.lede { color: var(--muted); font-size: 17px; max-width: 62ch; margin: 0 0 28px; }
+.shelves { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.shelf { display: block; text-decoration: none; color: inherit; padding: 18px; background: var(--panel); border: 1px solid var(--line2); border-radius: var(--r); transition: border-color .15s, transform .15s; }
+.shelf:hover { border-color: var(--accent); }
+.shelf .ic { width: 30px; height: 30px; color: var(--accent); margin-bottom: 10px; }
+.shelf h2 { margin: 0 0 4px; font-size: 17px; letter-spacing: -.01em; }
+.shelf p { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+.badge { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: var(--r); }
+.badge.ok { background: var(--ok-bg); color: var(--ok); }
+.badge.soon { background: var(--warn-bg); color: var(--warn); }
+.panel { background: var(--panel); border: 1px solid var(--line2); border-radius: var(--r); padding: 26px; margin-top: 8px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 13px 22px; background: var(--accent); color: #fff; text-decoration: none; font-weight: 700; border-radius: var(--r); font-size: 16px; }
+.btn:hover { filter: brightness(1.08); }
+.disclosure { margin-top: 16px; padding: 12px 14px; background: var(--panel2); border-left: 3px solid var(--accent); border-radius: 0 var(--r) var(--r) 0; font-size: 13.5px; color: var(--muted); max-width: 60ch; }
+ul.expect { padding-left: 20px; color: var(--muted); font-size: 14.5px; }
+ul.expect li { margin: 4px 0; }
+.back { display: inline-block; margin-top: 24px; font-size: 14px; font-weight: 600; text-decoration: none; color: var(--muted); }
+.back:hover { color: var(--accent); }
+.soon-icon { width: 56px; height: 56px; color: var(--muted); opacity: .5; margin-bottom: 6px; }
+footer.foot { max-width: 880px; margin: 0 auto; padding: 0 20px 40px; color: var(--muted); font-size: 12.5px; }
+
+</style>
+</head>
+<body>
+<header class="top">
+<a class="home" href="/"><svg class="logo" aria-hidden="true" focusable="false" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+<g><line x1="-30" y1="330" x2="90" y2="5" stroke="currentColor" stroke-width="14" stroke-linecap="round" opacity=".25"/><path d="M 80 38 L 450 70 Q 270 210, 68 250 Z" fill="#FF9800"/></g>
+<g><line x1="185" y1="495" x2="275" y2="90" stroke="currentColor" stroke-width="14" stroke-linecap="round" opacity=".25"/><path d="M 266 122 L 500 150 Q 380 240, 255 265 Z" fill="#E53935"/></g>
+<g><line x1="20" y1="560" x2="140" y2="235" stroke="currentColor" stroke-width="14" stroke-linecap="round" opacity=".25"/><path d="M 130 268 L 500 300 Q 320 440, 118 480 Z" fill="#66BB6A"/></g>
+</svg>TourGuid</a>
+<nav><a href="/store/">Store</a></nav>
+</header>
+<main>
+<p class="crumb"><a href="/store/">Store</a> / Flights</p>
+<h1>Flights</h1>
+<div class="panel" style="text-align:center; padding: 48px 26px;">
+  <svg class="soon-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 16l20-6-6 6 2 6-3-2-3 3-1-5-6-2z" stroke-linejoin="round"/></svg>
+  <p class="lede" style="margin: 6px auto 0; max-width: 46ch;">Flights in the TourGuid Store isn't built yet. We're working on it — check back soon.</p>
+</div>
+<a class="back" href="/store/">← Back to Store</a>
+</main>
+<footer class="foot">Prices, availability and offers shown here are provided by our travel partners, not TourGuid.</footer>
+</body>
+</html>

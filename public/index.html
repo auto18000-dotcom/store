@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TourGuid — Coming soon</title>
+<meta name="description" content="TourGuid is coming soon.">
+<meta name="theme-color" content="#1E88E5">
+<meta property="og:type" content="website">
+<meta property="og:title" content="TourGuid — Coming soon!">
+<meta property="og:description" content="TourGuid is coming soon.">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="/fonts/inter-800.woff2" as="font" type="font/woff2" crossorigin>
+<style>
+  /* Inter ExtraBold, latin subset, served from this site: the page makes no
+     third-party request. */
+  @font-face {
+    font-family: "Inter";
+    font-style: normal;
+    font-weight: 800;
+    font-display: swap;
+    src: url("/fonts/inter-800.woff2") format("woff2");
+  }
+
+  /* The blue is the app's own Login field: the logo's two background stops,
+     top to bottom, so the mark sits on the colour it was drawn on. */
+  :root {
+    --blue-top: #1E88E5;
+    --blue-bottom: #0D47A1;
+    --on-blue: #FFFFFF;
+  }
+
+  * { box-sizing: border-box; }
+
+  html {
+    background: var(--blue-bottom);
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    min-height: 100svh;
+    background: linear-gradient(180deg, var(--blue-top) 0%, var(--blue-bottom) 100%);
+    color: var(--on-blue);
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  main {
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(1.25rem, 5vmin, 3.5rem);
+    padding: max(24px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom));
+    text-align: center;
+  }
+
+  .logo {
+    display: block;
+    width: clamp(200px, 44vmin, 460px);
+    height: auto;
+  }
+
+  /* Sized against the width so it fills a phone and grows to a desktop; the
+     cap keeps it inside the window on a very wide screen. */
+  h1 {
+    margin: 0;
+    font-weight: 800;
+    font-size: clamp(2.6rem, 11.5vw, 9.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+</style>
+</head>
+<body>
+<main>
+  <!-- The approved mark, transparent variant (the pennants and poles only), the
+       same paths as TourGuid-Mobile's TourGuidLogo. Not redrawn or recoloured. -->
+  <svg class="logo" viewBox="0 0 512 512" role="img" aria-label="TourGuid" xmlns="http://www.w3.org/2000/svg">
+    <g>
+      <line x1="-30" y1="330" x2="90" y2="5" stroke="#F5F5F5" stroke-width="7" stroke-linecap="round"/>
+      <path d="M 80 38 L 450 70 Q 270 210, 68 250 Z" fill="#FF9800"/>
+    </g>
+    <g>
+      <line x1="185" y1="495" x2="275" y2="90" stroke="#F5F5F5" stroke-width="7" stroke-linecap="round"/>
+      <path d="M 266 122 L 500 150 Q 380 240, 255 265 Z" fill="#E53935"/>
+    </g>
+    <g>
+      <line x1="20" y1="560" x2="140" y2="235" stroke="#F5F5F5" stroke-width="7" stroke-linecap="round"/>
+      <path d="M 130 268 L 500 300 Q 320 440, 118 480 Z" fill="#66BB6A"/>
+    </g>
+  </svg>
+  <h1>COMING SOON!</h1>
+</main>
+</body>
+</html>
