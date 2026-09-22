@@ -151,6 +151,75 @@ ul.expect li { margin: 5px 0; }
 .foot p { margin: 0; font-size: .85rem; line-height: 1.6; }
 .foot a { color: #fff; }
 
+/* ---- hotel product page ---- */
+.prodbar { background: var(--surface); border-bottom: 1px solid var(--line); padding-block: max(14px, env(safe-area-inset-top)) 10px; }
+.prodbar .brand { color: var(--ink); }
+.prodbar .brand-mark path, .prodbar .brand-mark line { }
+.prodbar nav a { color: var(--muted); }
+.prodbar nav a:hover { color: var(--blue-text); }
+.prodbar .crumb-light { color: var(--muted); margin: 0; }
+.prodbar .crumb-light a { color: var(--muted); }
+.sampleband { background: color-mix(in srgb, var(--orange) 12%, var(--surface)); border-bottom: 1px solid color-mix(in srgb, var(--orange) 35%, transparent); }
+.sampleband .wrap { padding-block: 9px; font-size: .86rem; font-weight: 700; color: var(--orange-text); display: flex; align-items: center; gap: 8px; }
+
+.gallery { display: grid; grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; gap: 8px; height: clamp(240px, 38vw, 420px); margin: 18px 0; border-radius: var(--radius-card); overflow: hidden; }
+.gallery .g-main { grid-row: 1 / 3; }
+.gallery .g { position: relative; color: #fff; display: grid; place-items: center; overflow: hidden; }
+.gallery .g svg { width: 30px; height: 30px; opacity: .85; }
+.gallery .g span { position: absolute; bottom: 8px; left: 10px; font-size: 11px; font-weight: 700; background: rgba(0,0,0,.35); padding: 3px 8px; border-radius: 4px; }
+.g-1 { background: linear-gradient(135deg,#FF9F45,#B54708); } .g-2 { background: linear-gradient(135deg,#4C8DFF,#0F4FCC); }
+.g-3 { background: linear-gradient(135deg,#2FCB9A,#0E7A6C); } .g-4 { background: linear-gradient(135deg,#B98CFF,#5B36C9); } .g-5 { background: linear-gradient(135deg,#FFC94C,#B87F00); }
+
+.prod-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; margin-bottom: 4px; }
+.prod-head h1 { margin: 0; font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 800; letter-spacing: -.02em; }
+.prod-sub { color: var(--muted); font-size: .98rem; margin: 4px 0 16px; }
+.stars-badge { display: inline-flex; align-items: center; gap: 6px; font-weight: 800; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 4px 9px; font-size: .92rem; }
+.stars-badge b { color: #fff; background: var(--ok); border-radius: 3px; padding: 1px 7px; font-size: .88rem; }
+
+.prod-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 30px; align-items: start; margin-top: 6px; }
+.prod-main h2.ph { font-size: 1.2rem; font-weight: 800; letter-spacing: -.01em; margin: 32px 0 12px; }
+.prod-main h2.ph:first-child { margin-top: 0; }
+.amenity-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px 18px; }
+.amenity-grid li { list-style: none; display: flex; align-items: center; gap: 8px; color: var(--ink); font-size: .95rem; }
+.amenity-grid svg { width: 18px; height: 18px; color: var(--blue-text); flex: none; }
+.fit-panel { background: color-mix(in srgb, var(--blue) 6%, var(--surface)); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; }
+.fit-panel h3 { margin: 0 0 4px; font-size: 1.05rem; }
+.fit-panel .cap { margin: 0 0 12px; color: var(--muted); font-size: .86rem; }
+.nearby-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+.nearby-list li { display: flex; align-items: center; gap: 10px; font-size: .96rem; }
+.nearby-ico { width: 30px; height: 30px; flex: none; border-radius: 50%; background: var(--surface); border: 1px solid var(--line); display: grid; place-items: center; font-size: 15px; }
+.mapbox { height: 220px; border-radius: 10px; background: repeating-linear-gradient(45deg, var(--bg) 0 12px, var(--line) 12px 13px); border: 1px solid var(--line); display: grid; place-items: center; color: var(--muted); font-size: .88rem; font-weight: 700; }
+.review-card { border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; margin-bottom: 12px; }
+.review-top { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.review-av { width: 32px; height: 32px; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: .82rem; flex: none; }
+.review-stars { color: var(--orange); letter-spacing: 1px; }
+.review-card p { margin: 0; color: var(--muted); font-size: .95rem; }
+
+.price-card { position: sticky; top: 16px; border: 1px solid var(--line); border-radius: var(--radius-card); background: var(--surface); box-shadow: var(--shadow-card); padding: 20px; }
+.price-card .nightly { font-size: 1.8rem; font-weight: 800; letter-spacing: -.02em; }
+.price-card .per { color: var(--muted); font-size: .92rem; font-weight: 600; }
+.price-card .total { margin: 2px 0 14px; color: var(--muted); font-size: .92rem; }
+.price-card .stayrow { display: flex; justify-content: space-between; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); font-size: .92rem; }
+.price-card .stayrow:first-of-type { border-top: 0; }
+.pc-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 16px; }
+.pc-tag { font-size: .82rem; font-weight: 700; color: var(--ok); background: var(--ok-bg); border-radius: 4px; padding: 4px 8px; }
+.price-card .btn { width: 100%; margin-top: 8px; }
+.price-card .simnote { margin: 12px 0 0; font-size: .78rem; color: var(--muted); line-height: 1.5; }
+
+.room-card { display: grid; grid-template-columns: 120px 1fr auto; gap: 16px; align-items: center; border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+.room-thumb { height: 84px; border-radius: 6px; }
+.room-card h4 { margin: 0 0 4px; font-size: 1.02rem; }
+.room-card p { margin: 0; color: var(--muted); font-size: .88rem; }
+.room-price { text-align: right; }
+.room-price b { display: block; font-size: 1.2rem; }
+@media (max-width: 760px) {
+  .prod-grid { grid-template-columns: 1fr; }
+  .price-card { position: static; }
+  .gallery { grid-template-columns: 1fr 1fr; height: 260px; }
+  .room-card { grid-template-columns: 1fr; text-align: left; }
+  .room-price { text-align: left; }
+}
+
 @media (max-width: 700px) {
   .hero-bar nav a:not(.nav-home) { display: none; }
   .shelves { grid-template-columns: 1fr; }
