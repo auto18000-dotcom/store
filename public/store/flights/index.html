@@ -56,6 +56,16 @@ ul.expect li { margin: 4px 0; }
 .back:hover { color: var(--accent); }
 .soon-icon { width: 56px; height: 56px; color: var(--muted); opacity: .5; margin-bottom: 6px; }
 footer.foot { max-width: 880px; margin: 0 auto; padding: 0 20px 40px; color: var(--muted); font-size: 12.5px; }
+.prevh { font-family: "Inter", system-ui, sans-serif; font-weight: 800; letter-spacing: -.01em; font-size: 22px; margin: 40px 0 6px; }
+.previewpanel { border-color: var(--warn); background: color-mix(in srgb, var(--warn-bg) 55%, var(--panel)); }
+.searchform { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; align-items: end; }
+.searchform label { display: grid; gap: 4px; font-size: 12.5px; font-weight: 700; color: var(--muted); }
+.searchform input { padding: 9px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--panel); color: var(--ink); font: inherit; font-size: 14px; }
+.search-btn { border: 0; cursor: pointer; padding: 10px 18px; font-size: 14px; }
+#preview-results table.tbl { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+#preview-results th, #preview-results td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--line2); }
+#preview-results th { font-size: 11px; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+#preview-results td.price { font-weight: 800; font-variant-numeric: tabular-nums; }
 
 </style>
 </head>
@@ -77,6 +87,23 @@ footer.foot { max-width: 880px; margin: 0 auto; padding: 0 20px 40px; color: var
   <ul class="expect"><li>Search by origin, destination and dates on Expedia</li><li>Compare airlines, times and fares</li><li>Book securely, directly with Expedia</li></ul>
   <div class="disclosure">TourGuid participates in the Expedia affiliate program. If you book after clicking this link, we may earn a commission at no extra cost to you. You'll leave tourguid.net and complete your search and booking on Expedia's own site. This is Expedia's general site for now; a direct flights search is on the way.</div>
 </div>
+
+<h2 class="prevh">Preview: search flights directly on TourGuid</h2>
+<p class="lede" style="margin-bottom:16px;">This is a look at what's coming, not something you can book yet. Every result below is invented for the demo — airlines, times and prices — so try it, but don't trust it.</p>
+<div class="panel previewpanel">
+  <span class="badge soon" style="margin-bottom:14px;display:inline-block;">Sample data — not bookable</span>
+  <form id="preview-search" class="searchform">
+    <label>From<input id="pf-from" list="pf-cities" placeholder="City or airport" required></label>
+    <label>To<input id="pf-to" list="pf-cities" placeholder="City or airport" required></label>
+    <datalist id="pf-cities"><option>New York (JFK)</option><option>Los Angeles (LAX)</option><option>Chicago (ORD)</option><option>San Francisco (SFO)</option><option>Paris (CDG)</option><option>London (LHR)</option></datalist>
+    <label>Depart<input id="pf-depart" type="date" required></label>
+    <label>Travelers<input id="pf-travelers" type="number" min="1" max="9" value="1"></label>
+    <button type="submit" class="btn search-btn">Search (sample)</button>
+  </form>
+  <p id="preview-stamp" class="hint" style="margin-top:14px;"></p>
+  <div id="preview-results"></div>
+</div>
+<script src="/store/flights/search.js"></script>
 <a class="back" href="/store/">← Back to Store</a>
 </main>
 <footer class="foot">Prices, availability and offers shown here are provided by our travel partners, not TourGuid.</footer>
