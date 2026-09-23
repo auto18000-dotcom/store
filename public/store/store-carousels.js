@@ -1,5 +1,6 @@
-(()=>{
+(async()=>{
   const context=new URLSearchParams(location.search);
+  const destination=context.get('destination')||'Barcelona';
   const categoryHref=page=>{const url=new URL(`./${page}`,location.href);for(const key of ['destination','from','to'])if(context.has(key))url.searchParams.set(key,context.get(key));return `${url.pathname.split('/').pop()}${url.search?url.search:''}`};
   const categories={
     hotels:{page:'hotels.html',name:'Hotels',description:'Browse stays, compare neighborhoods, and open hotel details.',themes:[
@@ -26,6 +27,66 @@
       ['Arts and architecture','Collect landmarks for a day of discovery.','visual-place'],
       ['Nearby discoveries','Find places that fit around your hotel and route.','visual-city']
     ]}
+  };
+
+  // Live carousel data, one call for every row. A missing/failed/slow
+  // response is not an error state here -- it just means every row falls
+  // back to its editorial theme cards, which are honest on their own
+  // (clearly themes, never dressed as products).
+  let feed=null;
+  try{
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),4000);
+    const response=await fetch(`/api/store/feed?destination=${encodeURIComponent(destination)}`,{signal:controller.signal,headers:{Accept:'application/json'}});
+    clearTimeout(timeout);
+    if(response.ok)feed=await response.json();
+  }catch{feed=null}
+
+  const money=(amount,currency)=>{try{return new Intl.NumberFormat('en-US',{style:'currency',currency:currency||'USD'}).format(amount)}catch{return `${currency||''} ${amount}`.trim()}};
+
+  const buildThemeCard=(config,[title,summary,visualClass],categoryHref)=>{
+    const card=document.createElement('a');card.className='carousel-theme-card';card.href=categoryHref;
+    const visual=document.createElement('div');visual.className=`card-visual ${visualClass}`;
+    const caption=document.createElement('span');caption.textContent='Explore a theme';visual.append(caption);
+    const body=document.createElement('div');body.className='card-body';
+    const type=document.createElement('div');type.className='tag';type.textContent=config.name;
+    const name=document.createElement('h3');name.textContent=title;
+    const copy=document.createElement('p');copy.textContent=summary;
+    const linkText=document.createElement('span');linkText.className='theme-action';linkText.textContent=`Explore ${config.name.toLowerCase()} →`;
+    body.append(type,name,copy,linkText);card.append(visual,body);
+    return card;
+  };
+
+  const buildProductCard=(config,item)=>{
+    const card=document.createElement('a');
+    card.className='carousel-theme-card carousel-product-card';
+    card.href=item.url||categoryHref(config.page);
+    card.target='_blank';card.rel='noopener';
+    const visual=document.createElement('div');visual.className='card-visual product-photo';
+    if(item.photo)visual.style.backgroundImage=`url("${item.photo}")`;
+    const body=document.createElement('div');body.className='card-body';
+    const type=document.createElement('div');type.className='tag';type.textContent=item.source||config.name;
+    const name=document.createElement('h3');name.textContent=item.title;
+    const copy=document.createElement('p');copy.textContent=item.summary||'';
+    const meta=document.createElement('div');meta.className='product-meta';
+    if(typeof item.rating==='number'){
+      const rating=document.createElement('span');rating.className='product-rating';
+      rating.textContent=`★ ${item.rating.toFixed(1)}${item.reviewCount?` (${item.reviewCount.toLocaleString()})`:''}`;
+      meta.append(rating);
+    }
+    // bookable=false must look different from bookable=true: a Google listing
+    // has no price and no purchase action, only a place to look. Showing a
+    // price on an unpriced listing is exactly the failure mode to avoid.
+    if(item.bookable&&typeof item.price==='number'){
+      const price=document.createElement('span');price.className='product-price';
+      price.textContent=`from ${money(item.price,item.currency)}`;
+      meta.append(price);
+    }
+    const action=document.createElement('span');action.className='theme-action';
+    action.textContent=item.bookable?`Book on ${item.source} →`:'View details →';
+    body.append(type,name,copy,meta,action);
+    card.append(visual,body);
+    return card;
   };
 
   for(const [sectionId,config] of Object.entries(categories)){
@@ -56,16 +117,11 @@
     category.append(categoryVisual,categoryBody);
     track.insertBefore(category,track.children[2]);
 
-    for(const [title,summary,visualClass] of config.themes){
-      const card=document.createElement('a');card.className='carousel-theme-card';card.href=categoryHref(config.page);
-      const visual=document.createElement('div');visual.className=`card-visual ${visualClass}`;
-      const caption=document.createElement('span');caption.textContent='Explore a theme';visual.append(caption);
-      const body=document.createElement('div');body.className='card-body';
-      const type=document.createElement('div');type.className='tag';type.textContent=config.name;
-      const name=document.createElement('h3');name.textContent=title;
-      const copy=document.createElement('p');copy.textContent=summary;
-      const linkText=document.createElement('span');linkText.className='theme-action';linkText.textContent=`Explore ${config.name.toLowerCase()} →`;
-      body.append(type,name,copy,linkText);card.append(visual,body);track.append(card);
+    const live=feed?.categories?.[sectionId];
+    if(live?.live&&Array.isArray(live.items)&&live.items.length){
+      for(const item of live.items)track.append(buildProductCard(config,item));
+    }else{
+      for(const theme of config.themes)track.append(buildThemeCard(config,theme,categoryHref(config.page)));
     }
 
     const controls=document.createElement('div');controls.className='carousel-controls';

@@ -20,5 +20,9 @@
 .store-carousel .carousel-theme-card h3{font-size:1.18rem;line-height:1.25;margin:7px 0}
 .store-carousel .carousel-theme-card p{color:#5c7278;font-size:.91rem;margin:0 0 16px}
 .store-carousel .carousel-theme-card .theme-action{margin-top:auto;align-self:flex-start;color:#075d61;font-size:.84rem;font-weight:800;text-decoration:underline;text-underline-offset:3px}
+.store-carousel .product-photo{background-size:cover;background-position:center;background-color:#dce8e3}
+.store-carousel .product-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 12px}
+.store-carousel .product-rating{font-size:.85rem;font-weight:750;color:#9a5b00}
+.store-carousel .product-price{font-size:.85rem;font-weight:800;color:#075d61;margin-left:auto}
 @media(max-width:900px){.store-carousel .carousel-track>*{flex-basis:calc((100% - 19px)/2)}}
 @media(max-width:620px){.store-carousel .carousel-track>*{flex-basis:100%}.store-carousel .carousel-controls{margin-top:8px}}
