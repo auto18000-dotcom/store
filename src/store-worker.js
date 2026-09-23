@@ -216,6 +216,13 @@ async function askStoreSearch(env, provider, params, request) {
 
 /* ── mapping: provider shapes into the field names the pages read ────────── */
 
+/** "PT13H20M" -> 800. Null when absent, so a missing duration never sorts first. */
+function isoMinutes(value) {
+  const found = /^PT(?:(\d+)H)?(?:(\d+)M)?$/.exec(String(value || ""));
+  if (!found) return null;
+  return Number(found[1] || 0) * 60 + Number(found[2] || 0);
+}
+
 function flightOffers(payload, from, to, date) {
   const offers = [];
   for (const offer of (payload && payload.offers) || []) {
@@ -236,6 +243,21 @@ function flightOffers(payload, from, to, date) {
       arrival: last.arriving_at || null,
       stops: Math.max(segments.length - 1, 0),
       duration: (slices[0] && slices[0].duration) || null,
+      // Every slice added up, so a round trip is compared on the whole journey
+      // rather than on its outbound leg alone.
+      totalMinutes: slices.reduce((sum, slice) => {
+        const minutes = isoMinutes(slice && slice.duration);
+        return sum === null || minutes === null ? null : sum + minutes;
+      }, 0),
+      // Duffel's own artwork for the airline. Passed straight through — never
+      // guessed from an IATA code against some third-party logo service.
+      airlineLogo: offer.owner_logo_symbol_url || null,
+      airlineLogoWide: offer.owner_logo_lockup_url || null,
+      fareBrand: offer.fare_brand_name || null,
+      cabin: offer.cabin_class_marketing_name || offer.cabin_class || null,
+      baggage: offer.baggages || null,
+      conditions: offer.conditions || null,
+      emissionsKg: offer.total_emissions_kg ?? null,
       totalAmount: offer.total_amount || null,
       currency: offer.total_currency || null,
       expiresAt: offer.expires_at || null,
@@ -265,6 +287,27 @@ function flightOffers(payload, from, to, date) {
       })),
     });
   }
+  // WHICH ONE IS WORTH LOOKING AT. Computed once here rather than in the page,
+  // so every surface agrees about which offer is the cheapest — two screens
+  // disagreeing about that is worse than neither saying it.
+  //
+  // Ties are marked on ALL of the tied offers, not the first: three fares at
+  // 665.00 are equally the cheapest, and silently picking one would be a claim
+  // we cannot support. Duffel really does return ties — today's live search
+  // came back with two Air Tahiti Nui offers at exactly 665.00.
+  const priced = offers.filter((offer) => Number.isFinite(Number(offer.totalAmount)));
+  if (priced.length) {
+    const lowest = Math.min(...priced.map((offer) => Number(offer.totalAmount)));
+    for (const offer of priced) offer.cheapest = Number(offer.totalAmount) === lowest;
+  }
+  const timed = offers.filter((offer) => offer.totalMinutes !== null);
+  if (timed.length) {
+    const quickest = Math.min(...timed.map((offer) => offer.totalMinutes));
+    for (const offer of timed) offer.fastest = offer.totalMinutes === quickest;
+  }
+  const fewest = offers.length ? Math.min(...offers.map((offer) => offer.stops)) : null;
+  for (const offer of offers) offer.fewestStops = offer.stops === fewest;
+
   return offers;
 }
 
@@ -1165,6 +1208,34 @@ async function heroPhoto(env, params, ctx) {
   return json(data, { cache: HERO_TTL });
 }
 
+/**
+ * One line per request, readable with `wrangler tail`.
+ *
+ * WHY THIS EXISTS. On 2026-09-23 the owner reported "no live feeds" and an
+ * afternoon went into asking them what they saw. The preview server's request
+ * log answered it in one look: the page had never asked for the feed, because
+ * no destination was chosen, which is correct behaviour. A log of what was
+ * actually requested settles "is it the page or the server" immediately, and
+ * that question will be asked again.
+ *
+ * WHAT IT DELIBERATELY DOES NOT HOLD: no address, no query string, no typed
+ * search text. A destination is a city and is worth having; `?q=` from the
+ * suggest box is whatever a person typed and is none of our business. The
+ * ledger's rule applies here too — we are counting requests, not following
+ * people.
+ */
+function logLine(path, params, status, startedAt, extra) {
+  const parts = [
+    path.replace("/api/store/", ""),
+    `status=${status}`,
+    `ms=${Date.now() - startedAt}`,
+  ];
+  const where = params.get("destination");
+  if (where) parts.push(`destination=${where}`);
+  if (extra) parts.push(extra);
+  console.log(`[store] ${parts.join(" ")}`);
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
@@ -1173,13 +1244,21 @@ export default {
     // Everything that is not ours goes to the static site, unchanged.
     if (!path.startsWith("/api/store/")) return env.ASSETS.fetch(request);
 
-    if (request.method !== "GET" && request.method !== "HEAD") {
-      return json({ error: "method_not_allowed" }, { status: 405 });
-    }
+    const startedAt = Date.now();
     const params = url.searchParams;
 
-    switch (path) {
-      case "/api/store/health":
+    const response = await route(path, env, request, params, ctx);
+    logLine(path, params, response.status, startedAt, response.headers.get("x-tourguid-note"));
+    return response;
+  },
+};
+
+async function route(path, env, request, params, ctx) {
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    return json({ error: "method_not_allowed" }, { status: 405 });
+  }
+  switch (path) {
+    case "/api/store/health":
         return json({
           storeSearch:
             (env.STORE_SEARCH_URL || "").trim() && (env.STORE_CALLER_SECRET || "").trim()
@@ -1188,26 +1267,25 @@ export default {
           heroPhoto: (env.PEXELS_API_KEY || "").trim() ? "pexels" : "fallback_only",
           routes: ["suggest", "flights", "hotels", "activities", "places", "feed", "detail", "go", "hero-photo"],
         });
-      case "/api/store/flights":
+    case "/api/store/flights":
         return flights(env, request, params);
-      case "/api/store/hotels":
+    case "/api/store/hotels":
         return hotels(env, request, params);
-      case "/api/store/activities":
+    case "/api/store/activities":
         return activities(env, request, params);
-      case "/api/store/places":
+    case "/api/store/places":
         return places(env, request, params);
-      case "/api/store/feed":
+    case "/api/store/feed":
         return feed(env, request, params, ctx);
-      case "/api/store/go":
+    case "/api/store/go":
         return go(env, request, params);
-      case "/api/store/suggest":
+    case "/api/store/suggest":
         return suggest(env, request, params, ctx);
-      case "/api/store/detail":
+    case "/api/store/detail":
         return detail(env, request, params, ctx);
-      case "/api/store/hero-photo":
+    case "/api/store/hero-photo":
         return heroPhoto(env, params, ctx);
-      default:
+    default:
         return json({ error: "not_found" }, { status: 404 });
     }
-  },
-};
+}
