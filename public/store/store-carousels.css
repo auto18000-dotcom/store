@@ -29,3 +29,7 @@
 .store-carousel .product-instant{font-size:.78rem;font-weight:700;color:#0c7778}
 @media(max-width:900px){.store-carousel .carousel-track>*{flex-basis:calc((100% - 19px)/2)}}
 @media(max-width:620px){.store-carousel .carousel-track>*{flex-basis:100%}.store-carousel .carousel-controls{margin-top:8px}}
+
+.choose-destination-prompt{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:22px 24px;border:1px dashed #a9c6bd;border-radius:8px;background:#f4faf7;color:#123642}
+.choose-destination-prompt p{margin:0;font-size:1.02rem;font-weight:600}
+.choose-destination-prompt button{min-height:40px;padding:0 18px;border:0;border-radius:6px;background:#0c7778;color:#fff;font:inherit;font-weight:700;cursor:pointer}

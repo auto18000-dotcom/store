@@ -154,6 +154,18 @@
     // sitting behind eight editorial cards, reachable only by clicking past
     // all of them. Live results must lead the row, not follow it.
     const originalCards=[...track.children];
+    if(!destinationCtx){
+      // Nothing has been asked of any provider yet, so theme cards would be
+      // filler: say what the page needs instead.
+      originalCards.forEach(el=>el.remove());
+      const prompt=document.createElement('div');prompt.className='choose-destination-prompt';
+      const text=document.createElement('p');text.textContent="Choose a destination to see what's available";
+      const go=document.createElement('button');go.type='button';go.textContent='Search a place';
+      go.addEventListener('click',()=>{const field=document.getElementById('search-place');field?.scrollIntoView({behavior:'smooth',block:'center'});field?.focus()});
+      prompt.append(text,go);track.replaceWith(prompt);
+      const link=section.querySelector('.section-head > a');if(link){link.href=categoryHref(config.page);link.textContent=`Browse all ${config.name.toLowerCase()} →`;link.removeAttribute('target');link.removeAttribute('rel')}
+      continue;
+    }
     section.classList.add('store-carousel');
     track.classList.add('carousel-track');
     track.setAttribute('aria-label',`${config.name} carousel`);
