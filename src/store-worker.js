@@ -478,6 +478,92 @@ async function flights(env, request, params) {
   });
 }
 
+/**
+ * One place, with enough depth for a full page. Google's Place Details object,
+ * read the way placeResults reads Search: travel-lookup passes Google's own
+ * fields through unrenamed. Everything is optional — a hotel with no website
+ * or no editorial summary is ordinary, not an error.
+ *
+ * ATTRIBUTION IS NOT DECORATION HERE. Photos carry their photographer and
+ * reviews carry their author; Google's terms require both to be shown wherever
+ * the content is, and this page is the one Google's own reviewers will read.
+ */
+function placeDetail(payload) {
+  let place = payload && payload.place;
+  if (!place && payload && payload.id) place = payload;
+  if (!place || typeof place !== "object") return null;
+  const location = place.location || {};
+  const hours = place.regularOpeningHours || {};
+  const rawPhotos = place.tourguidPhotos || (place.tourguidPhoto ? [place.tourguidPhoto] : []);
+  return {
+    id: place.id ?? null,
+    name: textOf(place.displayName),
+    type: textOf(place.primaryTypeDisplayName) || place.primaryType || null,
+    address: place.formattedAddress ?? null,
+    lat: location.latitude ?? null,
+    lon: location.longitude ?? null,
+    rating: place.rating ?? null,
+    reviewCount: place.userRatingCount ?? null,
+    summary: textOf(place.editorialSummary),
+    website: place.websiteUri ?? null,
+    phone: place.internationalPhoneNumber || place.nationalPhoneNumber || null,
+    openingHours: hours.weekdayDescriptions || [],
+    photos: rawPhotos
+      .filter((photo) => photo && photo.url)
+      .map((photo) => ({ url: photo.url, credit: photo.author ?? null, creditUrl: photo.authorUri ?? null })),
+    reviews: (place.reviews || []).filter(Boolean).map((review) => {
+      const author = review.authorAttribution || {};
+      return {
+        rating: review.rating ?? null,
+        text: textOf(review.originalText) || textOf(review.text),
+        publishedAt: review.publishTime ?? null,
+        author: author.displayName ?? null,
+        authorPhoto: author.photoUri ?? null,
+        authorUrl: author.uri ?? null,
+      };
+    }),
+    url: place.googleMapsUri ?? null,
+    source: "Google Places",
+    // Google sells no rooms. A detail page may describe a hotel in full and
+    // still must not offer to book it.
+    bookable: false,
+  };
+}
+
+/** A full page for one place, from its Google place id. */
+async function detail(env, request, params, ctx) {
+  const placeId = one(params, "placeId", "", 200);
+  if (!placeId) {
+    return json({ error: "no_place", message: "A place id is required." }, { status: 400 });
+  }
+  const cache = caches.default;
+  const key = new Request(`https://detail.tourguid.invalid/${encodeURIComponent(placeId)}`);
+  const hit = await cache.match(key);
+  if (hit) return json({ ...(await hit.json()), cached: true });
+
+  const { payload, error } = await askStoreSearch(
+    env,
+    "place_details",
+    { place_id: placeId, photos: 6, reviews: true },
+    request
+  );
+  if (error) return refuse(error);
+  const found = placeDetail(payload);
+  if (!found) {
+    return json({ error: "not_found", message: "That place could not be loaded." }, { status: 404 });
+  }
+  const answer = { place: found, cached: false };
+  ctx.waitUntil(
+    cache.put(
+      key,
+      new Response(JSON.stringify(answer), {
+        headers: { "Content-Type": "application/json", "Cache-Control": `max-age=${FEED_TTL}` },
+      })
+    )
+  );
+  return json(answer);
+}
+
 /** Destination autocomplete. Worldwide, not a Barcelona list. */
 async function suggest(env, request, params, ctx) {
   const text = one(params, "q", "", 80);
@@ -798,7 +884,7 @@ export default {
               ? "configured"
               : "not_configured",
           heroPhoto: (env.PEXELS_API_KEY || "").trim() ? "pexels" : "fallback_only",
-          routes: ["suggest", "flights", "hotels", "activities", "places", "feed", "go", "hero-photo"],
+          routes: ["suggest", "flights", "hotels", "activities", "places", "feed", "detail", "go", "hero-photo"],
         });
       case "/api/store/flights":
         return flights(env, request, params);
@@ -814,6 +900,8 @@ export default {
         return go(env, request, params);
       case "/api/store/suggest":
         return suggest(env, request, params, ctx);
+      case "/api/store/detail":
+        return detail(env, request, params, ctx);
       case "/api/store/hero-photo":
         return heroPhoto(env, params, ctx);
       default:

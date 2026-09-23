@@ -1,7 +1,21 @@
 (async()=>{
   const context=new URLSearchParams(location.search);
-  const destination=context.get('destination')||'Barcelona';
-  const categoryHref=page=>{const url=new URL(`./${page}`,location.href);for(const key of ['destination','from','to'])if(context.has(key))url.searchParams.set(key,context.get(key));return `${url.pathname.split('/').pop()}${url.search?url.search:''}`};
+  // window.TourGuidDestination (set by index.html before this script loads)
+  // carries the FULL chosen place -- region/country/lat/lon, not just a name.
+  // A bare name is a guess handed to a geocoder (there are two Barcelonas:
+  // Catalonia and Anzoátegui, Venezuela), so pages without that context fall
+  // back to reading the same fields from the URL query instead of a name alone.
+  const destinationCtx=window.TourGuidDestination||{
+    name:context.get('destination')||'Barcelona',
+    region:context.get('region')||null,
+    country:context.get('country')||null,
+    countryCode:context.get('countryCode')||null,
+    lat:context.get('lat')?Number(context.get('lat')):null,
+    lon:context.get('lon')?Number(context.get('lon')):null,
+  };
+  const destination=destinationCtx.name;
+  const forwardKeys=['destination','region','country','countryCode','lat','lon','from','to'];
+  const categoryHref=page=>{const url=new URL(`./${page}`,location.href);for(const key of forwardKeys)if(context.has(key))url.searchParams.set(key,context.get(key));return `${url.pathname.split('/').pop()}${url.search?url.search:''}`};
   const categories={
     hotels:{page:'hotels.html',name:'Hotels',description:'Browse stays, compare neighborhoods, and open hotel details.',themes:[
       ['Waterfront stays','Find a base close to the coast and open spaces.','visual-water'],
@@ -37,7 +51,9 @@
   try{
     const controller=new AbortController();
     const timeout=setTimeout(()=>controller.abort(),4000);
-    const response=await fetch(`/api/store/feed?destination=${encodeURIComponent(destination)}`,{signal:controller.signal,headers:{Accept:'application/json'}});
+    const feedParams=new URLSearchParams({destination});
+    for(const [key,val] of [['region',destinationCtx.region],['country',destinationCtx.country],['lat',destinationCtx.lat],['lon',destinationCtx.lon]])if(val!=null&&val!=='')feedParams.set(key,val);
+    const response=await fetch(`/api/store/feed?${feedParams}`,{signal:controller.signal,headers:{Accept:'application/json'}});
     clearTimeout(timeout);
     if(response.ok)feed=await response.json();
   }catch{feed=null}
