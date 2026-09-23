@@ -27,9 +27,14 @@
  * store-search means the two secrets do not match.
  */
 
-const FEED_TTL = 3600; // seconds. See cachedFeed() for why it is an hour.
+const FEED_TTL = 3600; // seconds. See feed() for why it is an hour.
 const CARD_IMAGE_MIN_WIDTH = 600;
 const HERO_TTL = 86400;
+// Suggestions take 1.3-3.1s upstream, far too slow to feel like typing. City
+// names do not change, so a prefix is cached for a day and the page debounces
+// on top. Cached per PREFIX, so "barce" already serves "barcel" and "barcelo".
+const SUGGEST_TTL = 86400;
+const SUGGEST_MIN_CHARS = 2;
 
 const BARCELONA_FALLBACK = {
   image:
@@ -334,6 +339,64 @@ function placeResults(payload) {
   });
 }
 
+/**
+ * "Town, Region, Country" — the string every downstream search wants.
+ *
+ * A BARE NAME IS A GUESS HANDED TO A GEOCODER, AND IT GUESSES TOWARDS THE
+ * FAMOUS ONE. "Malay" finds Malaysia rather than Malay, Aklan. There are two
+ * Barcelonas — Catalonia and Venezuela — and only the qualifiers tell them
+ * apart. Same rule the app learned on 2026-09-17.
+ */
+function placeLabel(city) {
+  const seen = new Set();
+  return (
+    [city.name, city.region, city.country]
+      .map((part) => (part || "").trim())
+      .filter((part) => part && !seen.has(part.toLowerCase()) && seen.add(part.toLowerCase()))
+      .join(", ") || null
+  );
+}
+
+function suggestionsOf(payload) {
+  return (((payload && payload.cities) || []).filter((city) => city && city.name)).map((city) => ({
+    name: city.name,
+    region: city.region ?? null,
+    country: city.country ?? null,
+    countryCode: city.countryCode ?? null,
+    lat: city.lat ?? null,
+    lon: city.lon ?? null,
+    timeZone: city.timeZone ?? null,
+    // What the page sends back to every other route. Keeping the whole object,
+    // not just the label, is what lets Duffel and the renowned-places search
+    // use coordinates rather than a name.
+    label: placeLabel(city),
+  }));
+}
+
+/** Where the traveller actually means, from what the page sends back. */
+function contextOf(params) {
+  const where = {};
+  const city = one(params, "destination");
+  const region = one(params, "region");
+  const country = one(params, "country");
+  if (city) where.city = city;
+  if (region) where.region = region;
+  if (country) where.country = country;
+  const lat = Number(one(params, "lat"));
+  const lon = Number(one(params, "lon"));
+  if (Number.isFinite(lat) && Number.isFinite(lon) && one(params, "lat") && one(params, "lon")) {
+    where.lat = lat;
+    where.lon = lon;
+  }
+  return where;
+}
+
+// A FUNCTION, not a shared constant. A Response body can be consumed once, so
+// a module-level Response would serve the first visitor and fail every one
+// after it — and only under real traffic, never in a single-request test.
+const noDestination = () =>
+  json({ error: "no_destination", message: "Choose a destination first." }, { status: 400 });
+
 /** One shape for every carousel card, whatever supplied it. */
 function asCard(item, category, source, priced) {
   return {
@@ -404,10 +467,47 @@ async function flights(env, request, params) {
   if (error) return refuse(error);
   return json({
     offers: flightOffers(payload, origin, destination, departure),
+    // Duffel says which mode answered. A test key invents an airline called
+    // "Duffel Airways" and synthetic fares; a page that cannot tell the
+    // difference will quote them to a real traveller. Carry it through so the
+    // site can say so plainly — or refuse to show prices at all.
+    liveMode: payload.live_mode ?? null,
     // Carried through untouched. False means the search ran WITHOUT a CAPTCHA
     // check; passing it on means nobody can mistake one for the other.
     captchaChecked: payload.captchaChecked ?? null,
   });
+}
+
+/** Destination autocomplete. Worldwide, not a Barcelona list. */
+async function suggest(env, request, params, ctx) {
+  const text = one(params, "q", "", 80);
+  if (text.length < SUGGEST_MIN_CHARS) {
+    // Not an error: it is simply too early to ask. Answering empty keeps the
+    // field quiet rather than flashing "no results" after one letter.
+    return json({ suggestions: [], query: text });
+  }
+  const cache = caches.default;
+  const key = new Request(
+    `https://suggest.tourguid.invalid/${encodeURIComponent(text.toLowerCase())}`
+  );
+  const hit = await cache.match(key);
+  if (hit) return json({ ...(await hit.json()), cached: true });
+
+  const { payload, error } = await askStoreSearch(env, "city_autocomplete", { text, limit: 8 }, request);
+  if (error) return refuse(error);
+  const suggestions = suggestionsOf(payload);
+  const answer = { suggestions, query: text, cached: false };
+  if (suggestions.length) {
+    ctx.waitUntil(
+      cache.put(
+        key,
+        new Response(JSON.stringify(answer), {
+          headers: { "Content-Type": "application/json", "Cache-Control": `max-age=${SUGGEST_TTL}` },
+        })
+      )
+    );
+  }
+  return json(answer);
 }
 
 async function hotels(env, request, params) {
@@ -415,7 +515,7 @@ async function hotels(env, request, params) {
     env,
     "duffel_stay_search",
     {
-      place: one(params, "destination", "Barcelona"),
+      place: one(params, "destination"),
       check_in: one(params, "checkIn"),
       check_out: one(params, "checkOut"),
       adults: Number(one(params, "adults", "2")) || 2,
@@ -428,26 +528,33 @@ async function hotels(env, request, params) {
 }
 
 async function activities(env, request, params) {
+  const where = contextOf(params);
+  if (!where.city) return noDestination();
   const { payload, error } = await askStoreSearch(
     env,
     "viator_search",
-    { city: one(params, "destination", "Barcelona"), count: 12, nearbyMiles: 30, nearbyCount: 6 },
+    { ...where, count: 12, nearbyMiles: 30, nearbyCount: 6 },
     request
   );
   if (error) return refuse(error);
-  return json({ items: activityResults(payload), captchaChecked: payload.captchaChecked ?? null });
+  return json({
+    items: activityResults(payload),
+    // WHICH Viator destination actually answered. Viator resolves a small town
+    // to whatever it does have — Tangalan, Philippines came back as tours
+    // hundreds of miles away — so a page presenting these as local is honestly
+    // wrong. Pass it on and let the page say where they really are.
+    destination: payload.destination ?? null,
+    captchaChecked: payload.captchaChecked ?? null,
+  });
 }
 
 async function places(env, request, params) {
+  const where = contextOf(params);
+  if (!where.city) return noDestination();
   const { payload, error } = await askStoreSearch(
     env,
     "google_places_search",
-    {
-      city: one(params, "destination", "Barcelona"),
-      category: one(params, "category", "attraction"),
-      pageSize: 12,
-      ...GOOGLE_CARD,
-    },
+    { ...where, category: one(params, "category", "attraction"), pageSize: 12, ...GOOGLE_CARD },
     request
   );
   if (error) return refuse(error);
@@ -468,7 +575,12 @@ async function places(env, request, params) {
  * up as a result.
  */
 async function feed(env, request, params, ctx) {
-  const destination = one(params, "destination", "Barcelona") || "Barcelona";
+  const where = contextOf(params);
+  const destination = where.city;
+  // NO SILENT DEFAULT. A layer that quietly answers "Barcelona" when asked for
+  // nowhere is how a Barcelona carousel ends up under someone else's city —
+  // the owner's complaint on 2026-09-23.
+  if (!destination) return noDestination();
   const asked = one(params, "categories", "")
     .split(",")
     .filter((name) => FEED_PLAN[name]);
@@ -476,7 +588,9 @@ async function feed(env, request, params, ctx) {
 
   const cache = caches.default;
   const key = new Request(
-    `https://feed.tourguid.invalid/${encodeURIComponent(destination.toLowerCase())}/${wanted.join(",")}`,
+    `https://feed.tourguid.invalid/${encodeURIComponent(
+      [destination, where.region, where.country].filter(Boolean).join("|").toLowerCase()
+    )}/${wanted.join(",")}`,
     { method: "GET" }
   );
   const hit = await cache.match(key);
@@ -492,7 +606,7 @@ async function feed(env, request, params, ctx) {
       const { payload, error } = await askStoreSearch(
         env,
         provider,
-        { city: destination, place: destination, limit: 12, ...extra },
+        { ...where, place: destination, limit: 12, ...extra },
         request
       );
       if (error) {
@@ -684,7 +798,7 @@ export default {
               ? "configured"
               : "not_configured",
           heroPhoto: (env.PEXELS_API_KEY || "").trim() ? "pexels" : "fallback_only",
-          routes: ["flights", "hotels", "activities", "places", "feed", "go", "hero-photo"],
+          routes: ["suggest", "flights", "hotels", "activities", "places", "feed", "go", "hero-photo"],
         });
       case "/api/store/flights":
         return flights(env, request, params);
@@ -698,6 +812,8 @@ export default {
         return feed(env, request, params, ctx);
       case "/api/store/go":
         return go(env, request, params);
+      case "/api/store/suggest":
+        return suggest(env, request, params, ctx);
       case "/api/store/hero-photo":
         return heroPhoto(env, params, ctx);
       default:
