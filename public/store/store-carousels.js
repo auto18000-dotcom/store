@@ -64,8 +64,16 @@
     card.target='_blank';card.rel='noopener';
     const visual=document.createElement('div');visual.className='card-visual product-photo';
     if(item.photo)visual.style.backgroundImage=`url("${item.photo}")`;
+    // Google's Places terms require the photographer's attribution to travel
+    // with the image -- this is not optional decoration.
+    if(item.photoCredit){
+      const credit=document.createElement('span');credit.className='photo-credit';
+      credit.textContent=`Photo: ${item.photoCredit}`;
+      visual.append(credit);
+    }
     const body=document.createElement('div');body.className='card-body';
-    const type=document.createElement('div');type.className='tag';type.textContent=item.source||config.name;
+    const sourceTag=document.createElement('div');sourceTag.className='tag';
+    sourceTag.textContent=item.type?`${item.source||config.name} · ${item.type}`:(item.source||config.name);
     const name=document.createElement('h3');name.textContent=item.title;
     const copy=document.createElement('p');copy.textContent=item.summary||'';
     const meta=document.createElement('div');meta.className='product-meta';
@@ -84,7 +92,7 @@
     }
     const action=document.createElement('span');action.className='theme-action';
     action.textContent=item.bookable?`Book on ${item.source} →`:'View details →';
-    body.append(type,name,copy,meta,action);
+    body.append(sourceTag,name,copy,meta,action);
     card.append(visual,body);
     return card;
   };
