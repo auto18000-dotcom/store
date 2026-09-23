@@ -102,11 +102,12 @@ const MESSAGES = {
     "The store's search service refused this server. The shared secret is missing or does not match the one set on store-search.",
   unknown_search: "That search is not one the store offers.",
   busy: "You have made a lot of searches. Please try again shortly.",
+  lookups_busy: "Too many lookups at once. Please slow down for a moment.",
   daily_cap: "Search has reached today's limit. Please try again tomorrow.",
   switched_off: "This part of the store is switched off right now.",
   unavailable: "Live results could not be loaded right now.",
 };
-const STATUS = { busy: 429, daily_cap: 429, unavailable: 502, unknown_search: 404, provider_refused: 503 };
+const STATUS = { busy: 429, lookups_busy: 429, daily_cap: 429, unavailable: 502, unknown_search: 404, provider_refused: 503 };
 
 /** Only https, never credentials in the host, never a backslash trick. */
 function supplierOf(target) {
@@ -187,8 +188,11 @@ async function askStoreSearch(env, provider, params, request) {
   // read where it sends one: "over the day's budget" and "this visitor is
   // clicking too fast" need different words.
   let reason = "";
+  let kind = "";
   try {
-    reason = String(((await response.json()) || {}).reason || "");
+    const body = (await response.json()) || {};
+    reason = String(body.reason || "");
+    kind = String(body.kind || "");
   } catch {
     /* no body, or not JSON */
   }
@@ -203,7 +207,10 @@ async function askStoreSearch(env, provider, params, request) {
   // look like a bug on our side.
   const NAMED = { provider_refused: 1, switched_off: 1, provider_busy: 1, daily_cap: 1, ip_rate: 1 };
   if (NAMED[reason]) {
-    if (reason === "ip_rate") return { error: "busy" };
+    // Typing and searching have separate budgets, so they get separate words.
+    // Telling someone who is filling in a field that they have "made a lot of
+    // searches" is both wrong and baffling.
+    if (reason === "ip_rate") return { error: kind === "typeahead" ? "lookups_busy" : "busy" };
     if (reason === "provider_busy") return { error: "busy" };
     return { error: reason };
   }
@@ -881,6 +888,77 @@ async function destinations(env, request, ctx) {
   return json(answer);
 }
 
+/**
+ * Airport autocomplete, for the From and To fields.
+ *
+ * Two forms: `?q=` for typing, or `?lat=&lon=&radius=` for "airports near
+ * here", nearest first. Duffel does not charge for place suggestions, and the
+ * lookup budget is separate from the search budget — 300 an hour rather than
+ * 30 — so typing in a form can no longer starve the search that follows it.
+ *
+ * A row of `type: "city"` stands for EVERY airport in that city, which is
+ * usually what someone typing "Paris" means. Show it as such rather than
+ * hiding it: "PAR · Paris, all airports" above CDG, ORY, BVA.
+ */
+async function airports(env, request, params, ctx) {
+  const text = one(params, "q", "", 80);
+  const lat = Number(one(params, "lat"));
+  const lon = Number(one(params, "lon"));
+  const near = !!one(params, "lat") && !!one(params, "lon") && Number.isFinite(lat) && Number.isFinite(lon);
+  const limit = Math.min(Math.max(Number(one(params, "limit", "8")) || 8, 1), 20);
+
+  if (!near && text.length < SUGGEST_MIN_CHARS) {
+    return json({ suggestions: [], query: text });
+  }
+
+  const cache = caches.default;
+  const key = new Request(
+    `https://airports.tourguid.invalid/${
+      near ? `near/${lat.toFixed(3)},${lon.toFixed(3)}/${one(params, "radius", "100")}` : encodeURIComponent(text.toLowerCase())
+    }/${limit}`
+  );
+  const hit = await cache.match(key);
+  if (hit) return json({ ...(await hit.json()), cached: true });
+
+  const { payload, error } = await askStoreSearch(
+    env,
+    "duffel_place_suggestions",
+    near
+      ? { lat, lon, radius_km: Number(one(params, "radius", "100")) || 100, limit }
+      : { query: text, limit },
+    request
+  );
+  if (error) return refuse(error);
+
+  const rows = ((payload && payload.places) || []).filter(Boolean).map((place) => ({
+    iataCode: place.iata_code,
+    name: place.name,
+    type: place.type,
+    cityName: place.city_name ?? null,
+    countryCode: place.country_code ?? null,
+    lat: place.latitude ?? null,
+    lon: place.longitude ?? null,
+    timeZone: place.time_zone ?? null,
+    id: place.id ?? null,
+    distanceKm: place.distance_km ?? null,
+    // "SFO · San Francisco International Airport" — the code first, because
+    // that is what someone scanning a list of airports is looking for.
+    label: [place.iata_code, place.name].filter(Boolean).join(" · "),
+  }));
+  const answer = { suggestions: rows, query: near ? null : text, cached: false };
+  if (rows.length) {
+    ctx.waitUntil(
+      cache.put(
+        key,
+        new Response(JSON.stringify(answer), {
+          headers: { "Content-Type": "application/json", "Cache-Control": `max-age=${SUGGEST_TTL}` },
+        })
+      )
+    );
+  }
+  return json(answer);
+}
+
 /** Destination autocomplete. Worldwide, not a Barcelona list. */
 async function suggest(env, request, params, ctx) {
   const text = one(params, "q", "", 80);
@@ -1327,7 +1405,7 @@ async function route(path, env, request, params, ctx) {
               ? "configured"
               : "not_configured",
           heroPhoto: (env.PEXELS_API_KEY || "").trim() ? "pexels" : "fallback_only",
-          routes: ["destinations", "suggest", "flights", "hotels", "activities", "places", "feed", "detail", "go", "hero-photo"],
+          routes: ["destinations", "suggest", "airports", "flights", "hotels", "activities", "places", "feed", "detail", "go", "hero-photo"],
         });
     case "/api/store/flights":
         return flights(env, request, params);
@@ -1343,6 +1421,8 @@ async function route(path, env, request, params, ctx) {
         return go(env, request, params);
     case "/api/store/destinations":
         return destinations(env, request, ctx);
+    case "/api/store/airports":
+        return airports(env, request, params, ctx);
     case "/api/store/suggest":
         return suggest(env, request, params, ctx);
     case "/api/store/detail":

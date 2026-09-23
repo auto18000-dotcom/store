@@ -15,18 +15,19 @@
     if(!list){list=document.createElement('ul');list.className='place-suggestions';list.hidden=true;wrap.append(list)}
     list.setAttribute('role','listbox');
     input.setAttribute('autocomplete','off');input.setAttribute('role','combobox');input.setAttribute('aria-expanded','false');input.setAttribute('aria-autocomplete','list');
+    const airports=options.kind==='airports';
     const state={place:options.initial||null};
     let debounce=null,seq=0,active=-1;
     const close=()=>{list.hidden=true;list.replaceChildren();input.setAttribute('aria-expanded','false');active=-1};
-    const choose=item=>{state.place=item;input.value=item.label||item.name;close();options.onChoose?.(item)};
+    const choose=item=>{state.place=item;input.value=airports?item.label:(item.label||item.name);close();options.onChoose?.(item)};
     const setActive=index=>{const rows=[...list.querySelectorAll('li[role="option"]')];if(!rows.length)return;active=(index+rows.length)%rows.length;rows.forEach((row,i)=>row.setAttribute('aria-selected',String(i===active)));rows[active].scrollIntoView({block:'nearest'})};
     const render=(items,message)=>{
       list.replaceChildren();active=-1;
       if(!items.length){const li=document.createElement('li');li.className='place-suggestion-empty';li.textContent=message||'No matching places found.';list.append(li)}
       for(const item of items){
         const li=document.createElement('li');li.setAttribute('role','option');
-        const name=document.createElement('strong');name.textContent=item.name;
-        const meta=document.createElement('span');meta.textContent=[item.region,item.country].filter(Boolean).join(', ');
+        const name=document.createElement('strong');name.textContent=airports?`${item.iataCode} · ${item.name}`:item.name;
+        const meta=document.createElement('span');meta.textContent=airports?(item.type==='city'?`Every airport · ${item.countryCode||''}`.trim():`Airport · ${[item.cityName,item.countryCode].filter(Boolean).join(', ')}`):[item.region,item.country].filter(Boolean).join(', ');
         li.append(name,meta);
         li.addEventListener('mousedown',event=>{event.preventDefault();choose(item)});
         li._item=item;list.append(li);
@@ -41,9 +42,9 @@
       const mine=++seq;
       debounce=setTimeout(async()=>{
         try{
-          const response=await fetch(`/api/store/suggest?q=${encodeURIComponent(q)}`,{headers:{Accept:'application/json'}});
+          const response=await fetch(`/api/store/${airports?'airports':'suggest'}?q=${encodeURIComponent(q)}`,{headers:{Accept:'application/json'}});
           if(mine!==seq)return;
-          if(!response.ok)return render([],response.status===503?'Place search is not connected yet.':'Place search is unavailable. Try again.');
+          if(!response.ok){const body=await response.json().catch(()=>null);return render([],response.status===503?'Place search is not connected yet.':(response.status===429&&body?.message)||'Place search is unavailable. Try again.')}
           const payload=await response.json();
           if(mine!==seq)return;
           render(Array.isArray(payload.suggestions)?payload.suggestions:[]);

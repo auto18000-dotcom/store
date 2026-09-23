@@ -4,9 +4,9 @@
   const MAX_LEGS=10;
   const el=(tag,attrs={},text)=>{const n=document.createElement(tag);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,v);if(text!=null)n.textContent=text;return n};
   const field=(labelText,input)=>{const wrap=el('div',{class:'field'});const label=el('label',{},labelText);if(input.id)label.htmlFor=input.id;wrap.append(label,input);return wrap};
-  const place=(id,label,placeholder)=>{const input=el('input',{id,placeholder,maxlength:'60',autocomplete:'off'});const wrap=field(label,input);const state=window.TourGuidPlaces.attach(input);return {wrap,input,state}};
+  const place=(id,label,placeholder)=>{const input=el('input',{id,placeholder,maxlength:'60',autocomplete:'off'});const wrap=field(label,input);const state=window.TourGuidPlaces.attach(input,{kind:'airports'});return {wrap,input,state}};
   // A picked suggestion carries coordinates; a typed 3-letter entry is an IATA code; anything else is refused rather than guessed.
-  const resolve=p=>{const picked=p.state?.place;if(picked)return {name:picked.name,lat:picked.lat,lon:picked.lon};const t=p.input.value.trim();if(/^[A-Za-z]{3}$/.test(t))return {code:t.toUpperCase()};return null};
+  const resolve=p=>{const picked=p.state?.place;if(picked&&picked.iataCode)return {code:picked.iataCode,name:picked.name};if(picked)return {name:picked.name,lat:picked.lat,lon:picked.lon};const t=p.input.value.trim();if(/^[A-Za-z]{3}$/.test(t))return {code:t.toUpperCase()};return null};
   let mode='oneway';
   const status=el('div',{class:'status',id:'flight-status',role:'status','aria-live':'polite'});
   const results=document.getElementById('flight-results');
