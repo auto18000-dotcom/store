@@ -33,3 +33,13 @@
 .choose-destination-prompt{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:22px 24px;border:1px dashed #a9c6bd;border-radius:8px;background:#f4faf7;color:#123642}
 .choose-destination-prompt p{margin:0;font-size:1.02rem;font-weight:600}
 .choose-destination-prompt button{min-height:40px;padding:0 18px;border:0;border-radius:6px;background:#0c7778;color:#fff;font:inherit;font-weight:700;cursor:pointer}
+
+/* Live cards: long provider text must not stretch every card in the row. */
+.store-carousel .carousel-product-card .card-visual{height:150px}
+.store-carousel .carousel-product-card .card-body{padding:16px 18px}
+.store-carousel .carousel-product-card h3{font-size:1.05rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.store-carousel .carousel-product-card p:not(.product-meta){display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin:0 0 10px;font-size:.88rem}
+.store-carousel .carousel-product-card .product-meta{margin:0 0 10px}
+.store-carousel .carousel-theme-card .card-visual,.store-carousel .carousel-category-card .card-visual{height:150px}
+.store-carousel .carousel-track>*{min-height:0}
+.store-carousel .carousel-category-card,.store-carousel .carousel-theme-card{min-height:0}
