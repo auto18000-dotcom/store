@@ -4,6 +4,9 @@ body{-webkit-font-smoothing:antialiased}
 h1,h2,h3{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;letter-spacing:-.035em}
 .hero h1,.section-head h2,.feature h3,.journey h2,.intro h2,.block h2,.journey-dialog h2{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-weight:800;letter-spacing:-.035em}
 .hero h1{line-height:1.04}
-.brand img{width:42px;height:42px;object-fit:contain;border-radius:0;padding:0;background:none;box-sizing:border-box;box-shadow:none}
+/* The real logo is a solid square (blue field, no transparency), unlike the
+   hand-traced mark it replaced -- it needs a badge treatment, not a bare mark
+   floating on the header gradient. */
+.brand img{width:36px;height:36px;object-fit:cover;border-radius:8px;box-shadow:0 2px 8px rgba(5,20,15,.35)}
 .account-link{margin-left:auto;white-space:nowrap;color:#fff;text-decoration:none;font-size:.84rem;font-weight:750;border:1px solid #ffffff85;border-radius:5px;padding:8px 11px}.account-link:hover,.account-link.active{background:#ffffff1c;border-color:#fff}.account-link:focus-visible{outline:3px solid #ffae19;outline-offset:3px}
 .detail-link{display:inline-flex;align-items:center;margin-top:10px;color:#075d61;font-size:.84rem;font-weight:800;text-decoration:underline;text-underline-offset:3px}.card-actions .detail-link{min-height:40px}
