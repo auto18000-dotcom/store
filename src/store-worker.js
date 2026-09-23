@@ -83,6 +83,7 @@ const LEDGER_PROVIDERS = {
 };
 
 const MESSAGES = {
+  provider_refused: "This supplier is not available for the store right now.",
   not_connected:
     "Live results are not connected yet. The store-search service is not configured, so nothing is shown rather than something invented.",
   not_allowed:
@@ -93,7 +94,7 @@ const MESSAGES = {
   switched_off: "This part of the store is switched off right now.",
   unavailable: "Live results could not be loaded right now.",
 };
-const STATUS = { busy: 429, daily_cap: 429, unavailable: 502, unknown_search: 404 };
+const STATUS = { busy: 429, daily_cap: 429, unavailable: 502, unknown_search: 404, provider_refused: 503 };
 
 /** Only https, never credentials in the host, never a backslash trick. */
 function supplierOf(target) {
@@ -179,9 +180,24 @@ async function askStoreSearch(env, provider, params, request) {
   } catch {
     /* no body, or not JSON */
   }
+  // store-search names the reason, and the names are not interchangeable:
+  //   provider_refused — the provider itself said no, and will keep saying no
+  //                      (Duffel 403: Stays is not enabled on the account)
+  //   switched_off     — an operator turned the source off in Control, and can
+  //                      turn it back on in the next minute
+  //   provider_busy    — transient
+  // Trust the name over the status code where one is sent; a 403 used to be
+  // read as our own misconfiguration, which made a provider's durable refusal
+  // look like a bug on our side.
+  const NAMED = { provider_refused: 1, switched_off: 1, provider_busy: 1, daily_cap: 1, ip_rate: 1 };
+  if (NAMED[reason]) {
+    if (reason === "ip_rate") return { error: "busy" };
+    if (reason === "provider_busy") return { error: "busy" };
+    return { error: reason };
+  }
   if (response.status === 401) return { error: "not_allowed" };
   if (response.status === 404) return { error: "unknown_search" };
-  if (response.status === 429) return { error: reason === "daily_cap" ? "daily_cap" : "busy" };
+  if (response.status === 429) return { error: "busy" };
   if (response.status === 503) return { error: "switched_off" };
   return { error: "unavailable" };
 }
@@ -463,8 +479,8 @@ const GOOGLE_CARD = { withPhotos: true, withRatings: true };
 // feed cache. An isolate can vanish between requests, so this is best-effort —
 // fine for an optimisation whose failure mode is "do what we did before", and
 // not fine for the cache, whose failure mode was multiplying the Google bill.
-const SWITCHED_OFF = new Map();
-const SWITCHED_OFF_MS = 60 * 1000;
+const REFUSED = new Map();
+const REFUSED_MS = 30 * 60 * 1000;
 const FEED_PLAN = {
   // nearbyCount does nothing without nearbyMiles: the radius is what turns the
   // neighbouring-destination search on at all.
@@ -755,9 +771,9 @@ async function buildFeed(env, request, where, destination, wanted, cache, key) {
       for (const [provider, extra, source, priced] of plan) {
         // Skip a provider known to be switched off — unless it is the only one
         // this row has, in which case ask anyway so the reason stays truthful.
-        const until = SWITCHED_OFF.get(provider) || 0;
+        const until = REFUSED.get(provider) || 0;
         if (Date.now() < until && plan.length > 1) {
-          group.reason = "switched_off";
+          group.reason = "provider_refused";
           continue;
         }
         const { payload, error } = await askStoreSearch(
@@ -767,11 +783,15 @@ async function buildFeed(env, request, where, destination, wanted, cache, key) {
           request
         );
         if (error) {
-          if (error === "switched_off") SWITCHED_OFF.set(provider, Date.now() + SWITCHED_OFF_MS);
+          // ONLY the provider's own refusal is remembered. `switched_off` is an
+          // operator's switch in Control and gets NO memory at all: remembering
+          // it would make a re-enabled source look broken for as long as we
+          // held it.
+          if (error === "provider_refused") REFUSED.set(provider, Date.now() + REFUSED_MS);
           group.reason = error;
           continue;
         }
-        SWITCHED_OFF.delete(provider);
+        REFUSED.delete(provider);
         let rows;
         if (provider === "viator_search") rows = activityResults(payload);
         else if (provider === "duffel_stay_search") rows = hotelResults(payload);
