@@ -9,6 +9,9 @@
     const parts=[`${origin} ${clock(dep)||''} → ${dest} ${clock(arr)||''}`.replace(/\s+/g,' ').trim(),day(dep),span(dur),stops==null?null:stops===0?'Nonstop':`${stops} ${stops===1?'stop':'stops'}`].filter(Boolean);
     const row=el('p','flight-leg');row.append(el('b','',label+' '),document.createTextNode(parts.join(' · ')));return row;
   };
+  // Bags decide whether a fare is a deal, so they sit beside the price. Absent data says nothing rather than "no bags".
+  const bagText=list=>{if(!Array.isArray(list))return null;const n=type=>list.filter(b=>b&&b.type===type).reduce((t,b)=>t+(Number(b.quantity)||0),0);const carry=n('carry_on'),checked=n('checked');return `${checked} checked · ${carry} carry-on`};
+  const bagKey=list=>Array.isArray(list)?bagText(list):null;
   const card=(offer,ctx)=>{
     const c=el('article','card flight-card');const body=el('div','card-body');
     const head=el('div','flight-head');
@@ -24,8 +27,17 @@
     const rs=Array.isArray(offer.returnSegments)?offer.returnSegments:[];
     body.append(legLine('Outbound',offer.origin||ctx.origin,offer.destination||ctx.destination,offer.departure,offer.arrival,offer.duration,offer.stops));
     if(rs.length){const last=rs[rs.length-1];body.append(legLine('Return',rs[0].origin,last.destination,rs[0].departure,last.arrival,offer.returnDuration,rs.length-1))}
-    const facts=[offer.fareBrand,offer.cabin,offer.emissionsKg!=null?`${Math.round(offer.emissionsKg)} kg CO₂`:null].filter(Boolean);
+    const cabins=[...new Set([...(Array.isArray(offer.segments)?offer.segments:[]),...rs].map(g=>g.cabin).filter(Boolean))];const facts=[offer.fareBrand,offer.cabin||(cabins.length?cabins.join(' / '):null),offer.emissionsKg!=null?`${Math.round(offer.emissionsKg)} kg CO₂`:null].filter(Boolean);
     if(facts.length)body.append(el('p','flight-facts',facts.join(' · ')));
+    const baggageLine=bagText(offer.baggage);
+    const segs=[...(Array.isArray(offer.segments)?offer.segments:[]),...rs];
+    if(baggageLine)body.append(el('p','flight-bags',`Bags: ${baggageLine}`));
+    else if(segs.some(g=>Array.isArray(g.baggage))){
+      // Mixed across the journey: show each segment rather than a headline the data does not support.
+      const line=el('p','flight-bags','Bags vary by flight: ');
+      line.append(document.createTextNode(segs.filter(g=>Array.isArray(g.baggage)).map(g=>`${g.origin}→${g.destination} ${bagText(g.baggage)}`).join(' · ')));
+      body.append(line);
+    }
     body.append(el('p','flight-price',offer.totalAmount&&offer.currency?`${offer.currency} ${offer.totalAmount} total · expires ${offer.expiresAt||'time not supplied'}`:'Price not available'));
     if(offer.detailUrl){const u=new URL(offer.detailUrl,location.origin);if(u.origin===location.origin){const link=el('a','btn btn-primary','View flight');link.href=u.href;body.append(link)}}
     window.TourGuidJourney?.addButton(body,{title:`${offer.operatingCarrier||'Flight'} ${offer.origin||ctx.origin} to ${offer.destination||ctx.destination}`,type:'Flight',source:'Duffel'});

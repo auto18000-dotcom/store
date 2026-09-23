@@ -10,3 +10,4 @@
 .flight-leg-row{display:grid;grid-template-columns:auto repeat(3,minmax(140px,1fr)) auto;gap:10px;align-items:end;margin-bottom:10px}.flight-leg-title{padding-bottom:10px}.flight-leg-remove{min-height:40px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font:inherit}.flight-leg-remove[hidden]{display:none}
 .flight-leg-error{grid-column:1/-1;color:#9b2c1d;font-size:.85rem}.flight-leg-error:empty{display:none}
 @media(max-width:760px){.flight-leg-row{grid-template-columns:1fr}}
+.flight-bags{margin:4px 0;font-weight:600;font-size:.88rem}

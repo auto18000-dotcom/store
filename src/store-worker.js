@@ -216,6 +216,13 @@ async function askStoreSearch(env, provider, params, request) {
 
 /* ── mapping: provider shapes into the field names the pages read ────────── */
 
+/** The value when every segment agrees, else null. */
+function sameAcross(segments, read) {
+  if (!segments.length) return null;
+  const first = read(segments[0]);
+  return segments.every((leg) => read(leg) === first) ? first || null : null;
+}
+
 /** "PT13H20M" -> 800. Null when absent, so a missing duration never sorts first. */
 function isoMinutes(value) {
   const found = /^PT(?:(\d+)H)?(?:(\d+)M)?$/.exec(String(value || ""));
@@ -254,8 +261,18 @@ function flightOffers(payload, from, to, date) {
       airlineLogo: offer.owner_logo_symbol_url || null,
       airlineLogoWide: offer.owner_logo_lockup_url || null,
       fareBrand: offer.fare_brand_name || null,
-      cabin: offer.cabin_class_marketing_name || offer.cabin_class || null,
-      baggage: offer.baggages || null,
+      // ALL SEGMENTS OR NOTHING. Cabin and baggage are per segment, and an
+      // itinerary can mix them — economy out, premium back; a bag on one leg
+      // and not the next. A headline taken from the first segment would be a
+      // claim about the whole journey the data does not support, so it is set
+      // only when every segment agrees and null otherwise. The per-segment
+      // values are always there for a card that wants to show the difference.
+      cabin: sameAcross(segments, (leg) => leg.cabin_marketing_name),
+      baggage: sameAcross(segments, (leg) => JSON.stringify(leg.baggages || []))
+        ? segments[0].baggages || []
+        : null,
+      // Duffel's object, verbatim. BOTH live offers returned it null, so
+      // absent is the normal case rather than an error.
       conditions: offer.conditions || null,
       emissionsKg: offer.total_emissions_kg ?? null,
       totalAmount: offer.total_amount || null,
@@ -284,6 +301,8 @@ function flightOffers(payload, from, to, date) {
         duration: leg.duration,
         carrier: leg.marketing_carrier_name,
         flightNumber: leg.marketing_carrier_flight_number,
+        cabin: leg.cabin_marketing_name || null,
+        baggage: leg.baggages || [],
       })),
     });
   }
@@ -820,6 +839,48 @@ function endOfValues(named, lat, lon) {
   return { code: /^[A-Za-z]{3}$/.test(name) ? name.toUpperCase() : null, lat: la, lon: lo, point };
 }
 
+/**
+ * The curated destination gallery — 25 rows, in display order.
+ *
+ * Costs nothing and takes no rate-limit slot upstream, so this is cached for a
+ * day out of tidiness rather than thrift. The five fields are exactly the
+ * destination context the feed takes, so a chosen tile feeds straight into it
+ * with nothing to translate.
+ *
+ * No photograph here on purpose: use `hero-photo` per destination. Google
+ * photos are billed per request, and a 25-tile gallery drawn from
+ * `destination_photo` would be 25 billed requests every time a cache lapses.
+ */
+async function destinations(env, request, ctx) {
+  const cache = caches.default;
+  const key = new Request("https://destinations.tourguid.invalid/all");
+  const hit = await cache.match(key);
+  if (hit) return json({ ...(await hit.json()), cached: true });
+
+  const { payload, error } = await askStoreSearch(env, "destinations", {}, request);
+  if (error) return refuse(error);
+  const rows = ((payload && payload.destinations) || []).filter(Boolean).map((row) => ({
+    name: row.name,
+    region: row.region ?? null,
+    country: row.country ?? null,
+    countryCode: row.country_code ?? null,
+    lat: row.latitude ?? null,
+    lon: row.longitude ?? null,
+  }));
+  const answer = { destinations: rows, cached: false };
+  if (rows.length) {
+    ctx.waitUntil(
+      cache.put(
+        key,
+        new Response(JSON.stringify(answer), {
+          headers: { "Content-Type": "application/json", "Cache-Control": "max-age=86400" },
+        })
+      )
+    );
+  }
+  return json(answer);
+}
+
 /** Destination autocomplete. Worldwide, not a Barcelona list. */
 async function suggest(env, request, params, ctx) {
   const text = one(params, "q", "", 80);
@@ -1266,7 +1327,7 @@ async function route(path, env, request, params, ctx) {
               ? "configured"
               : "not_configured",
           heroPhoto: (env.PEXELS_API_KEY || "").trim() ? "pexels" : "fallback_only",
-          routes: ["suggest", "flights", "hotels", "activities", "places", "feed", "detail", "go", "hero-photo"],
+          routes: ["destinations", "suggest", "flights", "hotels", "activities", "places", "feed", "detail", "go", "hero-photo"],
         });
     case "/api/store/flights":
         return flights(env, request, params);
@@ -1280,6 +1341,8 @@ async function route(path, env, request, params, ctx) {
         return feed(env, request, params, ctx);
     case "/api/store/go":
         return go(env, request, params);
+    case "/api/store/destinations":
+        return destinations(env, request, ctx);
     case "/api/store/suggest":
         return suggest(env, request, params, ctx);
     case "/api/store/detail":
