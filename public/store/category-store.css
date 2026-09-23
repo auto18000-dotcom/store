@@ -1,11 +1,11 @@
 .category-store-intro{padding:42px 0 9px}
 .category-store-intro .kicker{margin-bottom:5px}
-.category-store-intro h2{font:normal clamp(1.9rem,3vw,2.6rem)/1.12 Georgia,serif;letter-spacing:-.04em;margin:4px 0 10px}
+.category-store-intro h2{font:normal clamp(1.9rem,3vw,2.6rem)/1.12 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:-.04em;margin:4px 0 10px}
 .category-store-intro p{max-width:780px;color:#577077;margin:0}
 .category-store-note{margin-top:17px;padding:11px 14px;border-left:4px solid #3ab77f;background:#eaf6f0;color:#315c5f;font-size:.84rem}
 .category-row{padding:31px 0 6px}
 .category-row-head{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:15px}
-.category-row-head h2{font:normal clamp(1.55rem,2.5vw,2.05rem)/1.14 Georgia,serif;letter-spacing:-.03em;margin:3px 0 5px}
+.category-row-head h2{font:normal clamp(1.55rem,2.5vw,2.05rem)/1.14 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:-.03em;margin:3px 0 5px}
 .category-row-head p{color:#577077;margin:0;font-size:.87rem}
 .category-row-controls{display:flex;align-items:center;gap:8px;flex:none}
 .category-row-count{color:#506b6e;font-size:.77rem;font-weight:750;min-width:83px;text-align:right}
