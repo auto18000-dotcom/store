@@ -4,3 +4,9 @@
 .flight-flags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.flight-flag{padding:3px 9px;border-radius:4px;font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 .flag-cheapest{background:#dff4e3;color:#155c2a}.flag-fastest{background:#dcecf9;color:#144c7a}.flag-stops{background:#fdf0d5;color:#7a4d06}
 .flight-leg{margin:4px 0;font-size:.9rem}.flight-facts{margin:4px 0;color:var(--muted);font-size:.82rem}.flight-price{margin:8px 0 4px;font-weight:700}
+
+.flight-modes{display:flex;gap:6px;margin-bottom:12px}.flight-modes button{min-height:38px;padding:0 16px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);font:inherit;font-weight:600;cursor:pointer}.flight-modes button[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
+.flight-simple{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}.flight-simple[hidden],.flight-multi[hidden]{display:none}
+.flight-leg-row{display:grid;grid-template-columns:auto repeat(3,minmax(140px,1fr)) auto;gap:10px;align-items:end;margin-bottom:10px}.flight-leg-title{padding-bottom:10px}.flight-leg-remove{min-height:40px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font:inherit}.flight-leg-remove[hidden]{display:none}
+.flight-leg-error{grid-column:1/-1;color:#9b2c1d;font-size:.85rem}.flight-leg-error:empty{display:none}
+@media(max-width:760px){.flight-leg-row{grid-template-columns:1fr}}
