@@ -86,6 +86,12 @@
     const url=new URL(link.href,location.href);
     if(!url.pathname.endsWith('.html'))continue;
     if(!['index.html','hotels.html','activities.html','food.html','places.html','flights.html'].some(page=>url.pathname.endsWith(page)))continue;
-    for(const key of ['destination','from','to'])if(key==='destination'||params.has(key))url.searchParams.set(key,key==='destination'?destination:params.get(key));link.href=url.href;
+    for(const key of ['destination','region','country','countryCode','lat','lon','from','to'])if(key==='destination'||params.has(key))url.searchParams.set(key,key==='destination'?destination:params.get(key));
+    // Never leave the query string on a '.html' path: this server (and
+    // Cloudflare's own default asset handling) redirects that filename to
+    // its clean-URL equivalent and drops every query parameter in the
+    // process -- silently discarding the destination on the very next click.
+    url.pathname=url.pathname.replace(/\.html$/,'');
+    link.href=url.href;
   }
 })();

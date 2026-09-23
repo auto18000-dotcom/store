@@ -15,7 +15,15 @@
   };
   const destination=destinationCtx.name;
   const forwardKeys=['destination','region','country','countryCode','lat','lon','from','to'];
-  const categoryHref=page=>{const url=new URL(`./${page}`,location.href);for(const key of forwardKeys)if(context.has(key))url.searchParams.set(key,context.get(key));return `${url.pathname.split('/').pop()}${url.search?url.search:''}`};
+  // The extensionless form, never '<page>.html': this local server (and
+  // Cloudflare's own default asset handling) redirects the .html filename to
+  // its clean-URL equivalent, and that redirect drops the query string
+  // entirely -- silently discarding the whole destination context on every
+  // single cross-page click. Confirmed live: navigating straight to
+  // hotels.html?destination=Lisbon lands on /store/hotels with no query at
+  // all, which is why "hotels are hardcoded to Barcelona" reproduced even
+  // though every handler here reads the destination correctly.
+  const categoryHref=page=>{const url=new URL(`./${page.replace(/\.html$/,'')}`,location.href);for(const key of forwardKeys)if(context.has(key))url.searchParams.set(key,context.get(key));return `${url.pathname.split('/').pop()}${url.search?url.search:''}`};
   const categories={
     hotels:{page:'hotels.html',name:'Hotels',description:'Browse stays, compare neighborhoods, and open hotel details.',themes:[
       ['Waterfront stays','Find a base close to the coast and open spaces.','visual-water'],
