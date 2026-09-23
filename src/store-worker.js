@@ -135,7 +135,14 @@ async function askStoreSearch(env, provider, params, request) {
     "x-store-caller": secret,
     // The visitor, not this Worker: store-search rate-limits on a salted hash
     // of it and stores only the hash.
-    "x-forwarded-for": request.headers.get("cf-connecting-ip") || "",
+    //
+    // MUST be `x-store-visitor`. `x-forwarded-for` is rewritten in transit
+    // with the address the platform actually sees — this Worker — so every
+    // traveller would share one bucket and the Store would stop searching for
+    // everybody after thirty requests an hour. Measured on Dev: twelve
+    // distinct addresses collapsed to a single hash. It would have read as a
+    // broken feed rather than as a rate limit.
+    "x-store-visitor": request.headers.get("cf-connecting-ip") || "",
   };
   const token = request.headers.get("x-turnstile-token");
   if (token) headers["x-turnstile-token"] = token;
