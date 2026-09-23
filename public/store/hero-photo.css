@@ -1,0 +1,4 @@
+.hero{background-position:center,center;background-size:cover,cover;background-repeat:no-repeat}
+.hero-photo-credit{position:absolute;z-index:2;right:max(20px,calc((100vw - 1180px)/2));bottom:15px;color:#fff;font-size:.69rem;font-weight:650;text-shadow:0 2px 6px #062d35;text-decoration:underline;text-underline-offset:2px}
+.hero-photo-credit[hidden]{display:none}
+@media(max-width:620px){.hero-photo-credit{right:15px;bottom:11px;font-size:.64rem}}

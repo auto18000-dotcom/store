@@ -1,0 +1,24 @@
+.profile-section{padding-top:62px}
+.profile-intro{display:flex;align-items:end;justify-content:space-between;gap:25px;margin-bottom:20px}
+.profile-intro h2{font-size:clamp(1.8rem,3vw,2.5rem);line-height:1.12;letter-spacing:-.04em;margin:7px 0 8px}
+.profile-intro p{color:var(--muted);max-width:700px;margin:0}
+.profile-badge{white-space:nowrap;color:#0b7166;border:1px solid #a8d1b6;background:#edf8ed;padding:7px 11px;border-radius:4px;font-size:.74rem;font-weight:800}
+.profile-form{display:grid;grid-template-columns:1fr 1fr;gap:34px;background:#fff;border:1px solid var(--line);border-top:4px solid var(--green);border-radius:7px;padding:28px;box-shadow:var(--shadow)}
+.profile-column{min-width:0}
+.profile-field{display:block;color:var(--ink);font-weight:800;font-size:.85rem;margin-bottom:19px}
+.profile-field input,.profile-field select,.profile-field textarea{display:block;width:100%;background:#fff;color:var(--ink);border:1px solid #b8cbc3;border-radius:4px;margin-top:8px;padding:10px 11px;font-weight:400;font-size:.87rem}
+.profile-field input,.profile-field select{min-height:43px}
+.profile-field textarea{min-height:84px;resize:vertical}
+.profile-fieldset{border:0;padding:0;margin:0 0 19px;min-width:0}
+.profile-fieldset legend{font-size:.85rem;font-weight:800;margin-bottom:8px}
+.profile-fieldset p{color:var(--muted);font-size:.77rem;margin:-5px 0 10px}
+.choice-row,.interest-grid{display:flex;flex-wrap:wrap;gap:8px}
+.choice-row label,.interest-grid label{display:inline-flex;align-items:center;gap:7px;border:1px solid #cbdcd2;border-radius:4px;background:#f9fcf8;padding:9px 11px;font-size:.79rem;cursor:pointer}
+.choice-row label:has(input:checked),.interest-grid label:has(input:checked){border-color:#44ad73;background:#e7f5e8;color:#095a51;font-weight:750}
+.choice-row input,.interest-grid input{accent-color:#0b7776;margin:0}
+.interest-grid{display:grid;grid-template-columns:1fr 1fr}
+.profile-privacy{font-size:.73rem;color:var(--muted);margin:0 0 12px}
+.profile-actions{display:flex;flex-wrap:wrap;gap:9px}
+.profile-status{font-size:.78rem;color:#0b6b62;margin:11px 0 0;min-height:1.2em}
+@media(max-width:800px){.profile-form{grid-template-columns:1fr;gap:4px}.profile-intro{display:block}.profile-badge{display:inline-block;margin-top:14px}}
+@media(max-width:520px){.profile-form{padding:18px}.interest-grid{grid-template-columns:1fr}.choice-row label{flex:1 1 auto}}

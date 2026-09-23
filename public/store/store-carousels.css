@@ -1,0 +1,24 @@
+.store-carousel{position:relative}
+.store-carousel .carousel-track{display:flex;gap:19px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:#9ec7ba transparent;padding:2px 2px 12px;overscroll-behavior-inline:contain}
+.store-carousel .carousel-track>*{flex:0 0 calc((100% - 38px)/3);min-width:0;scroll-snap-align:start}
+.store-carousel .carousel-controls{display:flex;align-items:center;justify-content:flex-end;gap:9px;margin:0 0 12px}
+.store-carousel .carousel-count{color:#526e70;font-size:.78rem;font-weight:750;min-width:86px;text-align:right}
+.store-carousel .carousel-arrow{width:38px;height:38px;border:1px solid #9dbdb2;border-radius:4px;background:#fff;color:#075d61;font-size:1.45rem;line-height:1;box-shadow:0 3px 10px #12364214}
+.store-carousel .carousel-arrow:hover:not(:disabled){background:#e5f4ed;border-color:#087568}
+.store-carousel .carousel-arrow:disabled{opacity:.38;cursor:default;box-shadow:none}
+.store-carousel .carousel-category-card,.store-carousel .carousel-theme-card{display:flex;flex-direction:column;overflow:hidden;min-height:100%;border:1px solid #c9dad3;border-radius:8px;background:#fff;box-shadow:0 7px 24px #0a32370b;text-decoration:none;color:#123642}
+.store-carousel .carousel-category-card{background:linear-gradient(150deg,#0c5b60,#087b6b);color:#fff;border-color:#0b6864}
+.store-carousel .carousel-category-card:hover{background:linear-gradient(150deg,#08484c,#0a6d60)}
+.store-carousel .carousel-category-card .card-visual{height:178px;background:linear-gradient(145deg,#0b555c,#148c76)}
+.store-carousel .carousel-category-card .card-visual span{font-size:.72rem}
+.store-carousel .carousel-category-card .card-body{padding:20px}
+.store-carousel .carousel-category-card .tag{color:#beeed9}
+.store-carousel .carousel-category-card p{color:#e5f5ee}
+.store-carousel .carousel-category-card .category-action{display:inline-flex;align-items:center;margin-top:auto;padding:10px 12px;border:1px solid #c9eee0;border-radius:4px;background:#fff;color:#075d61;font-size:.83rem;font-weight:850;align-self:flex-start}
+.store-carousel .carousel-theme-card .card-visual{height:178px}
+.store-carousel .carousel-theme-card .card-body{padding:20px;flex:1;display:flex;flex-direction:column}
+.store-carousel .carousel-theme-card h3{font-size:1.18rem;line-height:1.25;margin:7px 0}
+.store-carousel .carousel-theme-card p{color:#5c7278;font-size:.91rem;margin:0 0 16px}
+.store-carousel .carousel-theme-card .theme-action{margin-top:auto;align-self:flex-start;color:#075d61;font-size:.84rem;font-weight:800;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:900px){.store-carousel .carousel-track>*{flex-basis:calc((100% - 19px)/2)}}
+@media(max-width:620px){.store-carousel .carousel-track>*{flex-basis:100%}.store-carousel .carousel-controls{margin-top:8px}}
