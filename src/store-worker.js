@@ -442,6 +442,29 @@ function asCard(item, category, source, priced) {
 // free — a photo is a billed Places Photo request and a rating bills the whole
 // search at Google's Enterprise tier. That is what the cache pays for.
 const GOOGLE_CARD = { withPhotos: true, withRatings: true };
+
+// A provider that just answered "switched off" is skipped briefly, so a burst
+// of cold builds stops paying for a call we already know fails.
+//
+// SIXTY SECONDS, NOT TEN MINUTES, AND THAT IS THE WHOLE POINT. Two different
+// things reach us as "switched off" and they are not alike:
+//   - a source an operator turned off in Control, which they can turn back on
+//     in the next minute;
+//   - a provider refusing for its own reasons, such as Duffel answering 403
+//     because the account has no Stays entitlement, which stays true until the
+//     owner buys it.
+// A long memory is right for the second and wrong for the first: an operator
+// re-enables a source, reloads, sees nothing, and concludes the switch is
+// broken. Since our 503 is the REVERSIBLE one, the memory is kept short enough
+// that a switch feels immediate, and the saving still lands where it matters —
+// inside one cold build and the few that follow it.
+//
+// Module-level state is deliberate here and was deliberately NOT used for the
+// feed cache. An isolate can vanish between requests, so this is best-effort —
+// fine for an optimisation whose failure mode is "do what we did before", and
+// not fine for the cache, whose failure mode was multiplying the Google bill.
+const SWITCHED_OFF = new Map();
+const SWITCHED_OFF_MS = 60 * 1000;
 const FEED_PLAN = {
   // nearbyCount does nothing without nearbyMiles: the radius is what turns the
   // neighbouring-destination search on at all.
@@ -728,7 +751,15 @@ async function buildFeed(env, request, where, destination, wanted, cache, key) {
   const built = await Promise.all(
     wanted.map(async (name) => {
       let group = { live: false, reason: "not_connected", items: [] };
-      for (const [provider, extra, source, priced] of FEED_PLAN[name]) {
+      const plan = FEED_PLAN[name];
+      for (const [provider, extra, source, priced] of plan) {
+        // Skip a provider known to be switched off — unless it is the only one
+        // this row has, in which case ask anyway so the reason stays truthful.
+        const until = SWITCHED_OFF.get(provider) || 0;
+        if (Date.now() < until && plan.length > 1) {
+          group.reason = "switched_off";
+          continue;
+        }
         const { payload, error } = await askStoreSearch(
           env,
           provider,
@@ -736,9 +767,11 @@ async function buildFeed(env, request, where, destination, wanted, cache, key) {
           request
         );
         if (error) {
+          if (error === "switched_off") SWITCHED_OFF.set(provider, Date.now() + SWITCHED_OFF_MS);
           group.reason = error;
           continue;
         }
+        SWITCHED_OFF.delete(provider);
         let rows;
         if (provider === "viator_search") rows = activityResults(payload);
         else if (provider === "duffel_stay_search") rows = hotelResults(payload);
