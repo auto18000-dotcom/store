@@ -2,10 +2,16 @@
   "name": "tourguid-web",
   "compatibility_date": "2026-09-19",
 
-  // Assets-only, like TourGuid-Control: no Worker script, Cloudflare serves
-  // ./public from its edge. There is no server code and nothing secret here.
+  // No longer assets-only. The Store searches live suppliers without making
+  // visitors sign in first (the owner's decision, 2026-09-22: "public, with
+  // protection") -- that needs a server holding a shared secret, so this stopped
+  // being true the day src/store-worker.js was added. Static requests still
+  // reach ./public directly; the Worker only runs for paths it doesn't match,
+  // and its own first check hands anything outside /api/store/* to ASSETS.
+  "main": "src/store-worker.js",
   "assets": {
-    "directory": "./public"
+    "directory": "./public",
+    "binding": "ASSETS"
   },
 
   // Kept explicitly false, for the reason TourGuid-Control's wrangler.jsonc
