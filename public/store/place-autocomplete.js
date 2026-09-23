@@ -20,9 +20,9 @@
     const close=()=>{list.hidden=true;list.replaceChildren();input.setAttribute('aria-expanded','false');active=-1};
     const choose=item=>{state.place=item;input.value=item.label||item.name;close();options.onChoose?.(item)};
     const setActive=index=>{const rows=[...list.querySelectorAll('li[role="option"]')];if(!rows.length)return;active=(index+rows.length)%rows.length;rows.forEach((row,i)=>row.setAttribute('aria-selected',String(i===active)));rows[active].scrollIntoView({block:'nearest'})};
-    const render=items=>{
+    const render=(items,message)=>{
       list.replaceChildren();active=-1;
-      if(!items.length){const li=document.createElement('li');li.className='place-suggestion-empty';li.textContent='No matching places found.';list.append(li)}
+      if(!items.length){const li=document.createElement('li');li.className='place-suggestion-empty';li.textContent=message||'No matching places found.';list.append(li)}
       for(const item of items){
         const li=document.createElement('li');li.setAttribute('role','option');
         const name=document.createElement('strong');name.textContent=item.name;
@@ -43,11 +43,11 @@
         try{
           const response=await fetch(`/api/store/suggest?q=${encodeURIComponent(q)}`,{headers:{Accept:'application/json'}});
           if(mine!==seq)return;
-          if(!response.ok)return close();
+          if(!response.ok)return render([],response.status===503?'Place search is not connected yet.':'Place search is unavailable. Try again.');
           const payload=await response.json();
           if(mine!==seq)return;
           render(Array.isArray(payload.suggestions)?payload.suggestions:[]);
-        }catch{if(mine===seq)close()}
+        }catch{if(mine===seq)render([],'Place search is unavailable. Try again.')}
       },250);
     });
     input.addEventListener('keydown',event=>{

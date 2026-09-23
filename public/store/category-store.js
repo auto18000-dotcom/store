@@ -40,7 +40,10 @@
   const heading=document.createElement('h2');heading.textContent=destination?`Browse ${provider.name.toLowerCase()} in ${destination}`:`Browse ${provider.name.toLowerCase()}`;
   const copy=document.createElement('p');copy.textContent='Three collections are visible below. Use the arrows or swipe to see more ideas in each row.';
   const note=document.createElement('div');note.className='category-store-note';note.textContent=destination?'These are editorial discovery ideas. Current inventory, prices, availability and booking terms are confirmed by the named provider.':'Choose a destination on the Travel Store page to see places, stays and experiences for it. Until then these are general editorial ideas, not results for any place.';
-  introduction.append(kicker,heading,copy,note);jump.after(introduction);
+  const searchLabel=document.createElement('label');searchLabel.className='category-place-search';searchLabel.append('Search a Destination');
+  const searchInput=document.createElement('input');searchInput.type='search';searchInput.placeholder='City, State, Region or Province';searchInput.value=destination;searchInput.setAttribute('data-place','navigate');searchLabel.append(searchInput);
+  introduction.append(kicker,heading,copy,searchLabel,note);jump.after(introduction);
+  window.TourGuidPlaces?.attach(searchInput,{onChoose:place=>{const q=new URLSearchParams({destination:place.name});for(const key of ['region','country','countryCode','lat','lon'])if(place[key]!=null&&place[key]!=='')q.set(key,place[key]);location.href=`${location.pathname}?${q}`}});
 
   const renderRow=(eyebrowText,row,fill)=>{
     const section=document.createElement('section');section.className='wrap category-row';

@@ -29,3 +29,6 @@
 .category-store-footer{margin:30px 0 0;padding:17px 0;border-top:1px solid #d8e4df;color:#5b7278;font-size:.84rem}
 @media(max-width:850px){.collection-card{flex-basis:calc((100% - 18px)/2)}}
 @media(max-width:580px){.category-row-head{align-items:start;flex-direction:column}.category-row-controls{align-self:flex-end}.collection-card{flex-basis:100%}}
+
+.category-place-search{display:block;max-width:420px;margin:14px 0 4px;color:var(--muted,#577077);font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.category-place-search input{display:block;width:100%;height:42px;margin-top:5px;border:1px solid #bfcfcb;border-radius:4px;padding:0 10px;background:#fff;color:#123642;font-size:.92rem;font-weight:400;letter-spacing:normal;text-transform:none}

@@ -549,6 +549,14 @@ async function flights(env, request, params) {
   if (!departure) {
     return json({ error: "bad_request", message: "A departure date is required." }, { status: 400 });
   }
+  // A return may be the SAME DAY — a day trip is a real thing — but never
+  // before the departure. Refused here rather than spending a search.
+  if (isDate(departure) && isDate(returning) && returning < departure) {
+    return json(
+      { error: "bad_dates", message: "A return cannot be before the departure." },
+      { status: 400 }
+    );
+  }
   // NO DEFAULTS AT EITHER END. Neither a code nor a point means we were not
   // told, and saying so beats searching a route nobody asked for.
   if (!from.code && !from.point) {
@@ -697,6 +705,11 @@ function endOf(params, nameKey, latKey, lonKey) {
   return { named, code: /^[A-Za-z]{3}$/.test(named) ? named.toUpperCase() : null, lat, lon, point };
 }
 
+// ISO dates compare correctly as strings, which is the only reason this is
+// safe without parsing. Anything not in that shape is not compared at all —
+// upstream can refuse it with better context than we could invent.
+const isDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value);
+
 // Duffel accepts TEN legs and refuses eleven — measured, not assumed. We refuse
 // the eleventh here too, in milliseconds, rather than spending a request to be
 // told the same thing.
@@ -782,13 +795,34 @@ async function suggest(env, request, params, ctx) {
 }
 
 async function hotels(env, request, params) {
+  const checkIn = one(params, "checkIn");
+  const checkOut = one(params, "checkOut");
+
+  // A PICKER IS A CONVENIENCE; THE CHECK HAS TO EXIST BEHIND IT. A page can be
+  // reached with typed query parameters, an old bookmark or a stale link.
+  //
+  // A stay is at least one NIGHT, so check-out is the day AFTER check-in —
+  // which is not the same rule as a return flight, where the same day is a
+  // real day trip and is allowed deliberately.
+  if ((checkIn && !checkOut) || (checkOut && !checkIn)) {
+    return json(
+      { error: "bad_dates", message: "A stay needs both a check-in and a check-out date." },
+      { status: 400 }
+    );
+  }
+  if (isDate(checkIn) && isDate(checkOut) && checkOut <= checkIn) {
+    return json(
+      { error: "bad_dates", message: "Check-out must be at least one night after check-in." },
+      { status: 400 }
+    );
+  }
   const { payload, error } = await askStoreSearch(
     env,
     "duffel_stay_search",
     {
       place: one(params, "destination"),
-      check_in: one(params, "checkIn"),
-      check_out: one(params, "checkOut"),
+      check_in: checkIn,
+      check_out: checkOut,
       adults: Number(one(params, "adults", "2")) || 2,
       limit: 12,
     },
