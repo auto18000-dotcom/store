@@ -18,7 +18,7 @@
     const mark=logo(offer.airlineLogo);
     if(mark){const img=el('img','flight-logo');img.src=mark;img.alt='';img.width=32;img.height=32;img.loading='lazy';head.append(img)}
     head.append(el('h3','',offer.operatingCarrier||'Operating carrier unavailable'));
-    body.append(el('div','tag',ctx.isLive?'Duffel live offer':'Duffel test data'),head);
+    body.append(head);
     const flags=el('div','flight-flags');
     if(offer.cheapest)flags.append(el('span','flight-flag flag-cheapest','Cheapest'));
     if(offer.fastest)flags.append(el('span','flight-flag flag-fastest','Fastest'));
@@ -38,7 +38,7 @@
       line.append(document.createTextNode(segs.filter(g=>Array.isArray(g.baggage)).map(g=>`${g.origin}→${g.destination} ${bagText(g.baggage)}`).join(' · ')));
       body.append(line);
     }
-    body.append(el('p','flight-price',offer.totalAmount&&offer.currency?`${offer.currency} ${offer.totalAmount} total · expires ${offer.expiresAt||'time not supplied'}`:'Price not available'));
+    body.append(el('p','flight-price',offer.totalAmount&&offer.currency?`${offer.currency} ${offer.totalAmount} total`:'Price not available'));
     if(offer.detailUrl){const u=new URL(offer.detailUrl,location.origin);if(u.origin===location.origin){const link=el('a','btn btn-primary','View flight');link.href=u.href;body.append(link)}}
     window.TourGuidJourney?.addButton(body,{title:`${offer.operatingCarrier||'Flight'} ${offer.origin||ctx.origin} to ${offer.destination||ctx.destination}`,type:'Flight',source:'Duffel'});
     c.append(body);return c;
