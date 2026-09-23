@@ -640,6 +640,7 @@ async function flights(env, request, params) {
     request
   );
   if (error) return refuse(error);
+
   return json({
     offers: flightOffers(payload, from.code || from.named || null, to.code || to.named || null, departure),
     // Which airport Duffel actually resolved the coordinates to. A traveller
