@@ -32,3 +32,8 @@
 
 .category-place-search{display:block;max-width:420px;margin:14px 0 4px;color:var(--muted,#577077);font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
 .category-place-search input{display:block;width:100%;height:42px;margin-top:5px;border:1px solid #bfcfcb;border-radius:4px;padding:0 10px;background:#fff;color:#123642;font-size:.92rem;font-weight:400;letter-spacing:normal;text-transform:none}
+
+.category-live-grid .category-row-controls{display:none}
+.category-live-grid .category-track.is-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));overflow:visible;scroll-snap-type:none;gap:18px}
+.category-live-grid .category-track.is-grid .collection-card{flex:none}
+.category-choose-prompt{margin:26px auto;padding:22px 24px;border:1px dashed #a9c6bd;border-radius:8px;background:#f4faf7;color:#123642;font-weight:600}

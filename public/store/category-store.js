@@ -65,6 +65,7 @@
     previous.addEventListener('click',()=>track.scrollBy({left:-(track.children[0].getBoundingClientRect().width+18),behavior:'smooth'}));
     next.addEventListener('click',()=>track.scrollBy({left:track.children[0].getBoundingClientRect().width+18,behavior:'smooth'}));
     track.addEventListener('scroll',update,{passive:true});window.addEventListener('resize',update);update();
+    return section;
   };
 
   const money=(amount,currency)=>{try{return new Intl.NumberFormat('en-US',{style:'currency',currency:currency||'USD'}).format(amount)}catch{return `${currency||''} ${amount}`.trim()}};
@@ -105,8 +106,10 @@
       if(response.ok){const feed=await response.json();const entry=feed?.categories?.[category];if(entry?.live&&Array.isArray(entry.items))liveItems=entry.items}
     }catch{liveItems=[]}
   }
-  if(liveItems.length)renderRow('Live results',{title:`${provider.name} in ${destination}`,hint:'Current listings for this place from the named providers. Confirm price and terms with the provider.'},track=>liveItems.forEach((item,i)=>track.append(liveCard(item,i))));
-  provider.rows.forEach((row,rowIndex)=>renderRow(`Collection ${rowIndex+1} of 3`,row,track=>{
+  const liveSection=!liveItems.length?null:renderRow('Live results',{title:`${provider.name} in ${destination}`,hint:'Current listings for this place from the named providers. Confirm price and terms with the provider.'},track=>liveItems.forEach((item,i)=>track.append(liveCard(item,i))));
+  if(liveSection){liveSection.classList.add('category-live-grid');liveSection.querySelector('.category-track').classList.add('is-grid')}
+  if(!destination){const prompt=document.createElement('div');prompt.className='wrap category-choose-prompt';prompt.textContent="Choose a destination above to see what's available.";main.append(prompt)}
+  else provider.rows.forEach((row,rowIndex)=>renderRow(`Collection ${rowIndex+1} of 3`,row,track=>{
     for(const [itemIndex,[itemTitle,itemSummary]] of row.items.entries()){
       const card=document.createElement('article');card.className='collection-card';
       const art=document.createElement('div');art.className='collection-art';
