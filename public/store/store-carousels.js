@@ -50,6 +50,11 @@
   let feed=null;
   try{
     const controller=new AbortController();
+    // 4s is deliberate, not a placeholder -- it's what caught the feed's
+    // categories running sequentially server-side (fixed: now parallel,
+    // plus stale-while-revalidate so only the very first visitor per
+    // destination pays a cold build). Raising this would hide the next
+    // version of that same problem instead of surfacing it.
     const timeout=setTimeout(()=>controller.abort(),4000);
     const feedParams=new URLSearchParams({destination});
     for(const [key,val] of [['region',destinationCtx.region],['country',destinationCtx.country],['lat',destinationCtx.lat],['lon',destinationCtx.lon]])if(val!=null&&val!=='')feedParams.set(key,val);
@@ -133,6 +138,12 @@
     const section=document.getElementById(sectionId);
     const track=section?.querySelector(':scope > .grid');
     if(!track||track.children.length<3)continue;
+    // Captured before any manipulation: the hand-written editorial cards
+    // that shipped in the page's own HTML. When live data exists for this
+    // row, they're the failure mode the owner actually hit -- a real hotel
+    // sitting behind eight editorial cards, reachable only by clicking past
+    // all of them. Live results must lead the row, not follow it.
+    const originalCards=[...track.children];
     section.classList.add('store-carousel');
     track.classList.add('carousel-track');
     track.setAttribute('aria-label',`${config.name} carousel`);
@@ -155,12 +166,17 @@
     const action=document.createElement('span');action.className='category-action';action.textContent=`Open ${config.name} page →`;
     categoryBody.append(tag,heading,description,action);
     category.append(categoryVisual,categoryBody);
-    track.insertBefore(category,track.children[2]);
 
     const live=feed?.categories?.[sectionId];
     if(live?.live&&Array.isArray(live.items)&&live.items.length){
+      // Live results lead the row. The page's own hand-written editorial
+      // cards are removed entirely rather than pushed behind real results --
+      // a hotel that's real shouldn't sit eight clicks past ones that aren't.
+      originalCards.forEach(el=>el.remove());
+      track.append(category);
       for(const item of live.items)track.append(buildProductCard(config,item));
     }else{
+      track.insertBefore(category,track.children[2]);
       for(const theme of config.themes)track.append(buildThemeCard(config,theme,categoryHref(config.page)));
     }
 

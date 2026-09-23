@@ -1,4 +1,9 @@
 /**
+ * STALE COPY — the canonical file is in TourGuid-Web's repository
+ * (github.com/auto18000-dotcom/store), which is what deploys. This folder is a
+ * mirror of a ChatGPT project and its files may be replaced at any time. Edit
+ * there, or send a diff; do not assume a change made here reaches the site.
+ *
  * TourGuid Travel Store — the /api/store/* server, as a Cloudflare Worker.
  *
  * This is the deployed twin of `preview_server.py`. The two must agree: the
@@ -686,52 +691,86 @@ async function feed(env, request, params, ctx) {
     )}/${wanted.join(",")}`,
     { method: "GET" }
   );
+
+  // STALE WHILE REVALIDATE. Stored with a long max-age and its own `fetchedAt`,
+  // so a cached answer is always RETRIEVABLE and this code decides whether it
+  // is fresh. An hour old still goes out immediately and is refreshed behind
+  // the response.
+  //
+  // Why it matters: the page aborts the feed at 4000ms, and a cold build asks
+  // four providers that each take 1.3-3.1s. With a plain TTL the FIRST visitor
+  // of every hour pays that, times out, and sees editorial placeholders — so
+  // the Store would look unwired to a steady trickle of people forever. Only
+  // the very first visitor for a destination now pays a cold build at all.
   const hit = await cache.match(key);
   if (hit) {
     const body = await hit.json();
-    return json({ ...body, cached: true });
-  }
-
-  const categories = {};
-  for (const name of wanted) {
-    categories[name] = { live: false, reason: "not_connected", items: [] };
-    for (const [provider, extra, source, priced] of FEED_PLAN[name]) {
-      const { payload, error } = await askStoreSearch(
-        env,
-        provider,
-        { ...where, place: destination, limit: 12, ...extra },
-        request
-      );
-      if (error) {
-        categories[name].reason = error;
-        continue;
-      }
-      let rows;
-      if (provider === "viator_search") rows = activityResults(payload);
-      else if (provider === "duffel_stay_search") rows = hotelResults(payload);
-      else rows = placeResults(payload);
-      if (!rows.length) {
-        categories[name].reason = "no_results";
-        continue;
-      }
-      categories[name] = {
-        live: true,
-        reason: null,
-        source,
-        items: rows.slice(0, 12).map((row) => asCard(row, name, source, priced)),
-      };
-      break;
+    const age = Date.now() - (body.fetchedAt || 0);
+    if (age > FEED_TTL * 1000) {
+      ctx.waitUntil(buildFeed(env, request, where, destination, wanted, cache, key));
     }
+    return json({ ...body, cached: true, stale: age > FEED_TTL * 1000 });
   }
 
-  const answer = { destination, categories, cached: false };
+  return json(await buildFeed(env, request, where, destination, wanted, cache, key));
+}
+
+/**
+ * Ask every carousel's providers and store the result.
+ *
+ * THE CATEGORIES RUN IN PARALLEL. They used to run one after another, which on
+ * a cold build meant the sum of four upstream calls — comfortably past the
+ * page's 4000ms abort. Each category still tries its OWN providers in order,
+ * because that order is a preference (Duffel's priced rooms before Google's
+ * unpriced listings), not something to race.
+ */
+async function buildFeed(env, request, where, destination, wanted, cache, key) {
+  const built = await Promise.all(
+    wanted.map(async (name) => {
+      let group = { live: false, reason: "not_connected", items: [] };
+      for (const [provider, extra, source, priced] of FEED_PLAN[name]) {
+        const { payload, error } = await askStoreSearch(
+          env,
+          provider,
+          { ...where, place: destination, limit: 12, ...extra },
+          request
+        );
+        if (error) {
+          group.reason = error;
+          continue;
+        }
+        let rows;
+        if (provider === "viator_search") rows = activityResults(payload);
+        else if (provider === "duffel_stay_search") rows = hotelResults(payload);
+        else rows = placeResults(payload);
+        if (!rows.length) {
+          group.reason = "no_results";
+          continue;
+        }
+        group = {
+          live: true,
+          reason: null,
+          source,
+          items: rows.slice(0, 12).map((row) => asCard(row, name, source, priced)),
+        };
+        break;
+      }
+      return [name, group];
+    })
+  );
+
+  const categories = Object.fromEntries(built);
+  const answer = { destination, categories, cached: false, fetchedAt: Date.now() };
   if (Object.values(categories).some((group) => group.live)) {
-    const stored = new Response(JSON.stringify(answer), {
-      headers: { "Content-Type": "application/json", "Cache-Control": `max-age=${FEED_TTL}` },
-    });
-    ctx.waitUntil(cache.put(key, stored));
+    // A long max-age keeps it RETRIEVABLE; `fetchedAt` is what decides fresh.
+    await cache.put(
+      key,
+      new Response(JSON.stringify(answer), {
+        headers: { "Content-Type": "application/json", "Cache-Control": "max-age=86400" },
+      })
+    );
   }
-  return json(answer);
+  return answer;
 }
 
 /**
