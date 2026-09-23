@@ -12,9 +12,10 @@
   const results=document.getElementById('flight-results');
   form.replaceChildren();
 
-  const tabs=el('div',{class:'flight-modes',role:'group','aria-label':'Trip type'});
-  const modeButtons={};
-  for(const [key,text] of [['oneway','One way'],['round','Round trip'],['multi','Multi-city']]){const b=el('button',{type:'button','aria-pressed':'false'},text);b.addEventListener('click',()=>setMode(key));modeButtons[key]=b;tabs.append(b)}
+  const modeSelect=el('select',{id:'flight-mode','aria-label':'Trip type',class:'flight-mode-select'});
+  for(const [key,text] of [['oneway','One way'],['round','Round trip'],['multi','Multi-city']])modeSelect.append(el('option',{value:key},text));
+  modeSelect.addEventListener('change',()=>setMode(modeSelect.value));
+  const tabs=el('div',{class:'flight-modes'});tabs.append(modeSelect);
 
   const from=place('origin','From','City or Airport Code, e.g. SFO');from.wrap.classList.add('flight-place');
   const to=place('flight-to','To','City or Airport Code, e.g. CDG');to.wrap.classList.add('flight-place');
@@ -46,13 +47,12 @@
 
   const submit=el('button',{class:'btn btn-primary',type:'submit',id:'flight-submit'},'Search flights');
   const bottom=el('div',{class:'flight-bottom'});bottom.append(field('Passengers',passengers),submit);
-  const hint=el('button',{type:'button',class:'flight-multi-hint'},'Planning several stops? Try Multi-city');hint.addEventListener('click',()=>setMode('multi'));
-  form.append(tabs,simple,multi,hint,bottom,status);
+  bottom.append(status);form.append(tabs,simple,multi,bottom);
 
   function setMode(next){
     mode=next;
-    for(const [k,b] of Object.entries(modeButtons))b.setAttribute('aria-pressed',String(k===mode));
-    simple.hidden=mode==='multi';hint.hidden=mode==='multi';multi.hidden=mode!=='multi';returnField.hidden=mode!=='round';
+    modeSelect.value=mode;
+    simple.hidden=mode==='multi';multi.hidden=mode!=='multi';returnField.hidden=mode!=='round';
     if(mode!=='round')returnInput.value='';
     status.textContent='';
   }
