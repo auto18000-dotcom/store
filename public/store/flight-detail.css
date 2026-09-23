@@ -1,0 +1,15 @@
+.flight-detail{padding:34px 0 60px;max-width:900px}
+.flight-detail-back{display:inline-block;margin-bottom:16px;color:var(--teal);font-weight:600;text-decoration:underline;background:none;border:0;padding:0;font:inherit;cursor:pointer}
+.fd-head{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:6px}
+.fd-head h1{margin:0;font-size:1.9rem}.fd-logo{max-height:38px;max-width:150px;object-fit:contain}
+.fd-section{margin-top:26px;padding:22px;background:#fff;border:1px solid var(--line);border-radius:8px}
+.fd-section h2{margin:0 0 14px;font-size:1.15rem}
+.fd-seg{padding:12px 0;border-top:1px solid var(--line)}.fd-seg:first-of-type{border-top:0;padding-top:0}
+.fd-seg strong{display:block;font-size:1.02rem}.fd-seg span{color:var(--muted);font-size:.88rem}
+.fd-layover{margin:6px 0;padding:8px 12px;background:#fdf0d5;color:#7a4d06;border-radius:6px;font-size:.9rem;font-weight:600}
+.fd-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 20px;margin:0}
+.fd-facts dt{color:var(--muted);font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.fd-facts dd{margin:2px 0 0;font-weight:600}
+.fd-price{font-size:1.7rem;font-weight:800;margin:0}
+.fd-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:14px}
+.fd-actions .btn[disabled]{opacity:.55;cursor:not-allowed}.fd-actions small{color:var(--muted)}
+.flight-detail-empty{color:var(--muted)}

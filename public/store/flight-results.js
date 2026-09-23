@@ -39,8 +39,10 @@
       body.append(line);
     }
     body.append(el('p','flight-price',offer.totalAmount&&offer.currency?`${offer.currency} ${offer.totalAmount} total`:'Price not available'));
-    if(offer.detailUrl){const u=new URL(offer.detailUrl,location.origin);if(u.origin===location.origin){const link=el('a','btn btn-primary','View flight');link.href=u.href;body.append(link)}}
-    window.TourGuidJourney?.addButton(body,{title:`${offer.operatingCarrier||'Flight'} ${offer.origin||ctx.origin} to ${offer.destination||ctx.destination}`,type:'Flight',source:'Duffel'});
+    // The detail page reads the offer already in hand: no second (billable) lookup.
+    const view=el('a','btn btn-primary','View');view.href='./flight-detail';
+    view.addEventListener('click',()=>{try{sessionStorage.setItem('tourguid-flight-offer',JSON.stringify({offer,isLive:ctx.isLive,savedAt:Date.now()}))}catch{}});
+    body.append(view);
     c.append(body);return c;
   };
   window.TourGuidFlights={card};
