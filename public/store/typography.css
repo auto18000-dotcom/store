@@ -10,3 +10,11 @@ h1,h2,h3{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
 .brand img{width:38px;height:38px;object-fit:contain;border-radius:0;padding:0;background:none;box-sizing:border-box;box-shadow:none}
 .account-link{margin-left:auto;white-space:nowrap;color:#fff;text-decoration:none;font-size:.84rem;font-weight:750;border:1px solid #ffffff85;border-radius:5px;padding:8px 11px}.account-link:hover,.account-link.active{background:#ffffff1c;border-color:#fff}.account-link:focus-visible{outline:3px solid #ffae19;outline-offset:3px}
 .detail-link{display:inline-flex;align-items:center;margin-top:10px;color:#075d61;font-size:.84rem;font-weight:800;text-decoration:underline;text-underline-offset:3px}.card-actions .detail-link{min-height:40px}
+
+/* Field text is regular weight (labels above keep their own emphasis); the date format cue reads in capitals. */
+input,select,textarea{font-weight:400}
+input::placeholder,textarea::placeholder{font-weight:400}
+input[type="date"]::-webkit-datetime-edit,input[type="date"]::-webkit-datetime-edit-fields-wrapper,input[type="date"]::-webkit-datetime-edit-month-field,input[type="date"]::-webkit-datetime-edit-day-field,input[type="date"]::-webkit-datetime-edit-year-field,input[type="date"]::-webkit-datetime-edit-text{text-transform:uppercase;font-weight:400}
+.place-suggestions,.place-suggestions li{font-weight:400}
+.place-suggestions li strong{font-weight:600}
+.place-suggestions li,.place-suggestions li span{text-transform:capitalize}
