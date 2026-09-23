@@ -1,0 +1,10 @@
+.tg-auth-overlay{position:fixed;inset:0;background:rgba(8,30,35,.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:1000}
+.tg-auth-box{position:relative;background:#fffdf8;border-radius:10px;padding:32px 28px 26px;width:min(420px,100%);box-shadow:0 24px 64px rgba(8,30,35,.35)}
+.tg-auth-close{position:absolute;top:12px;right:14px;background:none;border:0;font-size:1.5rem;line-height:1;color:#5c7278;cursor:pointer}
+.tg-auth-title{font:normal 1.6rem/1.15 Georgia,serif;letter-spacing:-.03em;margin:0 0 8px;color:#123642}
+.tg-auth-lead{color:#5c7278;font-size:.92rem;margin:0 0 20px}
+.tg-auth-form{display:grid;gap:14px}
+.tg-auth-form label{display:block;font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:#5c7278}
+.tg-auth-form input{display:block;width:100%;height:44px;margin-top:5px;border:1px solid #bfcfcb;border-radius:4px;padding:0 12px;font:inherit;color:#123642;background:#fff}
+.tg-auth-status{min-height:20px;font-size:.85rem;color:#075d61;margin:0}
+.tg-auth-switch{margin-top:14px;background:none;border:0;color:#075d61;font-size:.86rem;text-decoration:underline;cursor:pointer;padding:0}
