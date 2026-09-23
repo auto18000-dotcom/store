@@ -41,13 +41,11 @@ const HERO_TTL = 86400;
 const SUGGEST_TTL = 86400;
 const SUGGEST_MIN_CHARS = 2;
 
-const BARCELONA_FALLBACK = {
-  image:
-    "https://images.pexels.com/photos/1388030/pexels-photo-1388030.jpeg?auto=compress&cs=tinysrgb&w=2000",
-  photographer: "Aleksandar Pasaric",
-  page: "https://www.pexels.com/photo/aerial-photography-of-city-1388030/",
-  source: "curated_fallback",
-};
+// NO CURATED FALLBACK PHOTOGRAPH, and no default destination anywhere in this
+// file. There used to be one hand-picked Barcelona image used when Pexels had
+// nothing; the owner's rule of 2026-09-23 is that no hardcoded Barcelona
+// remains in the Store. A city with no photograph now shows no photograph,
+// which is honest, where a Barcelona skyline under Porto's name is not.
 
 // Where an outbound click may land. An open redirect on a travel domain is a
 // phishing gift — our name and our padlock on someone else's login page — so
@@ -230,6 +228,18 @@ function flightOffers(payload, from, to, date) {
       // Nothing links anywhere yet. A detail page is Journey work, and a link
       // invented here would 404 in a visitor's face.
       detailUrl: null,
+      // The return leg, when there is one. `segments` stays the OUTBOUND, so
+      // nothing reading this today changes; a round trip simply carries more.
+      returnSegments: (((offer.slices || [])[1] || {}).segments || []).map((leg) => ({
+        origin: leg.origin,
+        destination: leg.destination,
+        departure: leg.departing_at,
+        arrival: leg.arriving_at,
+        duration: leg.duration,
+        carrier: leg.marketing_carrier_name,
+        flightNumber: leg.marketing_carrier_flight_number,
+      })),
+      returnDuration: ((offer.slices || [])[1] || {}).duration ?? null,
       segments: segments.map((leg) => ({
         origin: leg.origin,
         destination: leg.destination,
@@ -499,32 +509,68 @@ const one = (params, name, fallback = "", limit = 100) =>
   String(params.get(name) ?? fallback).trim().slice(0, limit);
 
 async function flights(env, request, params) {
-  const origin = one(params, "origin").toUpperCase();
-  const destination = (one(params, "destination") || "BCN").toUpperCase();
   const departure = one(params, "departure");
   const passengers = Number(one(params, "passengers", "1")) || 1;
-  if (!origin || !departure) {
-    return json(
-      { error: "bad_request", message: "A departure airport and date are required." },
-      { status: 400 }
-    );
+
+  // WHERE TO, without a table of airport codes. A three-letter destination is
+  // taken as an IATA code; anything else is a display name and the COORDINATES
+  // decide, which Duffel resolves to the nearest airport itself. That is what
+  // lets the page delete its Barcelona/Paris/Lisbon lookup — a hardcoded list
+  // of three cities is a Barcelona hardcode wearing a hat, and it silently
+  // fails for the fourth city anyone types.
+  const returning = one(params, "return") || one(params, "returnDate");
+
+  // BOTH ENDS READ THE SAME WAY: a three-letter value is an IATA code, longer
+  // is a display name and the coordinates decide. Duffel resolves the nearest
+  // airport itself, which is what lets the pages carry no airport table at all.
+  const from = endOf(params, "origin", "originLat", "originLon");
+  const to = endOf(params, "destination", "lat", "lon");
+
+  if (!departure) {
+    return json({ error: "bad_request", message: "A departure date is required." }, { status: 400 });
   }
+  // NO DEFAULTS AT EITHER END. Neither a code nor a point means we were not
+  // told, and saying so beats searching a route nobody asked for.
+  if (!from.code && !from.point) {
+    return json({ error: "no_origin", message: "Choose where you are flying from." }, { status: 400 });
+  }
+  if (!to.code && !to.point) return noDestination();
+
   const { payload, error } = await askStoreSearch(
     env,
     "duffel_flight_offers",
-    { from: origin, to: destination, date: departure, adults: passengers, limit: 12 },
+    {
+      ...(from.code ? { from: from.code } : {}),
+      ...(from.point ? { from_lat: from.lat, from_lon: from.lon } : {}),
+      ...(to.code ? { to: to.code } : {}),
+      ...(to.point ? { to_lat: to.lat, to_lon: to.lon } : {}),
+      date: departure,
+      // Optional. A second slice on the SAME offer request, so a round trip is
+      // priced as one rather than two one-ways added together — and it costs
+      // one search, not two, against the excess-search fee.
+      ...(returning ? { return_date: returning } : {}),
+      adults: passengers,
+      limit: 12,
+    },
     request
   );
   if (error) return refuse(error);
   return json({
-    offers: flightOffers(payload, origin, destination, departure),
+    offers: flightOffers(payload, from.code || from.named || null, to.code || to.named || null, departure),
+    // Which airport Duffel actually resolved the coordinates to. A traveller
+    // who typed a city is owed the airport they are being flown into.
+    destination: payload.destination ?? null,
+    origin: payload.origin ?? null,
+    // What was actually SEARCHED, so a dropped return date can never be
+    // silent again: a page that asked for a round trip and reads "one_way"
+    // knows its second date did not arrive.
+    trip: payload.trip ?? null,
+    departureDate: payload.departure_date ?? null,
+    returnDate: payload.return_date ?? null,
     // Duffel says which mode answered. A test key invents an airline called
     // "Duffel Airways" and synthetic fares; a page that cannot tell the
-    // difference will quote them to a real traveller. Carry it through so the
-    // site can say so plainly — or refuse to show prices at all.
+    // difference will quote them to a real traveller.
     liveMode: payload.live_mode ?? null,
-    // Carried through untouched. False means the search ran WITHOUT a CAPTCHA
-    // check; passing it on means nobody can mistake one for the other.
     captchaChecked: payload.captchaChecked ?? null,
   });
 }
@@ -613,6 +659,22 @@ async function detail(env, request, params, ctx) {
     )
   );
   return json(answer);
+}
+
+/**
+ * One end of a flight, from whatever the page could give us.
+ *
+ * Three letters is an IATA code. Anything longer is a name a traveller typed
+ * or picked, and the coordinates that came with the suggestion are what decide
+ * — Duffel resolves the nearest airport itself. Neither means we were not told.
+ */
+function endOf(params, nameKey, latKey, lonKey) {
+  const named = one(params, nameKey);
+  const lat = Number(one(params, latKey));
+  const lon = Number(one(params, lonKey));
+  const point =
+    !!one(params, latKey) && !!one(params, lonKey) && Number.isFinite(lat) && Number.isFinite(lon);
+  return { named, code: /^[A-Za-z]{3}$/.test(named) ? named.toUpperCase() : null, lat, lon, point };
 }
 
 /** Destination autocomplete. Worldwide, not a Barcelona list. */
@@ -912,7 +974,8 @@ function safePath(value) {
 }
 
 async function heroPhoto(env, params, ctx) {
-  const destination = one(params, "destination", "Barcelona", 100) || "Barcelona";
+  const destination = one(params, "destination", "", 100);
+  if (!destination) return json({ image: null, source: "no_destination" });
   const cache = caches.default;
   const key = new Request(
     `https://hero.tourguid.invalid/${encodeURIComponent(destination.toLowerCase())}`
@@ -956,9 +1019,7 @@ async function heroPhoto(env, params, ctx) {
       /* fall through to the fallback below */
     }
   }
-  const data = destination.toLowerCase().startsWith("barcelona")
-    ? BARCELONA_FALLBACK
-    : { image: null, source: "no_photo" };
+  const data = { image: null, source: "no_photo" };
   return json(data, { cache: HERO_TTL });
 }
 

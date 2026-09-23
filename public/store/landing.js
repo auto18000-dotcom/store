@@ -1,4 +1,4 @@
-const landingDestination=new URLSearchParams(location.search).get('destination')||window.TourGuidDestination?.name||'Barcelona';
+const landingDestination=new URLSearchParams(location.search).get('destination')||window.TourGuidDestination?.name||'your destination';
 const formMessages={
   'flight-search':()=>{const origin=document.getElementById('from').value.trim().toUpperCase();const depart=document.getElementById('depart').value;const ret=document.getElementById('return').value;if(ret&&ret<depart)return 'Return date must be after departure.';return `Route set: ${origin} to ${landingDestination} on ${depart}. Live Duffel offers require the TourGuid server connection.`},
   'hotel-search':()=>{const a=document.getElementById('checkin').value,b=document.getElementById('checkout').value;if(b<=a)return 'Check-out must be after check-in.';return `${landingDestination} stay set: ${a} to ${b}. A booking provider confirms current rates and availability.`},

@@ -2,12 +2,9 @@
   const hero=document.querySelector('.hero');
   const credit=document.querySelector('#hero-photo-credit');
   if(!hero||!credit)return;
-  const destination=(new URLSearchParams(location.search).get('destination')||'Barcelona').trim();
-  const fallback=destination.toLowerCase().startsWith('barcelona')?{
-    image:'https://images.pexels.com/photos/1388030/pexels-photo-1388030.jpeg?auto=compress&cs=tinysrgb&w=2000',
-    photographer:'Aleksandar Pasaric',
-    page:'https://www.pexels.com/photo/aerial-photography-of-city-1388030/'
-  }:null;
+  const destination=(new URLSearchParams(location.search).get('destination')||'').trim();
+  // No destination chosen means no photo request and no stock fallback image.
+  if(!destination)return;
   const show=photo=>{
     if(!photo?.image||!photo.image.startsWith('https://images.pexels.com/'))return;
     const image=new Image();
@@ -19,7 +16,6 @@
     };
     image.src=photo.image;
   };
-  if(fallback)show(fallback);
   fetch(`/api/store/hero-photo?destination=${encodeURIComponent(destination)}`,{headers:{Accept:'application/json'}})
     .then(response=>response.ok?response.json():null)
     .then(photo=>{if(photo?.source==='pexels_api')show(photo)})

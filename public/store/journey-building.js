@@ -10,30 +10,22 @@
   const safeText=value=>String(value??'');
   const initial=read(setupKey,{});
   const setup={
-    destination:safeText(params.get('destination')||initial.destination||'Barcelona').trim(),
+    destination:safeText(params.get('destination')||initial.destination||'').trim(),
     start:safeText(params.get('from')||initial.start||''),
     end:safeText(params.get('to')||initial.end||''),
     travelers:Number(initial.travelers)||1
   };
   let day=Math.max(1,Number(params.get('day'))||1);
   let map=null,markers=[];
-  const locations={
-    'hotel-arts-barcelona':[41.3863,2.1967],
-    'port-olimpic':[41.3871,2.1991],
-    'sagrada-familia':[41.4036,2.1744],
-    'barcelona-waterfront':[41.3784,2.1925],
-    'gaudi-architecture':[41.3916,2.1649],
-    'barcelona-water':[41.3871,2.1991],
-    'barcelona-neighborhood-walks':[41.3801,2.1752],
-    'barcelona-food-tours':[41.3816,2.1721],
-    'enoteca-paco-perez':[41.3863,2.1967]
-  };
+  // Coordinates come from Cards that carry their own lat/lon; nothing is
+  // looked up from a built-in list of places.
+  const locations={};
   const cards=()=>{
     const value=read(cardKey,[]);
     return Array.isArray(value)?value:[];
   };
   const destinationKey=value=>safeText(value).split(',')[0].trim().toLowerCase();
-  const belongs=item=>destinationKey(item.journeyDestination||'Barcelona')===destinationKey(setup.destination);
+  const belongs=item=>destinationKey(item.journeyDestination||'')===destinationKey(setup.destination);
   const saveCards=value=>{
     if(!write(cardKey,value))$('setup-message').textContent='This browser could not save your changes. Check browser storage and try again.';
   };
@@ -86,7 +78,7 @@
     });
     $('map-summary').textContent=markers.length?`${markers.length} mapped ${markers.length===1?'card':'cards'}`:'No mapped cards yet';
     if(markers.length){map.fitBounds(L.latLngBounds(markers.map(entry=>entry.marker.getLatLng())).pad(.3),{maxZoom:14,padding:[20,20]})}
-    else if(setup.destination.toLowerCase().startsWith('barcelona'))map.setView([41.3874,2.1686],12);
+    else if(params.get('lat')&&params.get('lon')&&Number.isFinite(Number(params.get('lat')))&&Number.isFinite(Number(params.get('lon'))))map.setView([Number(params.get('lat')),Number(params.get('lon'))],12);
     else {map.setView([20,0],2);node.setAttribute('aria-label','No known map coordinates for the selected destination')}
     setTimeout(()=>map.invalidateSize(),50);
   };

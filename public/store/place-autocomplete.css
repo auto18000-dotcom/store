@@ -1,0 +1,9 @@
+.place-field-wrap{position:relative}
+.place-suggestions{position:absolute;z-index:20;top:calc(100% + 4px);left:0;right:0;margin:0;padding:5px;list-style:none;background:#fff;border:1px solid #d5e1de;border-radius:6px;box-shadow:0 12px 30px rgba(10,50,60,.16);max-height:260px;overflow-y:auto;text-transform:none;letter-spacing:normal;text-align:left}
+.place-suggestions[hidden]{display:none}
+.place-suggestions li{padding:9px 10px;border-radius:4px;cursor:pointer;font-size:.9rem;font-weight:400;color:#12313a}
+.place-suggestions li strong{font-weight:700}
+.place-suggestions li span{display:block;color:#5d6f73;font-size:.78rem;margin-top:1px}
+.place-suggestions li:hover,.place-suggestions li[aria-selected="true"]{background:#eaf6f2}
+.place-suggestions li.place-suggestion-empty{color:#5d6f73;cursor:default}
+.place-suggestions li.place-suggestion-empty:hover{background:none}

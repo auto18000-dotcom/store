@@ -2,18 +2,20 @@
   const context=new URLSearchParams(location.search);
   // window.TourGuidDestination (set by index.html before this script loads)
   // carries the FULL chosen place -- region/country/lat/lon, not just a name.
-  // A bare name is a guess handed to a geocoder (there are two Barcelonas:
-  // Catalonia and Anzoátegui, Venezuela), so pages without that context fall
+  // A bare name is a guess handed to a geocoder (two different cities can
+  // share one name in different countries), so pages without that context fall
   // back to reading the same fields from the URL query instead of a name alone.
-  const destinationCtx=window.TourGuidDestination||{
-    name:context.get('destination')||'Barcelona',
+  const destinationCtx=window.TourGuidDestination||(context.get('destination')?{
+    name:context.get('destination'),
     region:context.get('region')||null,
     country:context.get('country')||null,
     countryCode:context.get('countryCode')||null,
     lat:context.get('lat')?Number(context.get('lat')):null,
     lon:context.get('lon')?Number(context.get('lon')):null,
-  };
-  const destination=destinationCtx.name;
+  }:null);
+  // No destination chosen: no live request (the feed refuses one), just the
+  // destination-neutral editorial theme cards.
+  const destination=destinationCtx?destinationCtx.name:null;
   const forwardKeys=['destination','region','country','countryCode','lat','lon','from','to'];
   // The extensionless form, never '<page>.html': this local server (and
   // Cloudflare's own default asset handling) redirects the .html filename to
@@ -21,7 +23,7 @@
   // entirely -- silently discarding the whole destination context on every
   // single cross-page click. Confirmed live: navigating straight to
   // hotels.html?destination=Lisbon lands on /store/hotels with no query at
-  // all, which is why "hotels are hardcoded to Barcelona" reproduced even
+  // all, which is why a chosen destination silently reset to the default even
   // though every handler here reads the destination correctly.
   const categoryHref=page=>{const url=new URL(`./${page.replace(/\.html$/,'')}`,location.href);for(const key of forwardKeys)if(context.has(key))url.searchParams.set(key,context.get(key));return `${url.pathname.split('/').pop()}${url.search?url.search:''}`};
   const categories={
@@ -56,7 +58,7 @@
   // back to its editorial theme cards, which are honest on their own
   // (clearly themes, never dressed as products).
   let feed=null;
-  try{
+  if(destinationCtx)try{
     const controller=new AbortController();
     // 4s is deliberate, not a placeholder -- it's what caught the feed's
     // categories running sequentially server-side (fixed: now parallel,
@@ -181,8 +183,12 @@
       // cards are removed entirely rather than pushed behind real results --
       // a hotel that's real shouldn't sit eight clicks past ones that aren't.
       originalCards.forEach(el=>el.remove());
+      // Same shape as the editorial row: two leading cards, the "View all"
+      // card, then the rest. Here the two leading cards are the searched
+      // city's first live results.
+      live.items.slice(0,2).forEach(item=>track.append(buildProductCard(config,item)));
       track.append(category);
-      for(const item of live.items)track.append(buildProductCard(config,item));
+      live.items.slice(2).forEach(item=>track.append(buildProductCard(config,item)));
     }else{
       track.insertBefore(category,track.children[2]);
       for(const theme of config.themes)track.append(buildThemeCard(config,theme,categoryHref(config.page)));
