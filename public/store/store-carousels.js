@@ -147,7 +147,7 @@
   for(const [sectionId,config] of Object.entries(categories)){
     const section=document.getElementById(sectionId);
     const track=section?.querySelector(':scope > .grid');
-    if(!track||track.children.length<3)continue;
+    if(!track)continue;
     // Captured before any manipulation: the hand-written editorial cards
     // that shipped in the page's own HTML. When live data exists for this
     // row, they're the failure mode the owner actually hit -- a real hotel
@@ -190,8 +190,10 @@
       track.append(category);
       live.items.slice(2).forEach(item=>track.append(buildProductCard(config,item)));
     }else{
-      track.insertBefore(category,track.children[2]);
-      for(const theme of config.themes)track.append(buildThemeCard(config,theme,categoryHref(config.page)));
+      originalCards.forEach(el=>el.remove());
+      config.themes.slice(0,2).forEach(theme=>track.append(buildThemeCard(config,theme,categoryHref(config.page))));
+      track.append(category);
+      config.themes.slice(2).forEach(theme=>track.append(buildThemeCard(config,theme,categoryHref(config.page))));
     }
 
     const controls=document.createElement('div');controls.className='carousel-controls';
