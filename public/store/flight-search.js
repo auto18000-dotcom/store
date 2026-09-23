@@ -16,8 +16,8 @@
   const modeButtons={};
   for(const [key,text] of [['oneway','One way'],['round','Round trip'],['multi','Multi-city']]){const b=el('button',{type:'button','aria-pressed':'false'},text);b.addEventListener('click',()=>setMode(key));modeButtons[key]=b;tabs.append(b)}
 
-  const from=place('origin','From','City or Airport Code, e.g. SFO');
-  const to=place('flight-to','To','City or Airport Code, e.g. CDG');
+  const from=place('origin','From','City or Airport Code, e.g. SFO');from.wrap.classList.add('flight-place');
+  const to=place('flight-to','To','City or Airport Code, e.g. CDG');to.wrap.classList.add('flight-place');
   const departure=el('input',{type:'date',id:'departure'});const returnInput=el('input',{type:'date',id:'return'});
   const passengers=el('input',{type:'number',id:'passengers',min:'1',max:'9',value:'1'});
   const simple=el('div',{class:'flight-simple'});
@@ -45,12 +45,14 @@
   const multi=el('div',{class:'flight-multi'});multi.append(legsBox,addLeg);
 
   const submit=el('button',{class:'btn btn-primary',type:'submit',id:'flight-submit'},'Search flights');
-  form.append(tabs,simple,multi,field('Passengers',passengers),submit,status);
+  const bottom=el('div',{class:'flight-bottom'});bottom.append(field('Passengers',passengers),submit);
+  const hint=el('button',{type:'button',class:'flight-multi-hint'},'Planning several stops? Try Multi-city');hint.addEventListener('click',()=>setMode('multi'));
+  form.append(tabs,simple,multi,hint,bottom,status);
 
   function setMode(next){
     mode=next;
     for(const [k,b] of Object.entries(modeButtons))b.setAttribute('aria-pressed',String(k===mode));
-    simple.hidden=mode==='multi';multi.hidden=mode!=='multi';returnField.hidden=mode!=='round';
+    simple.hidden=mode==='multi';hint.hidden=mode==='multi';multi.hidden=mode!=='multi';returnField.hidden=mode!=='round';
     if(mode!=='round')returnInput.value='';
     status.textContent='';
   }
@@ -91,9 +93,9 @@
       if(!b.code&&Number.isFinite(b.lat)){q.lat=String(b.lat);q.lon=String(b.lon)}
       if(mode==='round')q.return=returnInput.value;
       url=`/api/store/flights?${new URLSearchParams(q)}`;
-      status.textContent=`Searching live Duffel offers from ${a.name||a.code} to ${b.name||b.code}…`;
+      status.textContent=`Searching live Duffel offers from ${a.name||a.code} to ${b.name||b.code}. This usually takes a few seconds.`;
     }
-    submit.disabled=true;
+    submit.disabled=true;submit.classList.add('is-busy');submit.textContent='Searching…';form.setAttribute('aria-busy','true');
     const controller=new AbortController();
     // Duffel prices a long itinerary as one search and it can take well over 15 seconds, so no short abort here.
     const timer=setTimeout(()=>controller.abort(),75000);
@@ -122,6 +124,6 @@
     }catch(error){
       status.textContent=error.name==='AbortError'?'The flight search took too long. Try fewer legs or try again.':'Live Duffel flight results are not connected to this prototype.';
       results.replaceChildren(Object.assign(el('div',{class:'empty'}),{textContent:'No fares are displayed until the live Duffel service responds.'}));
-    }finally{clearTimeout(timer);submit.disabled=false}
+    }finally{clearTimeout(timer);submit.disabled=false;submit.classList.remove('is-busy');submit.textContent='Search flights';form.removeAttribute('aria-busy')}
   });
 })();

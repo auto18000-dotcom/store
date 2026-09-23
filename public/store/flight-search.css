@@ -1,0 +1,34 @@
+.flight-head{display:flex;align-items:center;gap:10px}.flight-head h3{margin:0}.flight-logo{border-radius:4px;object-fit:contain}
+.flight-flags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.flight-flag{padding:3px 9px;border-radius:4px;font-size:.7rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.flag-cheapest{background:#dff4e3;color:#155c2a}.flag-fastest{background:#dcecf9;color:#144c7a}.flag-stops{background:#fdf0d5;color:#7a4d06}
+.flight-leg{margin:4px 0;font-size:.9rem}.flight-facts{margin:4px 0;color:var(--muted);font-size:.82rem}.flight-price{margin:8px 0 4px;font-weight:700}
+
+.flight-modes{display:flex;gap:6px;margin-bottom:12px}.flight-modes button{min-height:38px;padding:0 16px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);font:inherit;font-weight:600;cursor:pointer}.flight-modes button[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:#fff}
+.flight-simple{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}.flight-simple[hidden],.flight-multi[hidden]{display:none}
+.flight-leg-row{display:grid;grid-template-columns:auto repeat(3,minmax(140px,1fr)) auto;gap:10px;align-items:end;margin-bottom:10px}.flight-leg-title{padding-bottom:10px}.flight-leg-remove{min-height:40px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:#fff;cursor:pointer;font:inherit}.flight-leg-remove[hidden]{display:none}
+.flight-leg-error{grid-column:1/-1;color:#9b2c1d;font-size:.85rem}.flight-leg-error:empty{display:none}
+@media(max-width:760px){.flight-leg-row{grid-template-columns:1fr}}
+.flight-bags{margin:4px 0;font-weight:600;font-size:.88rem}
+
+/* Flight module: the primary tool on the page, so it gets the full width. */
+#flights .feature{grid-template-columns:1fr;padding:28px}
+#flights .feature>div:first-child{max-width:720px}
+#flight-form{display:block;padding:26px;border:1px solid #e3d8c4}
+#flight-form .flight-modes{gap:0;margin-bottom:20px}
+#flight-form .flight-modes button{flex:1 1 0;min-height:46px;border-radius:0;font-size:1rem}
+#flight-form .flight-modes button:first-child{border-radius:6px 0 0 6px}#flight-form .flight-modes button:last-child{border-radius:0 6px 6px 0}
+#flight-form .flight-modes button+button{border-left:0}
+#flight-form .flight-simple{grid-template-columns:repeat(6,minmax(0,1fr));gap:16px}
+#flight-form .flight-simple>.field{grid-column:span 2}
+#flight-form .flight-simple>.flight-place{grid-column:span 3}
+#flight-form .field input{height:54px;font-size:1.05rem;padding:0 14px}
+#flight-form .flight-bottom{display:flex;align-items:flex-end;gap:16px;margin-top:16px;flex-wrap:wrap}
+#flight-form .flight-bottom .field{width:130px}
+#flight-form .flight-bottom .btn{flex:1;min-width:220px;min-height:54px;font-size:1.05rem}
+#flight-form .btn.is-busy{opacity:.85;cursor:progress}
+#flight-form .btn.is-busy::before{content:"";display:inline-block;width:.9em;height:.9em;margin-right:.6em;vertical-align:-.12em;border:2px solid rgba(255,255,255,.45);border-top-color:#fff;border-radius:50%;animation:flight-spin .8s linear infinite}
+@keyframes flight-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){#flight-form .btn.is-busy::before{animation:none}}
+.flight-multi-hint{margin-top:12px;padding:0;border:0;background:none;color:var(--teal);font:inherit;font-weight:600;text-decoration:underline;cursor:pointer}.flight-multi-hint[hidden]{display:none}
+#flight-form .status{margin-top:14px;font-size:.95rem}
+@media(max-width:760px){#flight-form .flight-simple{grid-template-columns:1fr}#flight-form .flight-simple>.field,#flight-form .flight-simple>.flight-place{grid-column:auto}#flight-form .flight-bottom .field{width:100%}}
