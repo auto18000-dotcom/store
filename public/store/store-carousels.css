@@ -25,5 +25,7 @@
 .store-carousel .product-meta{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 12px}
 .store-carousel .product-rating{font-size:.85rem;font-weight:750;color:#9a5b00}
 .store-carousel .product-price{font-size:.85rem;font-weight:800;color:#075d61;margin-left:auto}
+.store-carousel .product-duration{font-size:.82rem;color:#5c7278}
+.store-carousel .product-instant{font-size:.78rem;font-weight:700;color:#0c7778}
 @media(max-width:900px){.store-carousel .carousel-track>*{flex-basis:calc((100% - 19px)/2)}}
 @media(max-width:620px){.store-carousel .carousel-track>*{flex-basis:100%}.store-carousel .carousel-controls{margin-top:8px}}

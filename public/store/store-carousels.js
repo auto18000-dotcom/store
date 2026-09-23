@@ -79,8 +79,24 @@
     const meta=document.createElement('div');meta.className='product-meta';
     if(typeof item.rating==='number'){
       const rating=document.createElement('span');rating.className='product-rating';
-      rating.textContent=`★ ${item.rating.toFixed(1)}${item.reviewCount?` (${item.reviewCount.toLocaleString()})`:''}`;
+      const sources=Array.isArray(item.reviewSources)?item.reviewSources:null;
+      // rating/reviewCount are a COMBINED figure across review sources -- naming
+      // just the booking source (the tag above) beside a blended count would
+      // attribute strangers' reviews from other platforms to that one name.
+      const combined=sources&&sources.length>1;
+      rating.textContent=`★ ${item.rating.toFixed(1)}${item.reviewCount?` (${item.reviewCount.toLocaleString()}${combined?' combined':''})`:''}`;
+      if(combined)rating.title=sources.map(s=>`${s.provider} ${s.rating.toFixed(1)} (${s.count.toLocaleString()})`).join(' · ');
       meta.append(rating);
+    }
+    if(item.durationMinutes){
+      const duration=document.createElement('span');duration.className='product-duration';
+      duration.textContent=item.durationMinutes>=60?`${Math.round(item.durationMinutes/60*10)/10} hr`:`${item.durationMinutes} min`;
+      meta.append(duration);
+    }
+    if(item.instantConfirmation){
+      const instant=document.createElement('span');instant.className='product-instant';
+      instant.textContent='Confirms instantly';
+      meta.append(instant);
     }
     // bookable=false must look different from bookable=true: a Google listing
     // has no price and no purchase action, only a place to look. Showing a
