@@ -509,8 +509,8 @@ const one = (params, name, fallback = "", limit = 100) =>
   String(params.get(name) ?? fallback).trim().slice(0, limit);
 
 async function flights(env, request, params) {
-  const departure = one(params, "departure");
   const passengers = Number(one(params, "passengers", "1")) || 1;
+  const departure = one(params, "departure");
 
   // WHERE TO, without a table of airport codes. A three-letter destination is
   // taken as an IATA code; anything else is a display name and the COORDINATES
@@ -518,6 +518,26 @@ async function flights(env, request, params) {
   // lets the page delete its Barcelona/Paris/Lisbon lookup — a hardcoded list
   // of three cities is a Barcelona hardcode wearing a hat, and it silently
   // fails for the fourth city anyone types.
+  const raw = params.get("slices");
+  if (raw) {
+    const { slices, error: badLeg } = legsOf(raw);
+    if (badLeg) return json({ error: "bad_journey", message: badLeg }, { status: 400 });
+    const { payload, error } = await askStoreSearch(
+      env,
+      "duffel_flight_offers",
+      { slices, adults: passengers, limit: 12 },
+      request
+    );
+    if (error) return refuse(error);
+    return json({
+      offers: flightOffers(payload, null, null, null),
+      legs: payload.legs ?? payload.slices ?? null,
+      trip: payload.trip ?? null,
+      liveMode: payload.live_mode ?? null,
+      captchaChecked: payload.captchaChecked ?? null,
+    });
+  }
+
   const returning = one(params, "return") || one(params, "returnDate");
 
   // BOTH ENDS READ THE SAME WAY: a three-letter value is an IATA code, longer
@@ -675,6 +695,58 @@ function endOf(params, nameKey, latKey, lonKey) {
   const point =
     !!one(params, latKey) && !!one(params, lonKey) && Number.isFinite(lat) && Number.isFinite(lon);
   return { named, code: /^[A-Za-z]{3}$/.test(named) ? named.toUpperCase() : null, lat, lon, point };
+}
+
+// Duffel accepts TEN legs and refuses eleven — measured, not assumed. We refuse
+// the eleventh here too, in milliseconds, rather than spending a request to be
+// told the same thing.
+const MAX_FLIGHT_LEGS = 10;
+
+/**
+ * A multi-city journey from `?slices=<url-encoded JSON>`.
+ *
+ * Returns {slices} or {error}. NOTHING IS INHERITED BETWEEN LEGS: a leg says
+ * where it flies FROM even when that is not where the last leg landed, because
+ * Barcelona to Rome, then Florence to Paris with a train in between, is a real
+ * journey and inferring the origin would make it unsearchable.
+ */
+function legsOf(raw) {
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return { error: "A journey could not be read." };
+  }
+  if (!Array.isArray(parsed) || !parsed.length) return { error: "A journey needs at least one leg." };
+  if (parsed.length > MAX_FLIGHT_LEGS) {
+    return { error: `A journey can have at most ${MAX_FLIGHT_LEGS} legs.` };
+  }
+  const slices = [];
+  for (let i = 0; i < parsed.length; i += 1) {
+    const leg = parsed[i] || {};
+    const at = i + 1;
+    if (!leg.date) return { error: `Leg ${at} needs a date.` };
+    const from = endOfValues(leg.from, leg.from_lat, leg.from_lon);
+    const to = endOfValues(leg.to, leg.to_lat, leg.to_lon);
+    if (!from.code && !from.point) return { error: `Leg ${at} needs somewhere to fly from.` };
+    if (!to.code && !to.point) return { error: `Leg ${at} needs somewhere to fly to.` };
+    slices.push({
+      date: String(leg.date),
+      ...(from.code ? { from: from.code } : {}),
+      ...(from.point ? { from_lat: from.lat, from_lon: from.lon } : {}),
+      ...(to.code ? { to: to.code } : {}),
+      ...(to.point ? { to_lat: to.lat, to_lon: to.lon } : {}),
+    });
+  }
+  return { slices };
+}
+
+function endOfValues(named, lat, lon) {
+  const name = String(named ?? "").trim();
+  const la = Number(lat);
+  const lo = Number(lon);
+  const point = lat != null && lon != null && Number.isFinite(la) && Number.isFinite(lo);
+  return { code: /^[A-Za-z]{3}$/.test(name) ? name.toUpperCase() : null, lat: la, lon: lo, point };
 }
 
 /** Destination autocomplete. Worldwide, not a Barcelona list. */
