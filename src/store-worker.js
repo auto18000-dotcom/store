@@ -39,6 +39,20 @@ const HERO_TTL = 86400;
 // names do not change, so a prefix is cached for a day and the page debounces
 // on top. Cached per PREFIX, so "barce" already serves "barcel" and "barcelo".
 const SUGGEST_TTL = 86400;
+
+// The hero when no destination has been chosen: travellers, not a city. A set
+// the page cycles, rather than one picture — and the QUERY rotates by the day
+// so a regular visitor is not met by the same eight photographs forever, while
+// everyone on the same day shares one cached answer and one Pexels call.
+const HERO_QUERIES = [
+  "people travelling",
+  "friends cafe travel",
+  "couple vacation walking",
+  "traveller airport window",
+  "family holiday beach",
+  "woman exploring city",
+  "friends road trip",
+];
 const SUGGEST_MIN_CHARS = 2;
 
 // NO CURATED FALLBACK PHOTOGRAPH, and no default destination anywhere in this
@@ -1081,51 +1095,73 @@ function safePath(value) {
 
 async function heroPhoto(env, params, ctx) {
   const destination = one(params, "destination", "", 100);
-  if (!destination) return json({ image: null, source: "no_destination" });
+  const wanted = Math.min(Math.max(Number(one(params, "count", "6")) || 6, 1), 12);
+
+  // A named destination gets pictures OF that place. With none, the hero is
+  // generic travel rather than a city nobody asked for — which is why the
+  // curated Barcelona fallback was removed and this replaces it.
+  const day = Math.floor(Date.now() / 86400000);
+  const query = destination
+    ? `${destination} city skyline travel`
+    : HERO_QUERIES[day % HERO_QUERIES.length];
+
   const cache = caches.default;
   const key = new Request(
-    `https://hero.tourguid.invalid/${encodeURIComponent(destination.toLowerCase())}`
+    `https://hero.tourguid.invalid/${encodeURIComponent(query.toLowerCase())}/${wanted}`
   );
   const hit = await cache.match(key);
   if (hit) return json(await hit.json(), { cache: HERO_TTL });
 
   const apiKey = (env.PEXELS_API_KEY || "").trim();
-  if (apiKey) {
-    try {
-      const query = new URLSearchParams({
-        query: `${destination} city skyline travel`,
-        orientation: "landscape",
-        per_page: "8",
-      });
-      const response = await fetch(`https://api.pexels.com/v1/search?${query}`, {
-        headers: { Authorization: apiKey },
-      });
-      if (response.ok) {
-        const photos = ((await response.json()) || {}).photos || [];
-        const photo = photos.find((item) => item && item.src && item.src.large2x && item.url);
-        if (photo) {
-          const data = {
-            image: photo.src.large2x,
-            photographer: photo.photographer || "a Pexels photographer",
-            page: photo.url,
-            source: "pexels_api",
-          };
-          ctx.waitUntil(
-            cache.put(
-              key,
-              new Response(JSON.stringify(data), {
-                headers: { "Content-Type": "application/json", "Cache-Control": `max-age=${HERO_TTL}` },
-              })
-            )
-          );
-          return json(data, { cache: HERO_TTL });
-        }
-      }
-    } catch {
-      /* fall through to the fallback below */
+  if (!apiKey) return json({ photos: [], image: null, source: "no_key" }, { cache: HERO_TTL });
+
+  let photos = [];
+  try {
+    const search = new URLSearchParams({
+      query,
+      orientation: "landscape",
+      per_page: String(Math.max(wanted * 2, 8)),
+    });
+    const response = await fetch(`https://api.pexels.com/v1/search?${search}`, {
+      headers: { Authorization: apiKey },
+    });
+    if (response.ok) {
+      photos = (((await response.json()) || {}).photos || [])
+        .filter((photo) => photo && photo.src && photo.src.large2x && photo.url)
+        .slice(0, wanted)
+        .map((photo) => ({
+          image: photo.src.large2x,
+          // Pexels asks that the photographer be credited wherever the
+          // photograph is shown. Carried per photograph so a slideshow can
+          // change the credit with the picture.
+          photographer: photo.photographer || "a Pexels photographer",
+          photographerUrl: photo.photographer_url || null,
+          page: photo.url,
+        }));
     }
+  } catch {
+    /* fall through to an empty set — never a substitute picture */
   }
-  const data = { image: null, source: "no_photo" };
+
+  const data = {
+    photos,
+    // The first, for anything still reading a single hero.
+    image: photos.length ? photos[0].image : null,
+    photographer: photos.length ? photos[0].photographer : null,
+    page: photos.length ? photos[0].page : null,
+    source: photos.length ? "pexels_api" : "no_photo",
+    generic: !destination,
+  };
+  if (photos.length) {
+    ctx.waitUntil(
+      cache.put(
+        key,
+        new Response(JSON.stringify(data), {
+          headers: { "Content-Type": "application/json", "Cache-Control": `max-age=${HERO_TTL}` },
+        })
+      )
+    );
+  }
   return json(data, { cache: HERO_TTL });
 }
 
