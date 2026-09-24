@@ -138,9 +138,9 @@
       centres.forEach((c,i)=>{
         const d=dist[i]/far;
         if(i>0&&centres[i]!==origin&&Math.random()>1-d*0.8)return;
-        setTimeout(()=>turn(c.r,Math.random()<0.3?null:1300+Math.random()*1000),d*1100);
+        setTimeout(()=>turn(c.r,Math.random()<0.3?null:900+Math.random()*700),d*700);
       });
     };
-    [0,3600,7200].forEach((delay,i)=>setTimeout(ripple,700+delay));
+    [0,1400].forEach(delay=>setTimeout(ripple,300+delay));
   })();
 })();

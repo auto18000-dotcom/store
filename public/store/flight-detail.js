@@ -47,8 +47,9 @@
       if(extra){row.append(document.createElement('br'));row.append(el('span','',extra))}
       section.append(row);
     });
-    root.append(section);
+    trips.append(section);
   };
+  const trips=el('div','fd-trips');root.append(trips);
   itinerary('Outbound',offer.segments,offer.duration);
   itinerary('Return',offer.returnSegments,offer.returnDuration);
 

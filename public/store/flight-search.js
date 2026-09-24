@@ -64,6 +64,23 @@
   const label=v=>typeof v==='string'?v:v&&(v.name||v.iata_code||v.iataCode)||null;
   const banner=text=>results.append(el('div',{class:'live-mode-banner'},text));
 
+  // The last search travels with the visitor so a detail page can offer "search more" pre-filled.
+  const KEY='tourguid-flight-search';
+  const snap=p=>({text:p.input.value,place:p.state?.place||null});
+  const saveSearch=()=>{try{sessionStorage.setItem(KEY,JSON.stringify({mode,from:snap(from),to:snap(to),departure:departure.value,ret:returnInput.value,pax:passengers.value,legs:legs.map(l=>({from:snap(l.from),to:snap(l.to),date:l.date.value}))}))}catch{}};
+  const apply=(p,v)=>{if(!v)return;p.input.value=v.text||'';p.state.place=v.place||null};
+  const restoreSearch=()=>{
+    if(document.body.dataset.restoreSearch!=='1')return;
+    let s=null;try{s=JSON.parse(sessionStorage.getItem(KEY))}catch{}
+    if(!s)return;
+    while(legs.length<(s.legs||[]).length&&legs.length<MAX_LEGS)newLeg();
+    renumber();
+    apply(from,s.from);apply(to,s.to);departure.value=s.departure||'';returnInput.value=s.ret||'';passengers.value=s.pax||'1';
+    (s.legs||[]).forEach((v,i)=>{if(!legs[i])return;apply(legs[i].from,v.from);apply(legs[i].to,v.to);legs[i].date.value=v.date||''});
+    legDates();setMode(['oneway','round','multi'].includes(s.mode)?s.mode:'oneway');
+  };
+  restoreSearch();
+
   form.addEventListener('submit',async event=>{
     event.preventDefault();results.replaceChildren();legs.forEach(l=>{l.err.textContent=''});
     const pax=String(Math.min(9,Math.max(1,Number(passengers.value)||1)));
@@ -95,6 +112,7 @@
       url=`/api/store/flights?${new URLSearchParams(q)}`;
       status.textContent=`Searching live Duffel offers from ${a.name||a.code} to ${b.name||b.code}. This usually takes a few seconds.`;
     }
+    saveSearch();
     submit.disabled=true;submit.classList.add('is-busy');submit.textContent='Searching…';form.setAttribute('aria-busy','true');
     const controller=new AbortController();
     // Duffel prices a long itinerary as one search and it can take well over 15 seconds, so no short abort here.

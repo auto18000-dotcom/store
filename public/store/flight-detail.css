@@ -1,7 +1,7 @@
-.flight-detail{padding:34px 0 60px;max-width:900px}
+.flight-detail{padding:34px 0 60px;max-width:none}
 .flight-detail-back{display:inline-block;margin-bottom:16px;color:var(--teal);font-weight:600;text-decoration:underline;background:none;border:0;padding:0;font:inherit;cursor:pointer}
 .fd-head{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-bottom:6px}
-.fd-head h1{margin:0;font-size:1.9rem}.fd-logo{max-height:38px;max-width:150px;object-fit:contain}
+.fd-head h1{margin:0;font-size:1.9rem}.fd-logo{max-height:56px;max-width:240px;object-fit:contain}
 .fd-section{margin-top:26px;padding:22px;background:#fff;border:1px solid var(--line);border-radius:8px}
 .fd-section h2{margin:0 0 14px;font-size:1.15rem}
 .fd-seg{padding:12px 0;border-top:1px solid var(--line)}.fd-seg:first-of-type{border-top:0;padding-top:0}
@@ -13,3 +13,7 @@
 .fd-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:14px}
 .fd-actions .btn[disabled]{opacity:.55;cursor:not-allowed}.fd-actions small{color:var(--muted)}
 .flight-detail-empty{color:var(--muted)}
+
+.fd-trips{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:0 22px;align-items:start}
+.fd-more{margin-top:40px;padding-top:10px;border-top:1px solid var(--line)}
+.fd-more h2{margin:18px 0 6px;font-size:1.5rem}.fd-more>p{margin:0 0 16px;color:var(--muted)}
