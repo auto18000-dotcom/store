@@ -12,3 +12,9 @@
 .place-field-wrap.is-loading input{padding-right:40px}
 @keyframes place-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.place-field-wrap.is-loading::after{animation:none;border-top-color:#b9d3cc}}
+
+/* Suggestion menus: readable first line, clear qualifier line, tap-sized rows. */
+.place-field-wrap .place-suggestions{max-height:340px;padding:6px}
+.place-field-wrap .place-suggestions li{min-height:52px;padding:10px 14px;font-size:1.12rem;line-height:1.3}
+.place-field-wrap .place-suggestions li strong{font-size:1.12rem;font-weight:700}
+.place-field-wrap .place-suggestions li span{font-size:.95rem;margin-top:2px}
