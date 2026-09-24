@@ -101,27 +101,37 @@
     const pick=a=>a[Math.floor(Math.random()*a.length)];
     const fillBack=record=>{
       record.back.replaceChildren();
-      const kinds=['name','icon'];if(usable.length)kinds.push('photo','photo');
+      const kinds=['name','icon','name','icon'];if(usable.length)kinds.push('photo','photo');
       const kind=pick(kinds);let photo=null;
-      record.back.className='tile-face tile-back back-'+kind;
+      const tint=pick(['orange','green','green','orange','deep']);
+      record.back.className=`tile-face tile-back back-${kind} tint-${tint}`;
       if(kind==='photo'){photo=pick(usable);record.back.style.backgroundImage=`${shade},url("${photo.image}")`;record.back.append(el('strong','tile-back-name',record.d.name))}
       else{record.back.style.backgroundImage='';
         if(kind==='name')record.back.append(el('strong','tile-back-name',record.d.name));
         else{record.back.append(icon(Math.floor(Math.random()*ICONS.length)),el('span','tile-back-small',record.d.name))}}
       return photo;
     };
-    const turn=record=>{
+    const turn=(record,hold)=>{
       if(record.flipped||record.hovered)return;
       const photo=fillBack(record);
       record.flipped=true;record.tile.classList.add('is-flipped');setCredit(record,photo);
-      setTimeout(()=>{record.flipped=false;record.tile.classList.remove('is-flipped');setCredit(record,record.frontPhoto)},3200+Math.random()*1600);
+      setTimeout(()=>{record.flipped=false;record.tile.classList.remove('is-flipped');setCredit(record,record.frontPhoto)},hold);
     };
     tiles.forEach(r=>{r.tile.addEventListener('mouseenter',()=>{r.hovered=true});r.tile.addEventListener('mouseleave',()=>{r.hovered=false});r.tile.addEventListener('focusin',()=>{r.hovered=true});r.tile.addEventListener('focusout',()=>{r.hovered=false})});
-    let turns=0;
-    const timer=setInterval(()=>{
-      const free=tiles.filter(r=>!r.flipped&&!r.hovered);
-      if(free.length)turn(pick(free));
-      if(++turns>=14)clearInterval(timer);
-    },900);
+    // A splash: pick a tile, and a wave of flips spreads out from it. The further a tile is
+    // from the splash, the later it turns and the less likely it is to turn at all, so the
+    // ripple thins out and dies down. Several splashes, each from somewhere new.
+    const ripple=()=>{
+      const centres=tiles.map(r=>{const b=r.tile.getBoundingClientRect();return {r,x:b.left+b.width/2,y:b.top+b.height/2}});
+      const origin=pick(centres);
+      const dist=centres.map(c=>Math.hypot(c.x-origin.x,c.y-origin.y));
+      const far=Math.max(...dist)||1;
+      centres.forEach((c,i)=>{
+        const d=dist[i]/far;
+        if(i>0&&centres[i]!==origin&&Math.random()>1-d*0.8)return;
+        setTimeout(()=>turn(c.r,1300+Math.random()*1000),d*1100);
+      });
+    };
+    [0,3600,7200].forEach((delay,i)=>setTimeout(ripple,700+delay));
   })();
 })();
