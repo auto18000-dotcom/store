@@ -7,3 +7,8 @@
 .place-suggestions li:hover,.place-suggestions li[aria-selected="true"]{background:#eaf6f2}
 .place-suggestions li.place-suggestion-empty{color:#5d6f73;cursor:default}
 .place-suggestions li.place-suggestion-empty:hover{background:none}
+
+.place-field-wrap.is-loading::after{content:"";position:absolute;right:14px;top:50%;width:16px;height:16px;margin-top:-8px;border:2px solid #b9d3cc;border-top-color:#0c7778;border-radius:50%;animation:place-spin .7s linear infinite;pointer-events:none}
+.place-field-wrap.is-loading input{padding-right:40px}
+@keyframes place-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.place-field-wrap.is-loading::after{animation:none;border-top-color:#b9d3cc}}

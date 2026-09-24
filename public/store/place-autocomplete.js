@@ -17,7 +17,8 @@
     input.setAttribute('autocomplete','off');input.setAttribute('role','combobox');input.setAttribute('aria-expanded','false');input.setAttribute('aria-autocomplete','list');
     const airports=options.kind==='airports';
     const state={place:options.initial||null};
-    let debounce=null,seq=0,active=-1;
+    let debounce=null,seq=0,active=-1,lastQuery='',lastItems=[];
+    const memo=new Map();
     const close=()=>{list.hidden=true;list.replaceChildren();input.setAttribute('aria-expanded','false');active=-1};
     const choose=item=>{state.place=item;input.value=airports?item.label:(item.label||item.name);close();options.onChoose?.(item)};
     const setActive=index=>{const rows=[...list.querySelectorAll('li[role="option"]')];if(!rows.length)return;active=(index+rows.length)%rows.length;rows.forEach((row,i)=>row.setAttribute('aria-selected',String(i===active)));rows[active].scrollIntoView({block:'nearest'})};
@@ -34,21 +35,39 @@
       }
       list.hidden=false;input.setAttribute('aria-expanded','true');
     };
+    const textOf=item=>[item.name,item.region,item.country,item.iataCode,item.cityName,item.countryCode,item.label].filter(Boolean).join(' ').toLowerCase();
     input.addEventListener('input',()=>{
       if(state.place){state.place=null;options.onClear?.()}
       const q=input.value.trim();
       clearTimeout(debounce);
-      if(q.length<2){seq++;close();return}
+      if(q.length<2){seq++;wrap.classList.remove('is-loading');close();return}
+      const key=q.toLowerCase();
+      // A repeat (backspacing) answers instantly from what this field already fetched.
+      if(memo.has(key)){seq++;wrap.classList.remove('is-loading');render(memo.get(key));return}
+      // Typing on from a query we already hold: narrow that list ourselves so the menu
+      // follows every keystroke while the slower server answer is on its way.
+      if(lastQuery&&key.startsWith(lastQuery)&&lastItems.length){
+        const words=key.split(/\s+/).filter(Boolean);
+        const narrowed=lastItems.filter(item=>{const t=textOf(item);return words.every(w=>t.includes(w))});
+        if(narrowed.length)render(narrowed);else close();
+      }else if(!list.hidden&&lastQuery&&!key.startsWith(lastQuery))close();
       const mine=++seq;
+      wrap.classList.add('is-loading');
       debounce=setTimeout(async()=>{
         try{
           const response=await fetch(`/api/store/${airports?'airports':'suggest'}?q=${encodeURIComponent(q)}`,{headers:{Accept:'application/json'}});
+          // A newer keystroke has been issued since: this answer is for an older prefix and must not be shown.
           if(mine!==seq)return;
-          if(!response.ok){const body=await response.json().catch(()=>null);return render([],response.status===503?'Place search is not connected yet.':(response.status===429&&body?.message)||'Place search is unavailable. Try again.')}
+          if(!response.ok){wrap.classList.remove('is-loading');const body=await response.json().catch(()=>null);if(mine!==seq)return;return render([],response.status===503?'Place search is not connected yet.':(response.status===429&&body?.message)||'Place search is unavailable. Try again.')}
           const payload=await response.json();
+          const items=Array.isArray(payload.suggestions)?payload.suggestions:[];
+          // Kept for later (backspacing), but only the newest answer is ever shown.
+          memo.set(key,items);
           if(mine!==seq)return;
-          render(Array.isArray(payload.suggestions)?payload.suggestions:[]);
-        }catch{if(mine===seq)render([],'Place search is unavailable. Try again.')}
+          wrap.classList.remove('is-loading');
+          lastQuery=key;lastItems=items;
+          render(items);
+        }catch{if(mine===seq){wrap.classList.remove('is-loading');render([],'Place search is unavailable. Try again.')}}
       },250);
     });
     input.addEventListener('keydown',event=>{
