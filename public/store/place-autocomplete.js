@@ -60,7 +60,19 @@
     input.addEventListener('blur',()=>setTimeout(close,120));
     return state;
   };
-  window.TourGuidPlaces={attach};
+  // Typed text with no suggestion picked: take the best match, so Enter always goes somewhere.
+  const resolveFirst=async text=>{
+    const q=String(text||'').trim();
+    if(q.length<2)return {place:null,reason:'short'};
+    try{
+      const response=await fetch(`/api/store/suggest?q=${encodeURIComponent(q)}`,{headers:{Accept:'application/json'}});
+      if(!response.ok)return {place:null,reason:response.status===503?'offline':'error'};
+      const payload=await response.json();
+      const first=Array.isArray(payload.suggestions)?payload.suggestions[0]:null;
+      return first?{place:first}:{place:null,reason:'none'};
+    }catch{return {place:null,reason:'error'}}
+  };
+  window.TourGuidPlaces={attach,resolveFirst};
   // Declarative fields: data-place="fill" fills the box; data-place="navigate"
   // reloads THIS page with the chosen place as its destination context.
   const auto=()=>document.querySelectorAll('input[data-place]').forEach(input=>{

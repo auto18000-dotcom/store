@@ -87,12 +87,12 @@
     const originInput=document.getElementById('origin');
     const originState=window.TourGuidPlaces.attach(originInput);
 
-    placeDateSearch?.addEventListener('submit',event=>{
+    placeDateSearch?.addEventListener('submit',async event=>{
       event.preventDefault();
       const from=document.getElementById('search-from').value,to=document.getElementById('search-to').value;
       if(to<from){document.getElementById('search-to').setCustomValidity('Choose a date on or after the start date.');document.getElementById('search-to').reportValidity();return}
       document.getElementById('search-to').setCustomValidity('');
-      const place=placeState.place||{name:placeInput.value.trim()};
+      const place=placeState.place||(await window.TourGuidPlaces.resolveFirst(placeInput.value)).place||{name:placeInput.value.trim()};
       const q=new URLSearchParams({destination:place.name,from,to});
       for(const [key,val] of [['region',place.region],['country',place.country],['countryCode',place.countryCode],['lat',place.lat],['lon',place.lon]])if(val!=null&&val!=='')q.set(key,val);
       // './' not './index.html': some static hosts (confirmed on the local

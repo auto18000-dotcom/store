@@ -54,7 +54,14 @@
     let picked=null;
     const go=place=>{location.href=hrefFor(place)};
     const state=window.TourGuidPlaces?.attach(input,{onChoose:place=>{picked=place;go({name:place.name,region:place.region,country:place.country,countryCode:place.countryCode,lat:place.lat,lon:place.lon})}});
-    search.addEventListener('submit',event=>{event.preventDefault();if(state?.place)return go(state.place);note.textContent='Pick a place from the suggestions.'});
+    search.addEventListener('submit',async event=>{
+      event.preventDefault();
+      if(state?.place)return go(state.place);
+      note.textContent='Finding it…';
+      const {place,reason}=await window.TourGuidPlaces.resolveFirst(input.value);
+      if(place)return go(place);
+      note.textContent=reason==='offline'?'Place search is not connected yet.':reason==='short'?'Type at least two letters of a place.':reason==='none'?'No matching place found. Try another spelling.':'Place search is unavailable. Try again.';
+    });
     grid.append(search);
 
     const tiles=[];

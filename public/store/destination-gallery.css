@@ -1,11 +1,11 @@
 .destination-gallery{margin-top:34px}
 .destination-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
 .destination-search{grid-column:2/5;grid-row:3;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:22px 26px;border-radius:8px;background:#fff;border:2px solid #0c7778;box-shadow:0 10px 30px rgba(10,50,60,.14)}
-.destination-search-label{display:block;color:#123642;font-size:1.5rem;font-weight:700;letter-spacing:-.01em;margin-bottom:8px}
+.destination-search-label{display:block;color:#123642;font-size:1.9rem;font-weight:700;letter-spacing:-.01em;margin-bottom:8px}
 .destination-search-field{position:relative}
-.destination-search input{display:block;width:100%;height:54px;border:1px solid #9fbdb6;border-radius:6px;padding:0 16px;font:inherit;font-size:1.08rem;font-weight:400;color:#123642;background:#fff}
+.destination-search input{display:block;width:100%;height:72px;border:1px solid #9fbdb6;border-radius:8px;padding:0 20px;font:inherit;font-size:1.4rem;font-weight:400;color:#123642;background:#fff}
 .destination-search input:focus{outline:3px solid #ffae19;outline-offset:1px}
-.destination-search-note{min-height:1.2em;color:#9b2c1d;font-size:.88rem}
+.destination-search-note{min-height:1.2em;color:#9b2c1d;font-size:.95rem}
 .destination-tile{position:relative;border-radius:8px;aspect-ratio:4/3;perspective:900px}
 .tile-flip{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.4,.2,.2,1)}
 .destination-tile.is-flipped .tile-flip{transform:rotateY(180deg)}
