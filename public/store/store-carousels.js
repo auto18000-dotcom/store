@@ -53,25 +53,21 @@
     ]}
   };
 
-  // Live carousel data, one call for every row. A missing/failed/slow
-  // response is not an error state here -- it just means every row falls
-  // back to its editorial theme cards, which are honest on their own
-  // (clearly themes, never dressed as products).
-  let feed=null;
-  if(destinationCtx)try{
+  // One request PER ROW, all in parallel: a fast row (hotels, places) fills the moment
+  // it is ready instead of waiting for the slowest provider, and each row shows a
+  // placeholder while it loads. A missing/failed/slow answer is not an error state --
+  // that row keeps its editorial theme cards, which are honest on their own.
+  const fetchCategory=async id=>{
+    if(!destinationCtx)return null;
     const controller=new AbortController();
-    // 4s is deliberate, not a placeholder -- it's what caught the feed's
-    // categories running sequentially server-side (fixed: now parallel,
-    // plus stale-while-revalidate so only the very first visitor per
-    // destination pays a cold build). Raising this would hide the next
-    // version of that same problem instead of surfacing it.
-    const timeout=setTimeout(()=>controller.abort(),4000);
-    const feedParams=new URLSearchParams({destination});
-    for(const [key,val] of [['region',destinationCtx.region],['country',destinationCtx.country],['lat',destinationCtx.lat],['lon',destinationCtx.lon]])if(val!=null&&val!=='')feedParams.set(key,val);
-    const response=await fetch(`/api/store/feed?${feedParams}`,{signal:controller.signal,headers:{Accept:'application/json'}});
-    clearTimeout(timeout);
-    if(response.ok)feed=await response.json();
-  }catch{feed=null}
+    const timeout=setTimeout(()=>controller.abort(),15000);
+    try{
+      const feedParams=new URLSearchParams({destination,categories:id});
+      for(const [key,val] of [['region',destinationCtx.region],['country',destinationCtx.country],['lat',destinationCtx.lat],['lon',destinationCtx.lon]])if(val!=null&&val!=='')feedParams.set(key,val);
+      const response=await fetch(`/api/store/feed?${feedParams}`,{signal:controller.signal,headers:{Accept:'application/json'}});
+      return response.ok?(await response.json())?.categories?.[id]||null:null;
+    }catch{return null}finally{clearTimeout(timeout)}
+  };
 
   const money=(amount,currency)=>{try{return new Intl.NumberFormat('en-US',{style:'currency',currency:currency||'USD'}).format(amount)}catch{return `${currency||''} ${amount}`.trim()}};
 
@@ -189,24 +185,8 @@
     categoryBody.append(tag,heading,description,action);
     category.append(categoryVisual,categoryBody);
 
-    const live=feed?.categories?.[sectionId];
-    if(live?.live&&Array.isArray(live.items)&&live.items.length){
-      // Live results lead the row. The page's own hand-written editorial
-      // cards are removed entirely rather than pushed behind real results --
-      // a hotel that's real shouldn't sit eight clicks past ones that aren't.
-      originalCards.forEach(el=>el.remove());
-      // Same shape as the editorial row: two leading cards, the "View all"
-      // card, then the rest. Here the two leading cards are the searched
-      // city's first live results.
-      live.items.slice(0,2).forEach(item=>track.append(buildProductCard(config,item)));
-      track.append(category);
-      live.items.slice(2).forEach(item=>track.append(buildProductCard(config,item)));
-    }else{
-      originalCards.forEach(el=>el.remove());
-      config.themes.slice(0,2).forEach(theme=>track.append(buildThemeCard(config,theme,categoryHref(config.page))));
-      track.append(category);
-      config.themes.slice(2).forEach(theme=>track.append(buildThemeCard(config,theme,categoryHref(config.page))));
-    }
+    originalCards.forEach(el=>el.remove());
+    for(let i=0;i<3;i++){const sk=document.createElement('div');sk.className='carousel-skeleton';sk.setAttribute('aria-hidden','true');track.append(sk)}
 
     const controls=document.createElement('div');controls.className='carousel-controls';
     const count=document.createElement('span');count.className='carousel-count';count.setAttribute('aria-live','polite');
@@ -216,6 +196,28 @@
     const update=()=>{const step=track.children[0].getBoundingClientRect().width+19;const visible=window.matchMedia('(max-width:620px)').matches?1:window.matchMedia('(max-width:900px)').matches?2:3;const start=Math.min(track.children.length-visible,Math.max(0,Math.round(track.scrollLeft/step)));count.textContent=`${start+1}–${Math.min(start+visible,track.children.length)} of ${track.children.length}`;previous.disabled=start===0;next.disabled=start+visible>=track.children.length};
     const move=direction=>{const step=track.children[0].getBoundingClientRect().width+19;track.scrollBy({left:direction*step,behavior:'smooth'})};
     previous.addEventListener('click',()=>move(-1));next.addEventListener('click',()=>move(1));
-    track.addEventListener('scroll',update,{passive:true});window.addEventListener('resize',update);update();
+    track.addEventListener('scroll',update,{passive:true});window.addEventListener('resize',update);
+    const fillRow=live=>{
+      track.replaceChildren();track.scrollLeft=0;
+    if(live?.live&&Array.isArray(live.items)&&live.items.length){
+      // Live results lead the row. The page's own hand-written editorial
+      // cards are removed entirely rather than pushed behind real results --
+      // a hotel that's real shouldn't sit eight clicks past ones that aren't.
+      // Same shape as the editorial row: two leading cards, the "View all"
+      // card, then the rest. Here the two leading cards are the searched
+      // city's first live results.
+      live.items.slice(0,2).forEach(item=>track.append(buildProductCard(config,item)));
+      track.append(category);
+      live.items.slice(2).forEach(item=>track.append(buildProductCard(config,item)));
+    }else{
+      config.themes.slice(0,2).forEach(theme=>track.append(buildThemeCard(config,theme,categoryHref(config.page))));
+      track.append(category);
+      config.themes.slice(2).forEach(theme=>track.append(buildThemeCard(config,theme,categoryHref(config.page))));
+    }
+
+      update();
+    };
+    update();
+    fetchCategory(sectionId).then(fillRow);
   }
 })();

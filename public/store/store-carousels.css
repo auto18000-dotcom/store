@@ -43,3 +43,7 @@
 .store-carousel .carousel-theme-card .card-visual,.store-carousel .carousel-category-card .card-visual{height:150px}
 .store-carousel .carousel-track>*{min-height:0}
 .store-carousel .carousel-category-card,.store-carousel .carousel-theme-card{min-height:0}
+
+.store-carousel .carousel-skeleton{min-height:330px;border-radius:8px;background:linear-gradient(100deg,#e6efeb 30%,#f4f9f6 50%,#e6efeb 70%);background-size:200% 100%;animation:carousel-shimmer 1.3s linear infinite}
+@keyframes carousel-shimmer{to{background-position:-200% 0}}
+@media(prefers-reduced-motion:reduce){.store-carousel .carousel-skeleton{animation:none}}
