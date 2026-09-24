@@ -144,7 +144,7 @@
   </div>
   <div class="map-preview">
     <div class="map-preview-copy">
-      <h3>Barcelona &middot; Day 1 (sample)</h3>
+      <h3 id="trip-map-title">Your destination &middot; Day 1 (sample)</h3>
       <p>Every stop keeps its place in the day's order, whether or not the map can plot it yet. Choosing a different hotel moves the rings and recenters the view without losing your plan.</p>
       <div class="map-preview-legend">
         <span class="legend-hotel">Hotel anchor</span>
@@ -187,17 +187,28 @@
   // Optimization Tools (neutral base, vivid category pins, distance rings),
   // not a live itinerary.
   if(window.L){
-    const anchor=[41.3863,2.1967];
-    const map=L.map('trip-map-preview',{zoomControl:false,attributionControl:true,dragging:false,scrollWheelZoom:false,doubleClickZoom:false,touchZoom:false}).setView(anchor,13);
+    // No place is built in: the sample follows the destination carried over from
+    // the Store (?destination=&lat=&lon=), and shows a plain world map without one.
+    const query=new URLSearchParams(location.search);
+    const placeName=(query.get('destination')||'').trim();
+    const lat=Number(query.get('lat')),lon=Number(query.get('lon'));
+    const hasPlace=placeName&&query.get('lat')!==null&&query.get('lon')!==null&&Number.isFinite(lat)&&Number.isFinite(lon);
+    const heading=document.getElementById('trip-map-title');
+    if(heading)heading.textContent=hasPlace?`${placeName} · Day 1 (sample)`:'Your destination · Day 1 (sample)';
+    const map=L.map('trip-map-preview',{zoomControl:false,attributionControl:true,dragging:false,scrollWheelZoom:false,doubleClickZoom:false,touchZoom:false});
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
     const tiles=map.getPane('tilePane');if(tiles)tiles.style.filter='grayscale(1) saturate(0) contrast(.84) brightness(1.07)';
-    [1000,3000,5000].forEach(radius=>L.circle(anchor,{radius,color:'#7c9a96',weight:2,opacity:.9,fill:false,dashArray:'5 6',interactive:false}).addTo(map));
-    const pin=(pos,cls,glyph)=>L.marker(pos,{icon:L.divIcon({className:`map-stop-icon type-${cls}`,html:`<span class="pin-dot">${glyph}</span>`,iconSize:[30,30],iconAnchor:[15,15]})}).addTo(map);
-    pin(anchor,'hotel','&#8962;');
-    pin([41.3871,2.1991],'activity','1');
-    pin([41.3784,2.1925],'site','2');
-    L.polyline([anchor,[41.3871,2.1991],[41.3784,2.1925]],{color:'#e07824',weight:4,opacity:.96,dashArray:'10 6',interactive:false}).addTo(map);
-    map.fitBounds(L.latLngBounds([anchor,[41.3871,2.1991],[41.3784,2.1925]]).pad(.3),{padding:[30,30],animate:false});
+    if(hasPlace){
+      const anchor=[lat,lon],stopA=[lat+0.0008,lon+0.0024],stopB=[lat-0.0079,lon-0.0042];
+      map.setView(anchor,13);
+      [1000,3000,5000].forEach(radius=>L.circle(anchor,{radius,color:'#7c9a96',weight:2,opacity:.9,fill:false,dashArray:'5 6',interactive:false}).addTo(map));
+      const pin=(pos,cls,glyph)=>L.marker(pos,{icon:L.divIcon({className:`map-stop-icon type-${cls}`,html:`<span class="pin-dot">${glyph}</span>`,iconSize:[30,30],iconAnchor:[15,15]})}).addTo(map);
+      pin(anchor,'hotel','&#8962;');pin(stopA,'activity','1');pin(stopB,'site','2');
+      L.polyline([anchor,stopA,stopB],{color:'#e07824',weight:4,opacity:.96,dashArray:'10 6',interactive:false}).addTo(map);
+      map.fitBounds(L.latLngBounds([anchor,stopA,stopB]).pad(.3),{padding:[30,30],animate:false});
+    }else{
+      map.setView([25,10],2);
+    }
   }else{
     document.getElementById('trip-map-preview').innerHTML='<div class="map-fallback"><div><strong>Map preview unavailable</strong><br><span>Map tiles could not load. The station and profile content above still describes the design.</span></div></div>';
   }
