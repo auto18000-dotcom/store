@@ -8,7 +8,14 @@
   // being true the day src/store-worker.js was added. Static requests still
   // reach ./public directly; the Worker only runs for paths it doesn't match,
   // and its own first check hands anything outside /api/store/* to ASSETS.
-  "main": "src/store-worker.js",
+  "main": "src/index.js",
+  // Request logs and metrics for this Worker (Cloudflare dashboard -> Workers -> Observability).
+  "observability": { "enabled": true },
+
+  // One anonymous event per /api/store/* request; see src/index.js for exactly what is (and is not) kept.
+  // Read back by Control through Cloudflare's SQL API.
+  "analytics_engine_datasets": [{ "binding": "STATS", "dataset": "tourguid_web_events" }],
+
   "assets": {
     "directory": "./public",
     "binding": "ASSETS"
