@@ -115,6 +115,8 @@
       if(record.flipped||record.hovered)return;
       const photo=fillBack(record);
       record.flipped=true;record.tile.classList.add('is-flipped');setCredit(record,photo);
+      // hold === null: this one stays turned over, part of the patchwork the ripples leave behind.
+      if(hold===null)return;
       setTimeout(()=>{record.flipped=false;record.tile.classList.remove('is-flipped');setCredit(record,record.frontPhoto)},hold);
     };
     tiles.forEach(r=>{r.tile.addEventListener('mouseenter',()=>{r.hovered=true});r.tile.addEventListener('mouseleave',()=>{r.hovered=false});r.tile.addEventListener('focusin',()=>{r.hovered=true});r.tile.addEventListener('focusout',()=>{r.hovered=false})});
@@ -129,7 +131,7 @@
       centres.forEach((c,i)=>{
         const d=dist[i]/far;
         if(i>0&&centres[i]!==origin&&Math.random()>1-d*0.8)return;
-        setTimeout(()=>turn(c.r,1300+Math.random()*1000),d*1100);
+        setTimeout(()=>turn(c.r,Math.random()<0.3?null:1300+Math.random()*1000),d*1100);
       });
     };
     [0,3600,7200].forEach((delay,i)=>setTimeout(ripple,700+delay));
