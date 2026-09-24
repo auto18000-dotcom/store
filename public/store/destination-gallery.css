@@ -13,14 +13,14 @@
 .tile-front{background:#0c5e63}
 .destination-art{position:absolute;inset:0;background:linear-gradient(135deg,#0c5e63,#1f8f7c);background-size:cover;background-position:center;transition:transform .25s ease}
 .destination-label{position:absolute;left:14px;right:14px;bottom:28px;display:flex;flex-direction:column;gap:2px;color:#fff;text-shadow:0 2px 8px rgba(3,36,43,.7)}
-.destination-label strong{font-size:1.15rem;font-weight:700}.destination-label span{font-size:.8rem;opacity:.92}
+.destination-label strong{font-size:1.6rem;font-weight:800;line-height:1.1}.destination-label span{font-size:.9rem;opacity:.95}
 .tile-back{transform:rotateY(180deg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:#fff;text-align:center;background:linear-gradient(135deg,#0b555c,#148c76);background-size:cover;background-position:center}
 .back-name{background:linear-gradient(135deg,#123642,#0c7778)}
 .back-icon{background:linear-gradient(135deg,#e07824,#f0a94a)}
-.tile-back-name{font-size:1.6rem;font-weight:800;padding:0 12px;text-shadow:0 2px 10px rgba(3,36,43,.6)}
-.back-photo .tile-back-name{position:absolute;left:14px;bottom:28px;font-size:1.15rem;text-align:left;padding:0}
-.tile-icon{width:46px;height:46px;fill:none;stroke:#fff;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.tile-back-small{font-size:.9rem;font-weight:700}
+.tile-back-name{font-size:2.1rem;line-height:1.1;font-weight:800;padding:0 12px;text-shadow:0 2px 10px rgba(3,36,43,.6)}
+.back-photo .tile-back-name{position:absolute;left:14px;bottom:28px;font-size:1.6rem;text-align:left;padding:0}
+.tile-icon{width:52px;height:52px;fill:none;stroke:#fff;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.tile-back-small{font-size:1.25rem;font-weight:700}
 .destination-link{position:absolute;inset:0;z-index:2;border-radius:8px}
 .destination-tile:hover .destination-art{transform:scale(1.03)}
 .destination-link:focus-visible{outline:3px solid #ffae19;outline-offset:-3px}
@@ -30,3 +30,4 @@
 @media(max-width:1000px){.destination-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.destination-search{grid-column:1/-1;grid-row:1}}
 @media(max-width:560px){.destination-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.destination-search-label{font-size:1.25rem}}
 @media(prefers-reduced-motion:reduce){.tile-flip,.destination-art{transition:none}}
+@media(max-width:560px){.destination-label strong{font-size:1.25rem}.tile-back-name{font-size:1.6rem}.back-photo .tile-back-name{font-size:1.25rem}}
