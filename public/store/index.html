@@ -64,6 +64,8 @@
     }:null;
     // Read by map-workspace.js and store-carousels.js -- set before either loads.
     window.TourGuidDestination=destination;
+    // The optimization tools belong to a chosen city; the landing gallery has none.
+    if(!destination){for(const id of ['tools','trip-workspace'])document.getElementById(id)?.setAttribute('hidden','')}
 
     document.title=destination?`${destination.name} | TourGuid Travel Store`:'TourGuid Travel Store';
     const destinationCopy=destination?{
