@@ -7,7 +7,7 @@
   <link rel="icon" type="image/png" href="./tourguid-logo.png">
   <title>Journey Building | TourGuid</title>
   <link rel="stylesheet" href="./typography.css?v=4">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+  <link rel="stylesheet" href="./vendor/leaflet/1.9.4/leaflet.css">
   <link rel="stylesheet" href="./journey-building.css">
   <link rel="stylesheet" href="./profile-questionnaire.css">
 <link rel="stylesheet" href="./place-autocomplete.css"></head>
@@ -22,7 +22,7 @@
   </main>
   <footer class="footer"><div class="wrap footer-inner"><span>TourGuid · Journey Building preview</span><a href="./index.html">Travel Store ↗</a><a href="#top">Back to top ↑</a></div></footer>
   <dialog id="card-dialog" class="card-dialog" aria-labelledby="card-dialog-title"><form id="card-form"><div class="dialog-top"><div><div class="kicker">Activity Card</div><h2 id="card-dialog-title">Add a plan to your day</h2></div><button type="button" class="dialog-close" id="close-card" aria-label="Close">×</button></div><label>What are you planning?<input name="title" maxlength="120" placeholder="e.g. Visit the Gothic Quarter" required></label><div class="dialog-fields"><label>Type<select name="type"><option>Activity</option><option>Hotel</option><option>Flight</option><option>Food experience</option><option>Place</option><option>Transport</option><option>Other</option></select></label><label>Day<select name="day" id="card-day"></select></label></div><label>Location or meeting point<input name="location" maxlength="160" placeholder="Optional"></label><label>Time<input name="time" type="time"></label><p class="dialog-note">New cards are plans. Adding one does not make a booking.</p><div class="dialog-actions"><button type="button" class="button outline" id="cancel-card">Cancel</button><button type="submit" class="button dark">Save Activity Card</button></div></form></dialog>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="./vendor/leaflet/1.9.4/leaflet.js"></script>
   <script src="./profile-questionnaire.js"></script>
   <script src="./journey-building.js"></script>
 <script src="./place-autocomplete.js"></script><script src="./date-range.js"></script></body>
