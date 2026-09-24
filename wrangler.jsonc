@@ -14,7 +14,10 @@
 
   // One anonymous event per /api/store/* request; see src/index.js for exactly what is (and is not) kept.
   // Read back by Control through Cloudflare's SQL API.
-  "analytics_engine_datasets": [{ "binding": "STATS", "dataset": "tourguid_web_events" }],
+  // SWITCHED OFF until Analytics Engine is enabled once in the dashboard
+  // (Workers & Pages -> Analytics Engine); a deploy with the binding fails with code 10089 until then.
+  // src/index.js skips counting when the binding is absent, so nothing else changes. To turn on:
+  // "analytics_engine_datasets": [{ "binding": "STATS", "dataset": "tourguid_web_events" }],
 
   "assets": {
     "directory": "./public",
