@@ -65,7 +65,7 @@
     grid.append(search);
 
     const tiles=[];
-    for(const d of destinations.slice(0,22)){
+    for(const d of destinations.slice(0,12)){
       const tile=el('div','destination-tile');
       const flip=el('div','tile-flip');
       const front=el('div','tile-face tile-front');
