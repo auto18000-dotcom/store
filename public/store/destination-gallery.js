@@ -30,13 +30,22 @@
   const icon=i=>{const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('class','tile-icon');svg.setAttribute('aria-hidden','true');svg.innerHTML=ICONS[i%ICONS.length];return svg};
 
   (async()=>{
-    let destinations;
+    // Twelve real cities to start from. The server's list (in its own order) replaces this
+    // when the live connection answers; without it the gallery still has somewhere to start.
+    const STAND_IN=[
+      ['Paris','Île-de-France','France','FR',48.8566,2.3522],['Rome','Lazio','Italy','IT',41.9028,12.4964],
+      ['Barcelona','Catalonia','Spain','ES',41.3874,2.1686],['London','England','United Kingdom','GB',51.5074,-0.1278],
+      ['Lisbon','Lisboa','Portugal','PT',38.7223,-9.1393],['Amsterdam','North Holland','Netherlands','NL',52.3676,4.9041],
+      ['Prague','Prague','Czechia','CZ',50.0755,14.4378],['Athens','Attica','Greece','GR',37.9838,23.7275],
+      ['Istanbul','Istanbul','Türkiye','TR',41.0082,28.9784],['Reykjavík','Capital Region','Iceland','IS',64.1466,-21.9426],
+      ['New York','New York','United States','US',40.7128,-74.006],['San Francisco','California','United States','US',37.7749,-122.4194]
+    ].map(([name,region,country,countryCode,lat,lon])=>({name,region,country,countryCode,lat,lon}));
+    let destinations=null;
     try{
       const response=await fetch('/api/store/destinations',{headers:{Accept:'application/json'}});
-      if(!response.ok)return;
-      destinations=(await response.json()).destinations;
-    }catch{return}
-    if(!Array.isArray(destinations)||!destinations.length)return;
+      if(response.ok)destinations=(await response.json()).destinations;
+    }catch{}
+    if(!Array.isArray(destinations)||!destinations.length)destinations=STAND_IN;
 
     const section=el('section','wrap destination-gallery');section.id='destination-gallery';
     const head=el('div','section-head');const copy=el('div');
