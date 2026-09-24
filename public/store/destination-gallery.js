@@ -5,24 +5,30 @@
   if(!anchor)return;
   const el=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!=null)n.textContent=text;return n};
   const hrefFor=d=>{const q=new URLSearchParams({destination:d.name});for(const [k,v] of [['region',d.region],['country',d.country],['countryCode',d.countryCode],['lat',d.lat],['lon',d.lon]])if(v!=null&&v!=='')q.set(k,v);return `./?${q}`};
-  const photoFor=async(tile,art,credit,d)=>{
+  const shade='linear-gradient(180deg,rgba(4,46,55,0) 45%,rgba(4,46,55,.78) 100%)';
+  const okPhoto=p=>p&&p.image&&String(p.image).startsWith('https://images.pexels.com/');
+  const fetchPhotos=async(query)=>{
     try{
-      const query=new URLSearchParams({destination:[d.name,d.country].filter(Boolean).join(', '),count:'1'});
-      const response=await fetch(`/api/store/hero-photo?${query}`,{headers:{Accept:'application/json'}});
-      if(!response.ok)return;
+      const response=await fetch(`/api/store/hero-photo?${new URLSearchParams(query)}`,{headers:{Accept:'application/json'}});
+      if(!response.ok)return [];
       const payload=await response.json();
-      const photo=(Array.isArray(payload.photos)&&payload.photos[0])||payload;
-      if(payload.source!=='pexels_api'||!photo?.image||!String(photo.image).startsWith('https://images.pexels.com/'))return;
-      const img=new Image();
-      img.onload=()=>{
-        art.style.backgroundImage=`linear-gradient(180deg,rgba(4,46,55,0) 45%,rgba(4,46,55,.78) 100%),url("${photo.image}")`;
-        tile.classList.add('has-photo');
-        credit.href=photo.page||photo.photographerUrl||'https://www.pexels.com/';
-        credit.textContent=`Photo: ${photo.photographer||'Pexels'}`;credit.hidden=false;
-      };
-      img.src=photo.image;
-    }catch{}
+      if(payload.source!=='pexels_api')return [];
+      return (Array.isArray(payload.photos)&&payload.photos.length?payload.photos:[payload]).filter(okPhoto);
+    }catch{return []}
   };
+  const preload=photo=>new Promise(resolve=>{const img=new Image();img.onload=()=>resolve(true);img.onerror=()=>resolve(false);img.src=photo.image});
+
+  // Plain travel glyphs (not claims about any city's landmarks).
+  const ICONS=[
+    '<path d="M3 15l18-6-6 12-3-5-5-1z"/><path d="M12 16l9-7"/>',
+    '<path d="M3 20l6-10 4 6 3-4 5 8z"/><circle cx="17" cy="6" r="2"/>',
+    '<rect x="3" y="8" width="18" height="12" rx="2"/><path d="M8 8l1.5-3h5L16 8"/><circle cx="12" cy="14" r="3.2"/>',
+    '<rect x="6" y="8" width="12" height="12" rx="2"/><path d="M9 8V5h6v3M10 12v4M14 12v4"/>',
+    '<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2 5-5 2 2-5z"/>',
+    '<path d="M12 21V11M12 11c0-4 3-6 7-6 0 4-3 6-7 6zM12 13c0-3-2.5-5-6-5 0 3.5 2.5 5 6 5z"/>'
+  ];
+  const icon=i=>{const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox','0 0 24 24');svg.setAttribute('class','tile-icon');svg.setAttribute('aria-hidden','true');svg.innerHTML=ICONS[i%ICONS.length];return svg};
+
   (async()=>{
     let destinations;
     try{
@@ -31,24 +37,91 @@
       destinations=(await response.json()).destinations;
     }catch{return}
     if(!Array.isArray(destinations)||!destinations.length)return;
+
     const section=el('section','wrap destination-gallery');section.id='destination-gallery';
     const head=el('div','section-head');const copy=el('div');
     copy.append(el('div','kicker','Where to next'),el('h2','','Choose a destination'),el('p','','Pick a place to see current hotels, activities, food and landmarks, and to search flights there.'));
     head.append(copy);
     const grid=el('div','destination-grid');
-    for(const d of destinations){
+
+    // The middle three positions hold the search box.
+    const search=el('form','destination-search');search.setAttribute('role','search');
+    const label=el('label','',null);label.htmlFor='gallery-search';label.append(el('span','destination-search-label','Where do you want to go?'));
+    const input=el('input');input.id='gallery-search';input.type='search';input.placeholder='City, Region or Country';input.setAttribute('autocomplete','off');
+    const note=el('div','destination-search-note');note.setAttribute('aria-live','polite');
+    const field=el('div','destination-search-field');field.append(input);
+    search.append(label,field,note);
+    let picked=null;
+    const go=place=>{location.href=hrefFor(place)};
+    const state=window.TourGuidPlaces?.attach(input,{onChoose:place=>{picked=place;go({name:place.name,region:place.region,country:place.country,countryCode:place.countryCode,lat:place.lat,lon:place.lon})}});
+    search.addEventListener('submit',event=>{event.preventDefault();if(state?.place)return go(state.place);note.textContent='Pick a place from the suggestions.'});
+    grid.append(search);
+
+    const tiles=[];
+    for(const d of destinations.slice(0,22)){
       const tile=el('div','destination-tile');
-      const link=el('a','destination-link');link.href=hrefFor(d);
+      const flip=el('div','tile-flip');
+      const front=el('div','tile-face tile-front');
       const art=el('div','destination-art');
-      const label=el('div','destination-label');label.append(el('strong','',d.name),el('span','',[d.region,d.country].filter(Boolean).join(', ')));
-      link.append(art,label);
+      const labelBox=el('div','destination-label');labelBox.append(el('strong','',d.name),el('span','',[d.region,d.country].filter(Boolean).join(', ')));
+      front.append(art,labelBox);
+      const back=el('div','tile-face tile-back');
+      flip.append(front,back);
+      const link=el('a','destination-link');link.href=hrefFor(d);link.setAttribute('aria-label',`${d.name}, ${[d.region,d.country].filter(Boolean).join(', ')}`);
       const credit=el('a','destination-credit');credit.hidden=true;credit.target='_blank';credit.rel='noopener';
-      tile.append(link,credit);grid.append(tile);
-      photoFor(tile,art,credit,d);
+      tile.append(flip,link,credit);grid.append(tile);
+      const record={d,tile,flip,front,back,credit,frontPhoto:null,flipped:false};
+      tiles.push(record);
     }
     section.append(head,grid);
     anchor.after(section);
     // The gallery answers "nothing chosen yet", so the empty rows step aside.
     for(const id of ['hotels','activities','food','places'])document.getElementById(id)?.setAttribute('hidden','');
+
+    const setCredit=(record,photo)=>{
+      if(photo){record.credit.href=photo.page||photo.photographerUrl||'https://www.pexels.com/';record.credit.textContent=`Photo: ${photo.photographer||'Pexels'}`;record.credit.hidden=false}
+      else record.credit.hidden=true;
+    };
+    // Each tile's own photo, all requests in parallel.
+    tiles.forEach(async record=>{
+      const [photo]=await fetchPhotos({destination:[record.d.name,record.d.country].filter(Boolean).join(', '),count:'1'});
+      if(!photo||!(await preload(photo)))return;
+      record.frontPhoto=photo;
+      record.front.querySelector('.destination-art').style.backgroundImage=`${shade},url("${photo.image}")`;
+      record.tile.classList.add('has-photo');
+      if(!record.flipped)setCredit(record,photo);
+    });
+
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    // A little motion on arrival: a handful of tiles, chosen at random, turn over to show
+    // a picture, a big name or a travel glyph, then turn back.
+    const pool=await fetchPhotos({count:'12'});
+    await Promise.all(pool.map(async photo=>{photo._ok=await preload(photo)}));
+    const usable=pool.filter(p=>p._ok);
+    const pick=a=>a[Math.floor(Math.random()*a.length)];
+    const fillBack=record=>{
+      record.back.replaceChildren();
+      const kinds=['name','icon'];if(usable.length)kinds.push('photo','photo');
+      const kind=pick(kinds);let photo=null;
+      record.back.className='tile-face tile-back back-'+kind;
+      if(kind==='photo'){photo=pick(usable);record.back.style.backgroundImage=`${shade},url("${photo.image}")`;record.back.append(el('strong','tile-back-name',record.d.name))}
+      else{record.back.style.backgroundImage='';
+        if(kind==='name')record.back.append(el('strong','tile-back-name',record.d.name));
+        else{record.back.append(icon(Math.floor(Math.random()*ICONS.length)),el('span','tile-back-small',record.d.name))}}
+      return photo;
+    };
+    const turn=record=>{
+      if(record.flipped||record.hovered)return;
+      const photo=fillBack(record);
+      record.flipped=true;record.tile.classList.add('is-flipped');setCredit(record,photo);
+      setTimeout(()=>{record.flipped=false;record.tile.classList.remove('is-flipped');setCredit(record,record.frontPhoto)},3200+Math.random()*1600);
+    };
+    tiles.forEach(r=>{r.tile.addEventListener('mouseenter',()=>{r.hovered=true});r.tile.addEventListener('mouseleave',()=>{r.hovered=false});r.tile.addEventListener('focusin',()=>{r.hovered=true});r.tile.addEventListener('focusout',()=>{r.hovered=false})});
+    let turns=0;
+    const timer=setInterval(()=>{
+      const free=tiles.filter(r=>!r.flipped&&!r.hovered);
+      if(free.length)turn(pick(free));
+      if(++turns>=14)clearInterval(timer);
+    },900);
   })();
 })();
