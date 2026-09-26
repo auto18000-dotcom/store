@@ -22,3 +22,14 @@ input[type="date"]::-webkit-datetime-edit,input[type="date"]::-webkit-datetime-e
 /* Header, upper right: points visitors at the mobile-app waitlist on intro.tourguid.net. */
 .mobile-soon{margin-left:auto;white-space:nowrap;color:#fff;text-decoration:none;font-size:.84rem;font-weight:750;border:1px solid #ffffff85;border-radius:6px;padding:8px 12px}.mobile-soon:hover{background:#ffffff1c;border-color:#fff}.mobile-soon:focus-visible{outline:3px solid #ffae19;outline-offset:3px}
 @media(max-width:700px){.top-inner{flex-wrap:wrap;row-gap:10px;padding:12px 0}.mobile-soon{font-size:.76rem;padding:7px 10px}}
+
+/* Hero, upper right: three lines of type floating over the hero, no box. Whole block is one link to the mobile-app page. */
+.hero>.wrap{position:relative}
+.ms-float{position:absolute;z-index:3;top:20px;right:0;display:block;text-align:right;text-decoration:none;color:#fff;line-height:1.05;text-shadow:0 2px 14px rgba(4,46,55,.45)}
+.ms-float span{display:block}
+.ms-kicker{font-size:.72rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#ffae19}
+.ms-name{margin-top:6px;font-size:clamp(1.7rem,2.9vw,2.6rem);font-weight:800;letter-spacing:-.045em}
+.ms-os{margin-top:7px;font-size:1rem;font-weight:700;letter-spacing:.01em;color:#e9f9f4}
+.ms-float:hover .ms-name,.ms-float:focus-visible .ms-name{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:6px;text-decoration-color:#58c862}
+.ms-float:focus-visible{outline:3px solid #ffae19;outline-offset:6px;border-radius:2px}
+@media(max-width:900px){.ms-float{position:static;text-align:left;margin:0 0 22px}.ms-name{font-size:1.9rem}}
