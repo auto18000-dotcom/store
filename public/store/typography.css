@@ -23,9 +23,10 @@ input[type="date"]::-webkit-datetime-edit,input[type="date"]::-webkit-datetime-e
 .mobile-soon{margin-left:auto;white-space:nowrap;color:#fff;text-decoration:none;font-size:.84rem;font-weight:750;border:1px solid #ffffff85;border-radius:6px;padding:8px 12px}.mobile-soon:hover{background:#ffffff1c;border-color:#fff}.mobile-soon:focus-visible{outline:3px solid #ffae19;outline-offset:3px}
 @media(max-width:700px){.top-inner{flex-wrap:wrap;row-gap:10px;padding:12px 0}.mobile-soon{font-size:.76rem;padding:7px 10px}}
 
-/* Hero, upper right: three lines of type floating over the hero, no box. Whole block is one link to the mobile-app page. */
+/* Hero, upper right: type floating over the hero, no box. .ms-group holds two notices: the TourGuid Mobile one (a link to the mobile-app page) and, under it, the Trip Builder one (plain text, no link). */
 .hero>.wrap{position:relative}
-.ms-float{position:absolute;z-index:3;top:16px;right:0;display:block;text-align:right;text-decoration:none;color:#fff;line-height:1;text-shadow:0 3px 22px rgba(3,38,46,.6),0 1px 2px rgba(3,38,46,.5);animation:msFloat 5s ease-in-out infinite}
+.ms-group{position:absolute;z-index:3;top:16px;right:0;text-align:right;animation:msFloat 5s ease-in-out infinite;text-shadow:0 3px 22px rgba(3,38,46,.6),0 1px 2px rgba(3,38,46,.5)}
+.ms-float{display:block;text-decoration:none;color:#fff;line-height:1}
 .ms-float span{display:block}
 /* The three flag colours, skewed like the stripe already on the hero: an accent, not a box. */
 .ms-float:before{content:"";display:block;width:110px;height:6px;margin:0 0 11px auto;border-radius:4px;background:linear-gradient(90deg,#ffae19 0 48%,#fa3838 48% 72%,#4bc653 72%);transform:skewX(-22deg);box-shadow:0 2px 14px rgba(255,174,25,.45)}
@@ -35,6 +36,12 @@ input[type="date"]::-webkit-datetime-edit,input[type="date"]::-webkit-datetime-e
 .ms-os:after{content:" \2192";color:#58e070;font-weight:800}
 .ms-float:hover .ms-name,.ms-float:focus-visible .ms-name{text-decoration:underline;text-decoration-thickness:4px;text-underline-offset:7px;text-decoration-color:#58c862}
 .ms-float:focus-visible{outline:3px solid #ffae19;outline-offset:8px;border-radius:2px}
+/* Trip Builder: two lines, plain text. Deliberately no arrow, underline or hover, so it does not read as a link. */
+.ms-next{margin-top:20px;color:#fff;line-height:1.1;cursor:default}
+.ms-next span{display:block}
+.ms-next-title{font-size:clamp(1.05rem,1.5vw,1.3rem);font-weight:850;letter-spacing:-.03em}
+.ms-next-title b{margin-right:8px;font-size:.66rem;font-weight:850;letter-spacing:.22em;text-transform:uppercase;color:#ffc94d;vertical-align:.18em}
+.ms-next-os{margin-top:6px;font-size:clamp(.88rem,1.1vw,1rem);font-weight:700;color:#e9f9f4}
 @keyframes msFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-@media(prefers-reduced-motion:reduce){.ms-float{animation:none}}
-@media(max-width:1100px){.ms-float{position:static;text-align:left;margin:0 0 24px;animation:none}.ms-float:before{margin-left:0}.ms-name{font-size:1.75rem}}
+@media(prefers-reduced-motion:reduce){.ms-group{animation:none}}
+@media(max-width:1100px){.ms-group{position:static;text-align:left;margin:0 0 24px;animation:none}.ms-float:before{margin-left:0}.ms-name{font-size:1.75rem}.ms-next{margin-top:16px}}
