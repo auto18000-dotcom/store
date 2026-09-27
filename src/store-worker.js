@@ -356,6 +356,58 @@ function hotelResults(payload) {
 }
 
 /**
+ * LiteAPI's stays, mapped once here so no page has to learn its shape.
+ *
+ * FOUR FIELDS THAT LOOK SAFE AND ARE NOT. Each is a way to state something
+ * false while looking entirely correct in review:
+ *
+ *  - `rating` is LiteAPI's GUEST SCORE OUT OF TEN — its own filter example is
+ *    8.6. Everywhere else in this Worker `rating` means out of five (Google,
+ *    Viator), so 8.6 handed to a star widget draws nonsense, and 8.6 printed
+ *    beside a 4.4 is simply a lie about the same scale. It goes out as
+ *    `guestScoreOutOfTen`, and `rating` is emitted as an explicit null so a
+ *    page reading the old Duffel field gets nothing rather than a wrong number.
+ *  - `stars` is the hotel's CLASS, not a review score. Different thing again.
+ *  - `price.total` is the TOTAL FOR THE WHOLE STAY, never per night. It is
+ *    deliberately NOT copied into `fromPrice`, whose name means "nightly rate
+ *    starting from" and which stays reserved for Duffel.
+ *  - `notIncluded: null` means NOT KNOWN — the lowest-rate call carries no tax
+ *    breakdown at all. `[]` would positively claim everything is included, a
+ *    claim only the rooms call can support. Null must survive to the page so a
+ *    card says nothing either way.
+ */
+function liteapiStays(payload) {
+  const stays = (payload && payload.stays) || [];
+  return stays.map((stay) => ({
+    id: stay.id ?? null,
+    name: stay.name ?? null,
+    address: stay.address ?? null,
+    city: stay.city ?? null,
+    country: stay.country ?? null,
+    lat: stay.lat ?? null,
+    lon: stay.lon ?? null,
+    stars: stay.stars ?? null,
+    guestScoreOutOfTen: stay.rating ?? null,
+    reviewCount: stay.reviewCount ?? null,
+    photo: stay.photo || stay.thumbnail || null,
+    thumbnail: stay.thumbnail || null,
+    chain: stay.chain ?? null,
+    rating: null,
+    price: stay.price
+      ? {
+          total: stay.price.total,
+          currency: stay.price.currency,
+          nights: stay.price.nights,
+          occupancy: stay.price.occupancy ?? null,
+          checkIn: stay.price.checkIn ?? null,
+          checkOut: stay.price.checkOut ?? null,
+          notIncluded: stay.price.notIncluded ?? null,
+        }
+      : null,
+  }));
+}
+
+/**
  * Viator's `variants` are NOT ordered best-first — a real product came back
  * 100, 200, 400, 360, 480, 540, 674, 720, 210, 75. Taking the first gives a
  * 100px thumbnail, taking the last gives 75px, and either one stretched across
@@ -1013,20 +1065,61 @@ async function hotels(env, request, params) {
       { status: 400 }
     );
   }
+  // NO DATES IS A NORMAL REQUEST, NOT A FAULT. The owner chose option A on
+  // 2026-09-26: a dateless card shows no price and says "Choose dates to see a
+  // price". So a request without dates asks for the hotels and gets every
+  // `price: null` back at 200 — it must never error, because that is the path
+  // every visitor takes before searching. Only a HALF-filled pair is a fault,
+  // and that is caught above.
+  const dated = isDate(checkIn) && isDate(checkOut);
+  const where = contextOf(params);
+
+  // `liteapi_hotels` searches by COORDINATES ONLY and answers 400 without
+  // them — a destination NAME is not enough, and city/region/country are
+  // ignored. A place can reach us with no coordinates in ordinary use: a typed
+  // query string, an old bookmark, a link shared before the suggestion list
+  // existed. That is not a fault to show a visitor, it is a prompt.
+  //
+  // So: 200 with an empty list and a REASON. A 400 would tell them something
+  // is broken, and a bare empty list would tell them Paris has no hotels,
+  // which is false. The reason is what lets the page say "pick the city from
+  // the list" instead of either lie.
+  if (!Number.isFinite(where.lat) || !Number.isFinite(where.lon)) {
+    return json({
+      stays: [],
+      pricedFor: null,
+      liveMode: null,
+      reason: "no_coordinates",
+    });
+  }
+
   const { payload, error } = await askStoreSearch(
     env,
-    "duffel_stay_search",
+    "liteapi_hotels",
     {
-      place: one(params, "destination"),
-      check_in: checkIn,
-      check_out: checkOut,
-      adults: Number(one(params, "adults", "2")) || 2,
+      lat: where.lat,
+      lon: where.lon,
+      radiusKm: Number(one(params, "radiusKm", "3")) || 3,
       limit: 12,
+      ...(dated ? { checkIn, checkOut } : {}),
+      adults: Number(one(params, "adults", "2")) || 2,
+      currency: one(params, "currency", "USD"),
     },
     request
   );
   if (error) return refuse(error);
-  return json({ stays: hotelResults(payload), captchaChecked: payload.captchaChecked ?? null });
+  return json({
+    stays: liteapiStays(payload),
+    // What was ACTUALLY priced — occupancy, currency and nationality included,
+    // because two of those are our defaults rather than the visitor's choice.
+    // A figure the page cannot caption is a figure it should not print.
+    pricedFor: payload.pricedFor ?? null,
+    // False means test data. The banner shows only when this is false AND a
+    // price is present: warning about prices that are not on screen teaches
+    // people to ignore the banner, and then it is worthless when it matters.
+    liveMode: payload.liveMode ?? null,
+    captchaChecked: payload.captchaChecked ?? null,
+  });
 }
 
 async function activities(env, request, params) {
