@@ -63,10 +63,11 @@
   };
 
   const card=(stay,state,onChoose)=>{
+    const href=state.href?state.href(stay):null;
     const article=el('article',{class:'hs-card',role:'listitem','aria-label':stay.name||'Hotel'});
-    article.append(stay.photo?el('img',{class:'hs-photo',src:stay.photo,alt:'',loading:'lazy',referrerpolicy:'no-referrer'}):el('div',{class:'hs-photo empty','aria-hidden':'true'}));
+    article.append(stay.photo?el('img',{class:'hs-photo',src:stay.photo,alt:'',loading:'lazy',referrerpolicy:'no-referrer'}):el('div',{class:'hs-photo empty'},'Photo not available'));
     const body=el('div',{class:'hs-body'});
-    body.append(el('h3',{},stay.name||'Hotel'));
+    body.append(el('h3',{},href?el('a',{class:'hs-open',href},stay.name||'Hotel'):(stay.name||'Hotel')));
     const area=[stay.address,stay.city].filter(Boolean).join(', ');
     if(area)body.append(el('p',{class:'hs-area'},area));
     const facts=[];
@@ -89,6 +90,7 @@
 
   const KEYS=['region','country','countryCode','lat','lon'];
 
+  window.TourGuidHotelParts={el,priceBlock,banner,money,plural,rangeText,occupancyText,score,isDate,at};
   window.TourGuidHotels={
     /** Shows the stays after `after`. Resolves true when it did, false when the page should carry on without it. */
     async mount({after,destination,params}){
@@ -103,8 +105,8 @@
       const slot=el('div',{class:'hs-slot'});
       const grid=el('div',{class:'hs-grid',role:'list','aria-label':`Hotels in ${destination}`});
       const note=el('p',{class:'hs-note'});
-      const checkIn=el('input',{type:'date',id:'checkin',name:'checkIn',min:today(),value:isDate(params.get('checkIn'))?params.get('checkIn'):''});
-      const checkOut=el('input',{type:'date',id:'checkout',name:'checkOut',value:isDate(params.get('checkOut'))?params.get('checkOut'):''});
+      const checkIn=el('input',{type:'date',id:'checkin',name:'checkIn',min:today(),value:isDate(params.get('checkIn')||params.get('from'))?(params.get('checkIn')||params.get('from')):''});
+      const checkOut=el('input',{type:'date',id:'checkout',name:'checkOut',value:isDate(params.get('checkOut')||params.get('to'))?(params.get('checkOut')||params.get('to')):''});
       const adults=el('input',{type:'number',id:'guests',name:'adults',min:'1',max:'12',value:String(Math.min(12,Math.max(1,Number(params.get('adults'))||2)))});
       const submit=el('button',{class:'btn primary',type:'submit'},'Show prices');
       const clear=el('button',{class:'hs-clear',type:'button'},'Clear dates');
@@ -137,7 +139,7 @@
         q.set('adults',String(Math.min(12,Math.max(1,Number(adults.value)||2))));
         // The address bar keeps the choices, so a reload or a shared link shows the same stay.
         const shown=new URLSearchParams(location.search);
-        for(const key of ['checkIn','checkOut','adults'])shown.delete(key);
+        for(const key of ['checkIn','checkOut','adults','from','to'])shown.delete(key);
         for(const key of ['checkIn','checkOut','adults'])if(q.get(key))shown.set(key,q.get(key));
         history.replaceState(null,'',`${location.pathname}?${shown}`);
         section.dataset.state='loading';status.textContent=inValue&&outValue?'Loading hotels and their prices. This can take about ten seconds…':'Loading hotels…';grid.replaceChildren();slot.replaceChildren();note.textContent='';
@@ -163,7 +165,9 @@
         }
         const dated=!!(inValue&&outValue);
         const pricedCount=stays.filter(s=>s.price&&Number.isFinite(s.price.total)).length;
-        const state={liveMode:payload.liveMode===true?true:payload.liveMode===false?false:null,dated};
+        const detailKeys=['destination','region','country','countryCode','lat','lon'];
+        const href=stay=>{const q=new URLSearchParams({id:stay.id||''});for(const key of detailKeys){const v=key==='destination'?destination:params.get(key);if(v)q.set(key,v)}if(dated){q.set('from',inValue);q.set('to',outValue)}q.set('adults',String(Math.min(12,Math.max(1,Number(adults.value)||2))));if(stay.name)q.set('name',stay.name);return `hotel?${q}`};
+        const state={liveMode:payload.liveMode===true?true:payload.liveMode===false?false:null,dated,href};
         if(pricedCount>0&&state.liveMode!==true)slot.append(banner(state.liveMode));
         for(const stay of stays)grid.append(card(stay,state,chooseDates));
         sub.textContent=dated?`${rangeText(inValue,outValue)} · ${plural(Math.round((at(outValue)-at(inValue))/86400000),'night')} · ${plural(Number(adults.value)||2,'adult')}`:'Prices appear when you choose dates.';

@@ -43,3 +43,5 @@
 .hs-note{margin:18px 0 0;font-size:.85rem;color:#5c7278;max-width:80ch}
 @media(max-width:960px){.hs-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:600px){.hs-grid{grid-template-columns:1fr}.hs-where{flex-direction:column;align-items:stretch}.hs-where a{justify-content:center}.hs-field{min-width:130px;flex:1}}
+
+.hs-open{color:inherit;text-decoration:none}.hs-open:hover{text-decoration:underline}.hs-photo.empty{display:grid;place-items:center;font-size:.82rem;color:#5c7278;font-weight:600}

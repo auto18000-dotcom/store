@@ -89,6 +89,15 @@
     card.className='carousel-theme-card carousel-product-card';
     card.href=item.url||categoryHref(config.page);
     card.target='_blank';card.rel='noopener';
+    // A hotel opens its own page here (photos, reviews, map, contact and, with dates, its price), not Google Maps. Extensionless: a .html redirect drops the query.
+    if(item.category==='hotels'&&item.id){
+      const q=new URLSearchParams({placeId:item.id});
+      if(destination)q.set('destination',destination);
+      if(destinationCtx){for(const key of ['region','country','countryCode','lat','lon'])if(destinationCtx[key]!=null&&destinationCtx[key]!=='')q.set(key,destinationCtx[key])}
+      for(const key of ['from','to','adults'])if(context.get(key))q.set(key,context.get(key));
+      q.set('name',item.title||'');
+      card.href=`hotel?${q}`;card.removeAttribute('target');card.removeAttribute('rel');
+    }
     const visual=document.createElement('div');visual.className='card-visual product-photo';
     if(item.photo)visual.style.backgroundImage=`url("${item.photo}")`;
     // Google's Places terms require the photographer's attribution to travel
