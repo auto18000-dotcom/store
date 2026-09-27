@@ -140,7 +140,7 @@
         for(const key of ['checkIn','checkOut','adults'])shown.delete(key);
         for(const key of ['checkIn','checkOut','adults'])if(q.get(key))shown.set(key,q.get(key));
         history.replaceState(null,'',`${location.pathname}?${shown}`);
-        section.dataset.state='loading';status.textContent='Loading hotels…';grid.replaceChildren();slot.replaceChildren();note.textContent='';
+        section.dataset.state='loading';status.textContent=inValue&&outValue?'Loading hotels and their prices. This can take about ten seconds…':'Loading hotels…';grid.replaceChildren();slot.replaceChildren();note.textContent='';
         let payload=null,failed=false,badDates=null;
         try{
           const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),25000);
