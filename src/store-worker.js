@@ -546,6 +546,55 @@ function suggestionsOf(payload) {
   }));
 }
 
+/**
+ * Turn a destination NAME into a point.
+ *
+ * WHY THIS EXISTS, because it looks like belt-and-braces and is not. LiteAPI
+ * searches by coordinates alone, and almost nothing that links into the hotels
+ * page carries any: `categoryHref` in store-carousels.js copies `destination`,
+ * `from` and `to` and drops lat/lon. So without this, a visitor arriving by
+ * link — which is nearly all of them — saw "choose the city from the
+ * suggestions" and no LiteAPI hotels at all, while Google Places listings sat
+ * underneath looking like the feature working. The guard was right; the
+ * assumption behind it, that a place normally travels with its coordinates,
+ * was wrong.
+ *
+ * One `city_autocomplete` lookup, cached a day per name. `no_coordinates` is
+ * kept for what it should always have meant: a name nobody recognises.
+ *
+ * The first suggestion is taken, and the caller reports WHICH place that was,
+ * because there are two Barcelonas and a page that cannot say which one it is
+ * showing is guessing on the visitor's behalf.
+ */
+async function pointForName(env, request, name, ctx) {
+  const text = (name || "").trim();
+  if (text.length < SUGGEST_MIN_CHARS) return null;
+  const cache = caches.default;
+  const key = new Request(
+    `https://hotelpoint.tourguid.invalid/${encodeURIComponent(text.toLowerCase())}`
+  );
+  const hit = await cache.match(key);
+  if (hit) return await hit.json();
+
+  const { payload, error } = await askStoreSearch(env, "city_autocomplete", { text, limit: 1 }, request);
+  if (error) return null;
+  const first = suggestionsOf(payload)[0];
+  if (!first || !Number.isFinite(first.lat) || !Number.isFinite(first.lon)) return null;
+
+  const point = { lat: first.lat, lon: first.lon, label: first.label };
+  if (ctx) {
+    ctx.waitUntil(
+      cache.put(
+        key,
+        new Response(JSON.stringify(point), {
+          headers: { "content-type": "application/json", "cache-control": "max-age=86400" },
+        })
+      )
+    );
+  }
+  return point;
+}
+
 /** Where the traveller actually means, from what the page sends back. */
 function contextOf(params) {
   const where = {};
@@ -1043,7 +1092,7 @@ async function suggest(env, request, params, ctx) {
   return json(answer);
 }
 
-async function hotels(env, request, params) {
+async function hotels(env, request, params, ctx) {
   const checkIn = one(params, "checkIn");
   const checkOut = one(params, "checkOut");
 
@@ -1084,7 +1133,12 @@ async function hotels(env, request, params) {
   // is broken, and a bare empty list would tell them Paris has no hotels,
   // which is false. The reason is what lets the page say "pick the city from
   // the list" instead of either lie.
-  if (!Number.isFinite(where.lat) || !Number.isFinite(where.lon)) {
+  let point =
+    Number.isFinite(where.lat) && Number.isFinite(where.lon)
+      ? { lat: where.lat, lon: where.lon, label: null }
+      : await pointForName(env, request, one(params, "destination"), ctx);
+
+  if (!point) {
     return json({
       stays: [],
       pricedFor: null,
@@ -1097,8 +1151,8 @@ async function hotels(env, request, params) {
     env,
     "liteapi_hotels",
     {
-      lat: where.lat,
-      lon: where.lon,
+      lat: point.lat,
+      lon: point.lon,
       radiusKm: Number(one(params, "radiusKm", "3")) || 3,
       limit: 12,
       ...(dated ? { checkIn, checkOut } : {}),
@@ -1110,6 +1164,10 @@ async function hotels(env, request, params) {
   if (error) return refuse(error);
   return json({
     stays: liteapiStays(payload),
+    // Which place these hotels are actually near, when we resolved it from a
+    // name rather than being handed a point. There are two Barcelonas; a page
+    // that cannot say which one it is showing is guessing for the visitor.
+    resolvedPlace: point.label,
     // What was ACTUALLY priced — occupancy, currency and nationality included,
     // because two of those are our defaults rather than the visitor's choice.
     // A figure the page cannot caption is a figure it should not print.
@@ -1503,7 +1561,7 @@ async function route(path, env, request, params, ctx) {
     case "/api/store/flights":
         return flights(env, request, params);
     case "/api/store/hotels":
-        return hotels(env, request, params);
+        return hotels(env, request, params, ctx);
     case "/api/store/activities":
         return activities(env, request, params);
     case "/api/store/places":
