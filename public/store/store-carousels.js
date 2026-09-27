@@ -99,7 +99,7 @@
       visual.append(credit);
     }
     const body=document.createElement('div');body.className='card-body';
-    const sourceTag=document.createElement('div');sourceTag.className='tag';
+    const sourceTag=document.createElement('div');sourceTag.className=/google/i.test(item.source||'')?'tag tag-tiny':'tag';
     sourceTag.textContent=item.type?`${item.source||config.name} · ${item.type}`:(item.source||config.name);
     const name=document.createElement('h3');name.textContent=item.title;
     const copy=document.createElement('p');copy.textContent=item.summary||'';

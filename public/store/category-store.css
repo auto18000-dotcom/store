@@ -20,6 +20,8 @@
 .collection-art span{position:absolute;left:15px;bottom:14px;color:white;font-size:.7rem;font-weight:850;letter-spacing:.1em;text-transform:uppercase;text-shadow:0 2px 5px #1236427c}
 .collection-copy{padding:18px;display:flex;flex:1;flex-direction:column}
 .collection-copy .source{color:#16846b;font-size:.68rem;font-weight:850;letter-spacing:.09em;text-transform:uppercase}
+/* The Google Places label ("Google Places · Hotel") is set very small; other suppliers' labels keep their size. */
+.collection-copy .source.source-tiny{font-size:.5rem;letter-spacing:.06em}
 .collection-copy h3{font-size:1.12rem;line-height:1.25;margin:7px 0}
 .collection-copy p{color:#5b7278;font-size:.87rem;line-height:1.42;margin:0 0 16px}
 .collection-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:auto}

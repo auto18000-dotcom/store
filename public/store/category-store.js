@@ -76,7 +76,7 @@
     if(item.photo){art.style.backgroundImage=`url("${item.photo}")`;art.style.backgroundSize='cover';art.style.backgroundPosition='center'}
     if(item.photoCredit){const credit=document.createElement('span');credit.textContent=`Photo: ${item.photoCredit}`;art.append(credit)}
     const body=document.createElement('div');body.className='collection-copy';
-    const source=document.createElement('div');source.className='source';source.textContent=item.type?`${item.source||provider.supplier} · ${item.type}`:(item.source||provider.supplier);
+    const source=document.createElement('div');source.className=/google/i.test(item.source||'')?'source source-tiny':'source';source.textContent=item.type?`${item.source||provider.supplier} · ${item.type}`:(item.source||provider.supplier);
     const name=document.createElement('h3');name.textContent=item.title;
     const summary=document.createElement('p');summary.textContent=item.summary||'';
     const meta=[];
