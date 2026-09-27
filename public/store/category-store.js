@@ -95,8 +95,11 @@
   // follow. No destination, or a feed that is not live, leaves only the
   // editorial rows -- never a substitute invented to fill the space.
   const lat=params.get('lat'),lon=params.get('lon');
+  // Hotels: stays with prices (LiteAPI, through /api/store/hotels) lead the page. When they are shown, the older Google listing row below is not, so a hotel is not
+  // listed twice; when they cannot be shown (no coordinates, or the request failed) the page carries on exactly as before.
+  const staysShown=category==='hotels'&&window.TourGuidHotels?await window.TourGuidHotels.mount({after:introduction,destination,params}):false;
   let liveItems=[];
-  if(destination){
+  if(destination&&!staysShown){
     try{
       const q=new URLSearchParams({destination,categories:category});
       for(const key of ['region','country','countryCode','lat','lon'])if(params.get(key))q.set(key,params.get(key));

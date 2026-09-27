@@ -1,0 +1,45 @@
+/* Hotel stays with prices (hotel-stays.js). Design by TG-Web-1A: the Store's own caution banner, the price as a specimen and not a promotion, no booking button. */
+.hs{padding-top:26px;padding-bottom:10px}
+.hs h2{margin:4px 0 4px;font-size:1.9rem;letter-spacing:-.02em;color:#123642}
+.hs-sub{margin:0 0 14px;color:#5c7278}
+.hs-form{display:flex;flex-wrap:wrap;gap:12px 14px;align-items:flex-end;margin:0 0 12px}
+.hs-form[hidden],.hs[hidden]{display:none}
+.hs-field{display:grid;gap:5px;min-width:150px}.hs-field.narrow{min-width:90px;max-width:110px}
+.hs-field label{font-size:.78rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#075d61}
+.hs-field input{height:42px;padding:0 11px;border:1px solid #b8cbc3;border-radius:6px;background:#fff;color:#123642;font:inherit}
+.hs-actions{display:flex;gap:12px;align-items:center}
+.hs-clear{all:unset;cursor:pointer;color:#075d61;font-weight:650;text-decoration:underline;padding:6px 2px}
+.hs-clear:focus-visible{outline:3px solid #ffae19;outline-offset:3px}
+.hs-status{margin:6px 0 14px;color:#5c7278;font-size:.95rem;min-height:1.2em}
+.hs-banner,.live-mode-banner.hs-banner{border:2px solid #d97706;background:#fef3c7;border-radius:6px;padding:12px 16px;color:#78350f;font-size:.92rem;font-weight:800;margin:0 0 16px}
+.hs-banner small{display:block;font-weight:600;font-size:.86rem;margin-top:2px}
+.hs-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.hs-card{background:#fff;border:1px solid #d9e2de;border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
+.hs-photo{display:block;width:100%;height:170px;object-fit:cover;background:#e7eeeb}
+.hs-photo.empty{background:linear-gradient(125deg,#dcebe6,#eef5f1)}
+.hs-body{padding:18px 20px 0;flex:1}
+.hs-card h3{margin:0;font-size:1.18rem;letter-spacing:-.02em;color:#123642;line-height:1.25}
+.hs-area{margin:2px 0 10px;color:#5c7278;font-size:.9rem}
+.hs-rate{margin:0 0 14px;color:#5c7278;font-size:.9rem}.hs-rate b{color:#123642}.hs-rate span{white-space:nowrap}
+/* the price block: a specimen, not a promotion */
+.hs-price{border-radius:6px;padding:10px 14px 12px}
+.hs-price.test{border:1.5px dashed #d97706;background:repeating-linear-gradient(135deg,#fffaf0 0 9px,#fdf1cf 9px 10px)}
+.hs-price.prov{border:1.5px dashed #d97706;background:#fff}
+.hs-price.live,.hs-price.na{border:1px solid #d9e2de;background:#fff}
+.hs-tag{color:#78350f;font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.hs-fig{display:flex;align-items:baseline;gap:8px;margin-top:4px}
+.hs-fig b{font-size:1.6rem;letter-spacing:-.02em;color:#123642;font-weight:750}
+.hs-cur{font-size:.75rem;font-weight:700;letter-spacing:.08em;color:#6a4a1a}.hs-price.live .hs-cur{color:#5c7278}
+.hs-tot{font-size:.9rem;font-weight:650;color:#123642;margin:1px 0 6px}
+.hs-for{font-size:.82rem;color:#6a4a1a;margin-top:2px}.hs-price.live .hs-for{color:#5c7278}
+.hs-fee{font-size:.82rem;color:#6a4a1a;font-weight:600;margin-top:6px}.hs-price.live .hs-fee{color:#123642}
+.hs-price.na b{font-size:.95rem;color:#123642;font-weight:650;display:block}
+.hs-price.na p{margin:2px 0 0;font-size:.82rem;color:#5c7278}
+.hs-choose{display:inline-flex;align-items:center;margin-top:10px;height:36px;padding:0 12px;border:1px solid #075d61;border-radius:6px;background:#fff;color:#075d61;font:inherit;font-weight:650;font-size:.9rem;cursor:pointer}
+.hs-choose:focus-visible,.hs-where a:focus-visible{outline:3px solid #ffae19;outline-offset:3px}
+.hs-where{margin-top:14px;border-top:1px solid #d9e2de;padding:12px 20px 16px;display:flex;align-items:center;gap:12px;background:#fbfcfb}
+.hs-where p{margin:0;flex:1;font-size:.82rem;color:#5c7278;line-height:1.4}
+.hs-where a{display:inline-flex;align-items:center;height:38px;padding:0 14px;border:1px solid #d9e2de;border-radius:6px;color:#075d61;font-weight:650;font-size:.9rem;background:#fff;text-decoration:none;white-space:nowrap}
+.hs-note{margin:18px 0 0;font-size:.85rem;color:#5c7278;max-width:80ch}
+@media(max-width:960px){.hs-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.hs-grid{grid-template-columns:1fr}.hs-where{flex-direction:column;align-items:stretch}.hs-where a{justify-content:center}.hs-field{min-width:130px;flex:1}}
