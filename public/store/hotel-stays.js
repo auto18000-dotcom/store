@@ -133,18 +133,22 @@
         for(const key of ['checkIn','checkOut','adults'])if(q.get(key))shown.set(key,q.get(key));
         history.replaceState(null,'',`${location.pathname}?${shown}`);
         section.dataset.state='loading';status.textContent=inValue&&outValue?'Loading hotels and their prices. This can take about ten seconds…':'Loading hotels…';grid.replaceChildren();slot.replaceChildren();note.textContent='';
-        let payload=null,failed=false,badDates=null;
+        let payload=null,failed=false,badDates=null,busy=null;
         try{
           const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),25000);
           const response=await fetch(`/api/store/hotels?${q}`,{signal:controller.signal,headers:{Accept:'application/json'}});
           clearTimeout(timer);
           if(response.status===400){const body=await response.json().catch(()=>null);if(body&&body.error==='bad_dates')badDates=body.message||'Check the dates and try again.';else failed=true}
+          // The API limits how many searches one visitor can make in a short time; say so, do not act as if there were no hotels.
+          else if(response.status===429){const body=await response.json().catch(()=>null);busy=(body&&body.message)||'You have made a lot of searches. Please try again shortly.'}
           else if(!response.ok)failed=true;
           else payload=await response.json();
         }catch{failed=true}
         if(mine!==generation)return true;
         if(badDates){status.textContent=badDates;section.dataset.state='bad-dates';return true}
-        if(failed||!payload||!Array.isArray(payload.stays)){status.textContent='';section.dataset.state='unavailable';section.hidden=true;return false}
+        if(busy){section.hidden=false;status.textContent=busy;section.dataset.state='busy';return false}
+        // Never vanish: an absence looks like the feature not existing, and gives the visitor nothing to do. Say it, and keep the form so they can try again.
+        if(failed||!payload||!Array.isArray(payload.stays)){section.hidden=false;status.textContent='Hotels could not be loaded just now. Please try again in a moment.';section.dataset.state='unavailable';return false}
         section.hidden=false;
         // A name with no coordinates is resolved by the server, and it says which place it found: there are two Barcelonas, so the visitor is told and can choose another.
         const found=typeof payload.resolvedPlace==='string'?payload.resolvedPlace.trim():'';
