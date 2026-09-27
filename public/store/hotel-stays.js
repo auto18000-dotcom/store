@@ -95,11 +95,9 @@
     /** Shows the stays after `after`. Resolves true when it did, false when the page should carry on without it. */
     async mount({after,destination,params}){
       if(!destination)return false;
-      // A missing value is not zero: Number(null) is 0, which would pass for a place in the Atlantic.
-      const number=v=>v!=null&&String(v).trim()!==''&&Number.isFinite(Number(v));
-      const hasPlace=number(params.get('lat'))&&number(params.get('lon'));
       const section=el('section',{class:'wrap hs','aria-labelledby':'hs-h','data-state':'loading'});
       const title=el('h2',{id:'hs-h'},`Hotels in ${destination}`);
+      const where=el('p',{class:'hs-where'});
       const sub=el('p',{class:'hs-sub'});
       const status=el('p',{class:'hs-status',role:'status','aria-live':'polite'});
       const slot=el('div',{class:'hs-slot'});
@@ -115,17 +113,9 @@
         el('div',{class:'hs-field'},el('label',{for:'checkout'},'Check-out'),checkOut),
         el('div',{class:'hs-field narrow'},el('label',{for:'guests'},'Adults'),adults),
         el('div',{class:'hs-actions'},submit,clear));
-      section.append(el('div',{class:'kicker'},'Where to stay'),title,sub,form,status,slot,grid,note);
+      section.append(el('div',{class:'kicker'},'Where to stay'),title,where,sub,form,status,slot,grid,note);
       after.after(section);
       const chooseDates=()=>{checkIn.focus();try{checkIn.showPicker?.()}catch{}};
-
-      if(!hasPlace){
-        // A typed name, an old bookmark or a shared link has no coordinates, and the supplier searches by coordinates only.
-        sub.textContent='';form.hidden=true;
-        status.textContent='Choose the city from the suggestions above to see hotels and their prices.';
-        section.dataset.state='no-coordinates';
-        return false;
-      }
 
       let generation=0;
       const load=async()=>{
@@ -156,10 +146,14 @@
         if(badDates){status.textContent=badDates;section.dataset.state='bad-dates';return true}
         if(failed||!payload||!Array.isArray(payload.stays)){status.textContent='';section.dataset.state='unavailable';section.hidden=true;return false}
         section.hidden=false;
+        // A name with no coordinates is resolved by the server, and it says which place it found: there are two Barcelonas, so the visitor is told and can choose another.
+        const found=typeof payload.resolvedPlace==='string'?payload.resolvedPlace.trim():'';
+        where.textContent=found?`Showing hotels near ${found}. Not the right place? Choose the city from the suggestions above.`:'';
         const stays=payload.stays;
         if(!stays.length){
           // An empty list with a reason is a PROMPT; an empty list without one means nothing was found there. They are not the same sentence.
-          status.textContent=payload.reason==='no_coordinates'?'Choose the city from the suggestions above to see hotels and their prices.':`No hotels were found near ${destination}.`;
+          if(payload.reason==='no_coordinates')form.hidden=true;
+          status.textContent=payload.reason==='no_coordinates'?'Choose the city from the suggestions above to see hotels and their prices.':`No hotels were found near ${found||destination}.`;
           section.dataset.state=payload.reason==='no_coordinates'?'no-coordinates':'empty';
           return payload.reason!=='no_coordinates';
         }

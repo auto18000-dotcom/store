@@ -1,6 +1,7 @@
 /* Hotel stays with prices (hotel-stays.js). Design by TG-Web-1A: the Store's own caution banner, the price as a specimen and not a promotion, no booking button. */
 .hs{padding-top:26px;padding-bottom:10px}
 .hs h2{margin:4px 0 4px;font-size:1.9rem;letter-spacing:-.02em;color:#123642}
+.hs-where{margin:0 0 6px;color:#5c7278;font-size:.92rem}.hs-where:empty{display:none}
 .hs-sub{margin:0 0 14px;color:#5c7278}
 .hs-form{display:flex;flex-wrap:wrap;gap:12px 14px;align-items:flex-end;margin:0 0 12px}
 .hs-form[hidden],.hs[hidden]{display:none}
