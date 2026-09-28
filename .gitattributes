@@ -1,0 +1,5 @@
+# Prevents core.autocrlf on some future checkout from rewriting LF to CRLF in served static assets --
+# harmless for most files here, but this repo now also carries files that get hashed/compared byte-for-byte
+# in other parts of the TourGuid estate (see TourGuid-App's own .gitattributes for the version of this
+# problem that actually bit something). Cheap to apply broadly rather than re-discover per file later.
+public/** text eol=lf

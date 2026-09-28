@@ -1,0 +1,15 @@
+filename,kind,owner,licence,dimensions,focal_point,alt_text,source,sha256_first16,approval_status
+assets/favicon.svg,favicon,TourGuid (owner),owner's own,vector 512x512,n/a,TourGuid,"copy of the owner's original: TourGuid-Web public/favicon.svg, byte for byte",087af6235c7df857,used verbatim
+assets/favicon-16.png,favicon,TourGuid (owner),owner's own,16x16,n/a,TourGuid,drawn from favicon.svg at size,cce136bdb1ad59b6,ready for approval
+assets/favicon-32.png,favicon,TourGuid (owner),owner's own,32x32,n/a,TourGuid,drawn from favicon.svg at size,8e1312fb1f63c77c,ready for approval
+assets/favicon-48.png,favicon,TourGuid (owner),owner's own,48x48,n/a,TourGuid,drawn from favicon.svg at size,b3314695e5b2b16c,ready for approval
+assets/apple-touch-icon-180.png,touch icon,TourGuid (owner),owner's own,180x180,n/a,TourGuid,drawn from favicon.svg at size,e6776eed152ddaa2,ready for approval
+assets/icon-192.png,app icon,TourGuid (owner),owner's own,192x192,n/a,TourGuid,drawn from favicon.svg at size,b627a4efbafe6c99,ready for approval
+assets/icon-512.png,app icon,TourGuid (owner),owner's own,512x512,n/a,TourGuid,drawn from favicon.svg at size,7fc3338a153e45e6,ready for approval
+tourguid-mark-on-dark.svg,logo,TourGuid (owner),owner's own,vector 512x512,n/a,TourGuid,byte-for-byte copy of TourGuid-Web public/tourguid-mark-on-dark.svg; never redrawn,0f579f2e6b6cc323,used verbatim; dark surface only (light poles vanish on white)
+assets/mark-on-dark-256.png,logo fallback (PNG),TourGuid (owner),owner's own,256x256,n/a,TourGuid,drawn from tourguid-mark-on-dark.svg on transparency,06e799899f3dee04,ready for approval; dark surface only
+assets/mark-on-dark-512.png,logo fallback (PNG),TourGuid (owner),owner's own,512x512,n/a,TourGuid,drawn from tourguid-mark-on-dark.svg on transparency,4265dd5449d29a86,ready for approval; dark surface only
+assets/og-1200x630.png,social image,TourGuid (owner),owner's own,1200x630,n/a,TourGuid: Let's explore and experience this wonderful world!,"made from the verbatim mark, the Store's header gradient and Inter; no photograph, no people",775560287794d9db,draft; the headline may be replaced by the homepage's
+hero photo (4:3),photograph,OWNER TO SUPPLY,to be recorded,to be recorded,to be set when supplied,to be written when supplied,the owner's own; no stock and no invented people; no personal data in any image,,SLOT: empty
+gallery photos (any),photograph,OWNER TO SUPPLY,to be recorded,to be recorded,to be set when supplied,to be written when supplied,the owner's own; no stock and no invented people; no personal data in any image,,SLOT: empty
+app screenshots,screenshots,OWNER TO SUPPLY,to be recorded,to be recorded,to be set when supplied,to be written when supplied,the owner's own; no stock and no invented people; no personal data in any image,,SLOT: empty

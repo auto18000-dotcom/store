@@ -1,4 +1,5 @@
 .wrangler/
+wrangler-dev.log
 
 # wrangler dev's local-only secrets file (STORE_SEARCH_URL, STORE_CALLER_SECRET,
 # PEXELS_API_KEY). Never committed -- this repo held no secrets before

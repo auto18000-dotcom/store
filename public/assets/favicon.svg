@@ -1,0 +1,44 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1E88E5"/>
+      <stop offset="100%" stop-color="#0D47A1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background: square, no rounding (store applies its own mask) -->
+  <rect x="0" y="0" width="512" height="512" fill="url(#bg)"/>
+  <rect x="0" y="0" width="512" height="512" fill="white" opacity="0.04"/>
+
+  <!-- Layer order: orange back, red middle, green front -->
+
+  <!-- Pole 3 (orange, far left, same angle as green pole, raised further up, back) -->
+  <g>
+    <line x1="-30" y1="330" x2="90" y2="5" stroke="#F5F5F5" stroke-width="7" stroke-linecap="round"/>
+    <path d="M 80 38
+             L 450 70
+             Q 270 210, 68 250
+             Z"
+          fill="#FF9800"/>
+  </g>
+
+  <!-- Pole 2 (red, moved further left, nudged up a notch, middle layer) -->
+  <g>
+    <line x1="185" y1="495" x2="275" y2="90" stroke="#F5F5F5" stroke-width="7" stroke-linecap="round"/>
+    <path d="M 266 122
+             L 500 150
+             Q 380 240, 255 265
+             Z"
+          fill="#E53935"/>
+  </g>
+
+  <!-- Pole 1 (green, left, lowest, biggest flag, front) -->
+  <g>
+    <line x1="20" y1="560" x2="140" y2="235" stroke="#F5F5F5" stroke-width="7" stroke-linecap="round"/>
+    <path d="M 130 268
+             L 500 300
+             Q 320 440, 118 480
+             Z"
+          fill="#66BB6A"/>
+  </g>
+</svg>

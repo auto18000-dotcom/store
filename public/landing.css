@@ -1,0 +1,322 @@
+/* TourGuid landing page: rebuilt to the owner's reference image (2026-09-27), replacing the earlier square-corner/no-photo drafts. Rounded geometry
+   and full photography are a deliberate, direct instruction from the owner and supersede the Engineering Specifications' F04 (square corners) and the
+   earlier "no photos yet" note -- flagged in the handoff, not silently decided. Colours are the codebase's own: the logo's orange (#FF9800, --orange)
+   and the green theme's dark greens already used elsewhere in this preview (--green-900/800). Photography is Wikimedia Commons, credited in
+   assets/photos/CREDITS.tsv, self-hosted (z1's CSP allows img-src 'self' only, no external hosts).
+   Contrast checked on what is actually drawn: white on --green-900 (13.3:1), white on --orange (2.3:1 -- orange is a FILL behind dark text or a
+   decorative surface only, never small text), --ink on --orange (7.8:1), --muted on --paper (5.2:1), white over the hero photo (a dark gradient
+   scrim sits under the text, measured against its own darkest stop, not the raw photo). */
+@font-face { font-family: "Inter"; src: url("/fonts/inter-var.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+
+:root {
+  --paper: #FFFFFF;
+  --soft: #F6F5F1;
+  --ink: #17324A;
+  --muted: #5C7078;
+  --line: #E4E1D8;
+  /* White text on --orange must read at 4.5:1: this shade measures 4.87:1 (a lighter, more vivid orange like the logo's #FF9800 only reaches
+     2.76:1 and is used only as an icon/decoration colour below, never as a solid fill under white text). */
+  --orange: #B8540F;
+  --orange-hover: #9A450C;
+  --orange-active: #7E380A;
+  --orange-tint: #FDECE0;
+  --orange-vivid: #FF9800;
+  --green-900: #0F2E20;
+  --green-800: #16402C;
+  --green-700: #1D5138;
+  --focus: #005FCC;
+  /* The Travel Store's own corner rounding (owner, 2026-09-27), not the more rounded shapes an earlier pass used: 6px controls, 8px cards,
+     12px for the few large panel surfaces. True circles (avatars, icon badges) are a shape, not a "corner", and stay round. */
+  --radius-s: 6px;
+  --radius-m: 8px;
+  --radius-l: 12px;
+  --gutter: 16px;
+  --header-h: 68px;
+  --font: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+@media (min-width: 768px) { :root { --gutter: 28px; --header-h: 76px; } }
+@media (min-width: 1024px) { :root { --gutter: 40px; --header-h: 84px; } }
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 1rem/1.55 var(--font); }
+img, svg { max-width: 100%; }
+h1, h2, h3, p, ul, ol, figure, dl, dd { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+a { color: var(--green-700); text-decoration: none; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.on-dark :focus-visible, .on-photo :focus-visible { outline-color: #FFFFFF; }
+
+.container { width: 100%; max-width: 1280px; margin: 0 auto; padding-inline: var(--gutter); }
+.container.narrow { max-width: 760px; }
+.skip { position: absolute; left: 8px; top: -80px; z-index: 30; background: #FFFFFF; color: var(--ink); padding: 12px 16px; border: 2px solid var(--focus); border-radius: var(--radius-s); font-weight: 600; }
+.skip:focus { top: 8px; }
+.preview-strip { background: var(--green-900); color: #E8EFE9; font-size: .8125rem; line-height: 1.4; padding: 8px var(--gutter); text-align: center; }
+.preview-strip b { color: var(--orange-vivid); letter-spacing: .06em; text-transform: uppercase; }
+.preview-strip a { color: #FFFFFF; font-weight: 600; text-decoration: underline; }
+
+/* Buttons: rounded, per the reference. Primary is white text on the brand orange; outline sits on white or on a photo. */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; min-width: 44px; padding: 0 22px; border: 2px solid transparent; border-radius: var(--radius-s); font: 600 .9375rem/1.2 var(--font); text-align: center; cursor: pointer; white-space: nowrap; }
+.btn-sm { min-height: 44px; padding: 0 18px; font-size: .875rem; }
+.btn-primary { background: var(--orange); border-color: var(--orange); color: #FFFFFF; }
+.btn-primary:hover { background: var(--orange-hover); border-color: var(--orange-hover); }
+.btn-primary:active { background: var(--orange-active); border-color: var(--orange-active); }
+.btn-outline { background: transparent; border-color: currentColor; color: var(--ink); }
+.btn-outline:hover { background: rgba(23, 50, 74, .06); }
+.btn-outline.on-photo, .on-photo .btn-outline { color: #FFFFFF; }
+.btn-outline.on-photo:hover, .on-photo .btn-outline:hover { background: rgba(255, 255, 255, .16); }
+.btn-ghost { background: transparent; border-color: transparent; color: var(--ink); padding-inline: 12px; }
+.btn-ghost:hover { background: rgba(23, 50, 74, .06); }
+.btn-dark { background: var(--green-800); border-color: var(--green-800); color: #FFFFFF; }
+.btn-dark:hover { background: var(--green-700); border-color: var(--green-700); }
+.link-arrow { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--green-700); }
+.link-arrow:hover { color: var(--green-900); }
+.link-arrow svg { width: 16px; height: 16px; }
+
+/* Header */
+.site-header { background: #FFFFFF; border-bottom: 1px solid var(--line); }
+.header-in { display: flex; align-items: center; gap: 12px 20px; min-height: var(--header-h); }
+.brand { display: flex; align-items: center; gap: 10px; min-height: 44px; color: var(--ink); }
+.brand-mark { display: block; width: 34px; height: 34px; flex: none; }
+.brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+.brand-word { font-size: 1.25rem; font-weight: 800; letter-spacing: -.01em; }
+.brand-tag { font-size: .6875rem; font-weight: 600; letter-spacing: .03em; color: var(--muted); }
+.menu-btn { display: none; margin-left: auto; }
+.site-nav { display: flex; align-items: center; gap: 4px; margin-left: 28px; }
+.site-nav a:not(.btn) { display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border-radius: var(--radius-s); color: var(--ink); font-weight: 600; font-size: .9375rem; }
+.site-nav a:not(.btn):hover, .site-nav a:not(.btn):focus-visible { background: var(--soft); }
+.header-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 50%; color: var(--ink); }
+.icon-btn:hover { background: var(--soft); }
+.icon-btn svg { width: 20px; height: 20px; }
+/* Found by TG-Web-1A alongside the search-field bug: the full nav plus both header buttons don't fit until genuinely wide (900px overflowed by
+   106px). Same fix as the search panel -- the mobile header pattern (already proven down to 320px) now covers the whole 768-1023 range too,
+   and the row layout only turns on where it was actually measured to fit. */
+@media (max-width: 1023px) {
+  .menu-btn { display: inline-flex; }
+  .header-actions .btn { display: none; }
+  /* Without JavaScript there is no way to toggle the panel open, so the nav never gets the "hide it" class below -- it stays in flow and wraps
+     instead of overflowing. The links remain reachable either way, which is what actually matters without JS. */
+  .site-nav { flex-wrap: wrap; row-gap: 4px; }
+  html.js .site-nav { display: none; position: absolute; left: 0; right: 0; top: var(--header-h); background: #FFFFFF; border-bottom: 1px solid var(--line); flex-direction: column; align-items: stretch; margin: 0; padding: 8px var(--gutter) 16px; z-index: 25; }
+  html.js .site-nav.is-open { display: flex; }
+  html.js .site-nav a:not(.btn) { min-height: 48px; }
+  html.js .site-nav .nav-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--line); }
+  html.js .site-nav .nav-actions .btn { display: inline-flex; }
+}
+@media (min-width: 1024px) { .nav-actions { display: none; } }
+
+/* Hero: a real photo, a dark scrim under the text, rounded geometry throughout. */
+.hero { position: relative; color: #FFFFFF; overflow: hidden; }
+.hero-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 62%; }
+/* Dark enough across the text column (0-52%) that white text stays >=4.5:1 against ANY underlying pixel, including a bright cloud or whitewashed
+   wall -- measured against a worst-case near-white photo pixel, not assumed from the photo's average tone. Fades out toward the right so the
+   rest of the photo shows through uncovered -- there's no second column competing for that space any more. */
+.hero-scrim { position: absolute; inset: 0; background: linear-gradient(100deg, rgba(9, 28, 20, .92) 0%, rgba(9, 28, 20, .88) 52%, rgba(9, 28, 20, .5) 70%, rgba(9, 28, 20, .12) 88%, rgba(9, 28, 20, 0) 100%); }
+.hero-in { position: relative; padding-block: 48px 72px; }
+@media (min-width: 768px) { .hero-in { padding-block: 52px 84px; } }
+@media (min-width: 1024px) { .hero-in { padding-block: 56px 96px; } }
+/* Single column now that the phone mockup is gone. Left-aligned, not centered: the scrim above is darkest over the 0-52% band specifically to
+   sit under this copy, and centering it would drift part of it into the lighter, less-legible zone the gradient fades into. */
+.hero-grid { display: grid; align-items: center; justify-items: start; }
+.hero-copy { max-width: 640px; }
+h1 { font-size: 2.25rem; line-height: 1.08; font-weight: 800; letter-spacing: -.02em; text-wrap: balance; }
+@media (min-width: 768px) { h1 { font-size: 2.875rem; } }
+@media (min-width: 1024px) { h1 { font-size: 3.375rem; } }
+.hero-sub { margin-top: 14px; font-size: 1.1875rem; font-weight: 700; }
+.hero-lead { margin-top: 12px; max-width: 34em; color: rgba(255, 255, 255, .92); }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+.hero-caption { position: absolute; top: 22px; right: var(--gutter); z-index: 2; max-width: 160px; font-family: Georgia, "Times New Roman", serif; font-style: italic; font-size: 1.0625rem; line-height: 1.25; color: #FFFFFF; text-align: right; text-shadow: 0 1px 6px rgba(0, 0, 0, .35); }
+.hero-caption svg { display: block; margin: 4px 0 0 auto; width: 70px; height: 18px; color: var(--orange-vivid); }
+@media (max-width: 640px) { .hero-caption { display: none; } }
+
+/* The Trip Builder section's card: a drawn, honest representation of the real trip UI (not a photo, not invented functionality). */
+.device-card { background: #FFFFFF; color: var(--ink); border-radius: var(--radius-m); box-shadow: 0 24px 60px -20px rgba(0, 0, 0, .45); overflow: hidden; }
+.device-card .dm-head { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--line); font-size: .8125rem; }
+.device-card .dm-head b { font-size: .875rem; }
+.device-card .dm-head .dm-flag { width: 16px; height: 16px; color: var(--orange); flex: none; }
+.device-card .dm-body { display: grid; grid-template-columns: 74px 1fr; }
+.dm-rail { border-right: 1px solid var(--line); padding: 10px 0; font-size: .6875rem; color: var(--muted); }
+.dm-rail li { padding: 7px 10px; }
+.dm-rail li.cur { color: var(--ink); font-weight: 700; background: var(--soft); border-radius: var(--radius-s); margin: 0 4px; }
+.dm-main { padding: 12px 14px; }
+.dm-row { display: flex; align-items: baseline; justify-content: space-between; font-size: .8125rem; margin-bottom: 8px; }
+.dm-row b { font-size: .875rem; }
+.dm-timeline { display: grid; gap: 8px; font-size: .75rem; }
+.dm-timeline li { display: grid; grid-template-columns: 34px 1fr; gap: 8px; }
+.dm-timeline time { color: var(--muted); }
+.dm-photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+.dm-photos img { width: 100%; height: 44px; object-fit: cover; border-radius: 6px; }
+/* Three crops of one illustrative photo, without inline style (z1's CSP has no unsafe-inline for style-src). */
+.dm-photos img.op-a { object-position: 15% 60%; }
+.dm-photos img.op-b { object-position: 55% 75%; }
+.dm-photos img.op-c { object-position: 85% 40%; }
+
+/* Search panel: overlaps the hero photo's bottom edge, tabs select the Store category it targets. */
+.search-wrap { position: relative; margin-top: -56px; z-index: 2; }
+@media (min-width: 768px) { .search-wrap { margin-top: -64px; } }
+.search-panel { background: #FFFFFF; border-radius: var(--radius-l); box-shadow: 0 18px 44px -18px rgba(15, 46, 32, .28); padding: 22px; }
+.search-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; margin-bottom: 16px; }
+.search-head h2 { font-size: 1.375rem; font-weight: 800; }
+.search-head p { color: var(--muted); font-size: .9375rem; }
+/* Found by TG-Web-1A: a bare 1fr row starting at 720px let the destination field get squeezed to a few pixels between roughly 720-1000px (worst at
+   768, where the travelers dropdown became fully invisible). Fixed two ways: the row only starts where it was already proven to fit (1024px, the
+   stacked single-column layout below that is the one already verified at 768/390/320), and minmax floors stop it happening again at any width. */
+.search-fields { display: grid; grid-template-columns: 1fr; gap: 10px; }
+@media (min-width: 1024px) { .search-fields { grid-template-columns: minmax(200px, 1.6fr) minmax(130px, 1fr) minmax(130px, 1fr) minmax(120px, 1fr) auto; align-items: stretch; } }
+.field-box { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: var(--radius-s); padding: 0 14px; min-height: 50px; }
+.field-box svg { width: 18px; height: 18px; color: var(--muted); flex: none; }
+.field-box input, .field-box select { border: 0; outline: 0; background: transparent; font: inherit; color: var(--ink); width: 100%; min-width: 0; }
+.field-box input::placeholder { color: var(--muted); }
+.search-fields .btn { min-height: 50px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 16px; border-top: 1px solid var(--line); padding-top: 14px; }
+.tabs button { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 14px; border: 0; border-radius: var(--radius-s); background: transparent; color: var(--muted); font: 600 .875rem var(--font); cursor: pointer; }
+.tabs button svg { width: 16px; height: 16px; }
+.tabs button:hover { background: var(--soft); }
+.tabs button[aria-pressed="true"] { background: var(--orange-tint); color: var(--orange-active); }
+
+/* Visually hidden but readable by assistive tech: icon-only controls and field labels that repeat a visible icon's meaning in words. */
+.sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+/* Every icon sized by its container by default; a handful of contexts above already set a more specific size. */
+.btn svg { width: 18px; height: 18px; flex: none; }
+.device-card .dm-head .dm-flag svg { width: 14px; height: 14px; }
+
+/* Sections */
+.section { padding-block: 44px; }
+@media (min-width: 768px) { .section { padding-block: 56px; } }
+.section.soft { background: var(--soft); }
+.section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 20px; margin-bottom: 20px; }
+h2 { font-size: 1.5rem; font-weight: 800; letter-spacing: -.01em; }
+@media (min-width: 768px) { h2 { font-size: 1.75rem; } }
+.kicker { display: block; margin-bottom: 6px; font-size: .8125rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--green-700); }
+.section-lead { color: var(--muted); max-width: 46em; }
+.section-lead.mt { margin-top: 12px; }
+.mt-20 { margin-top: 20px; }
+.cross-sample { display: grid; grid-template-columns: 1fr auto 1fr; gap: 14px; align-items: center; }
+@media (max-width: 640px) { .cross-sample { grid-template-columns: 1fr; } .cross-sample .journey-arrow { transform: rotate(90deg); margin: -4px auto; } }
+.device-card.builder { max-width: 520px; }
+
+/* Destinations */
+.dest-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+@media (min-width: 640px) { .dest-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 960px) { .dest-grid { grid-template-columns: repeat(6, 1fr); } }
+.dest-card { position: relative; display: block; border-radius: var(--radius-m); overflow: hidden; aspect-ratio: 4 / 5; }
+.dest-card img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
+.dest-card:hover img { transform: scale(1.05); }
+.dest-card::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0, 0, 0, 0) 55%, rgba(9, 25, 18, .78) 100%); }
+.dest-card span { position: absolute; left: 12px; bottom: 10px; z-index: 1; color: #FFFFFF; font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .dest-card img { transition: none; } }
+
+/* Cross-sell: a sample activity card + a sample itinerary strip, clearly labelled sample data. */
+.cross-grid { display: grid; gap: 24px; align-items: center; }
+@media (min-width: 860px) { .cross-grid { grid-template-columns: 1fr 1fr; } }
+.sample-tag { display: inline-block; margin-bottom: 10px; font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.activity-card { background: #FFFFFF; border: 1px solid var(--line); border-radius: var(--radius-m); overflow: hidden; box-shadow: 0 14px 36px -22px rgba(15, 46, 32, .3); }
+.activity-card .ac-photo { position: relative; aspect-ratio: 16/10; }
+.activity-card .ac-photo img { width: 100%; height: 100%; object-fit: cover; }
+.activity-card .fav { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; background: rgba(255, 255, 255, .92); border-radius: 50%; color: var(--ink); }
+.activity-card .fav svg { width: 17px; height: 17px; }
+.activity-card .ac-body { padding: 14px 16px 16px; }
+.activity-card h3 { font-size: 1.0625rem; margin-bottom: 4px; }
+.activity-card .ac-meta { display: flex; align-items: center; gap: 6px; font-size: .875rem; color: var(--muted); margin-bottom: 2px; }
+.activity-card .ac-meta svg { width: 14px; height: 14px; }
+.activity-card .ac-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+.activity-card .ac-price { font-size: .8125rem; color: var(--muted); }
+.activity-card .ac-price b { display: block; font-size: 1rem; color: var(--ink); }
+.journey-card { background: #FFFFFF; border: 1px solid var(--line); border-radius: var(--radius-m); padding: 16px; }
+.journey-card h3 { font-size: 1rem; }
+.journey-card .jc-sub { font-size: .8125rem; color: var(--muted); margin-top: 2px; }
+.journey-list { display: grid; gap: 12px; margin-top: 12px; }
+.journey-list li { display: grid; grid-template-columns: 46px 1fr; gap: 10px; font-size: .875rem; }
+.journey-list time { color: var(--muted); font-weight: 600; }
+.journey-arrow { display: flex; justify-content: center; color: var(--orange); }
+.journey-arrow svg { width: 26px; height: 26px; }
+@media (max-width: 859px) { .journey-arrow { transform: rotate(90deg); margin: -4px 0; } }
+
+/* Trip Builder */
+.builder-grid { display: grid; gap: 28px; align-items: center; }
+@media (min-width: 900px) { .builder-grid { grid-template-columns: 1fr 1.1fr; } }
+.builder-note { margin-top: 14px; font-size: .875rem; color: var(--muted); }
+.modes { display: grid; gap: 12px; margin-top: 28px; }
+@media (min-width: 640px) { .modes { grid-template-columns: repeat(3, 1fr); } }
+/* Each mode is a real link into the Store (no sign-up to browse); styled like the block it was, with its own hover/focus feedback. */
+.mode { display: flex; gap: 12px; padding: 16px; background: var(--soft); border-radius: var(--radius-m); color: var(--ink); border: 1px solid transparent; }
+.mode:hover { background: #EFEEE8; border-color: var(--line); }
+.mode:hover h3 { color: var(--green-700); }
+.mode .icon { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: var(--orange-tint); color: var(--orange-active); }
+.mode .icon svg { width: 20px; height: 20px; }
+.mode h3 { font-size: .9375rem; margin-bottom: 2px; }
+.mode p { font-size: .8125rem; color: var(--muted); }
+
+/* Share */
+.share-grid { display: grid; gap: 16px; }
+@media (min-width: 720px) { .share-grid { grid-template-columns: repeat(3, 1fr); } }
+.share-card { background: #FFFFFF; border: 1px solid var(--line); border-radius: var(--radius-m); overflow: hidden; }
+.share-card .sc-photo { aspect-ratio: 4/3; }
+.share-card .sc-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.share-card .sc-body { padding: 14px 16px; }
+.share-card h3 { font-size: 1rem; margin-bottom: 2px; }
+.share-card .sc-meta { font-size: .8125rem; color: var(--muted); }
+.share-card .link-arrow { margin-top: 10px; font-size: .875rem; }
+
+/* Footer promo band + footer */
+.promo-band { background: linear-gradient(120deg, var(--green-900) 0%, var(--green-800) 100%); color: #FFFFFF; padding-block: 40px; }
+.promo-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px 32px; padding-bottom: 28px; border-bottom: 1px solid rgba(255, 255, 255, .18); margin-bottom: 24px; }
+.promo-top h2 { font-size: 1.375rem; }
+.promo-price { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 28px; }
+.promo-features { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+@media (min-width: 720px) { .promo-features { grid-template-columns: repeat(5, 1fr); } }
+.promo-features li { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; font-size: .8125rem; font-weight: 600; }
+.promo-features svg { width: 24px; height: 24px; color: var(--orange-vivid); }
+.site-footer { background: var(--green-900); color: rgba(255, 255, 255, .82); padding-block: 22px; }
+.footer-in { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+.footer-brand { display: flex; align-items: center; gap: 10px; color: #FFFFFF; }
+.footer-brand .brand-mark { width: 26px; height: 26px; }
+.footer-brand small { display: block; font-size: .75rem; color: rgba(255, 255, 255, .6); }
+.footer-nav { display: flex; flex-wrap: wrap; gap: 4px 18px; }
+.footer-nav a { color: rgba(255, 255, 255, .82); font-size: .875rem; }
+.footer-nav a:hover { color: #FFFFFF; text-decoration: underline; }
+/* A native disclosure, closed by default, so licence text never competes with the page for attention while still being one tap away. */
+.photo-credits { margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, .18); }
+.photo-credits summary { cursor: pointer; font-size: .8125rem; font-weight: 600; color: rgba(255, 255, 255, .7); }
+.photo-credits summary:hover { color: #FFFFFF; }
+.photo-credits p { margin: 10px 0; font-size: .75rem; color: rgba(255, 255, 255, .6); max-width: 60em; }
+.photo-credits ul { display: grid; gap: 4px; font-size: .75rem; color: rgba(255, 255, 255, .6); }
+.photo-credits a { color: rgba(255, 255, 255, .82); text-decoration: underline; }
+.photo-credits a:hover { color: #FFFFFF; }
+
+/* Consent banner */
+.consent-banner { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--green-900); color: #FFFFFF; box-shadow: 0 -8px 24px rgba(0, 0, 0, .18); }
+.consent-in { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding-block: 14px; }
+.consent-in p { max-width: 60em; min-width: 0; margin: 0; font-size: .9375rem; }
+.consent-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.consent-actions .btn { min-height: 44px; padding: 0 18px; }
+.consent-actions .btn-outline { color: #FFFFFF; }
+@media (max-width: 600px) { .consent-in { flex-direction: column; align-items: stretch; } .consent-actions .btn { flex: 1; } }
+
+/* Dev-only stub/state pages reuse a couple of plain utility rules */
+.stub { min-height: 60vh; padding-block: 56px; }
+.stub h1 { font-size: 2rem; margin-bottom: 16px; }
+.stub p + p { margin-top: 12px; }
+.stub dl { margin: 24px 0; display: grid; grid-template-columns: max-content 1fr; gap: 8px 20px; }
+.stub dt { font-weight: 600; }
+.stub-punch { margin-top: 16px; font-size: 1.375rem; font-weight: 800; }
+.stub-actions { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 12px; }
+.mt-32 { margin-top: 32px; }
+.mt-40 { margin-top: 40px; }
+.demo-dark-box { background: var(--green-900); padding: 20px; border-radius: var(--radius-l); }
+.state-label.on-dark { color: #FFFFFF; }
+.tabs.demo { border-top: 0; padding-top: 0; max-width: 420px; }
+.dest-grid.demo { max-width: 220px; }
+.consent-banner.demo { position: static; box-shadow: none; border-radius: var(--radius-l); }
+.state-row { display: flex; flex-wrap: wrap; gap: 20px; align-items: end; }
+.state-cell { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.state-label { font-size: .8125rem; font-weight: 600; color: var(--muted); }
+.demo-hover.btn-primary { background: var(--orange-hover); border-color: var(--orange-hover); }
+.demo-active.btn-primary { background: var(--orange-active); border-color: var(--orange-active); }
+.demo-hover.btn-outline { background: rgba(23, 50, 74, .06); }
+.demo-active.btn-outline { background: rgba(23, 50, 74, .12); }
+.demo-focus { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; scroll-behavior: auto !important; } }
+@media (forced-colors: active) { .btn, .dest-card, .activity-card, .journey-card, .share-card, .search-panel { border: 1px solid CanvasText; } }
