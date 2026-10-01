@@ -18,10 +18,14 @@
   "observability": { "enabled": true },
 
   // One anonymous event per /api/store/* request; see src/index.js for exactly what is (and is not) kept.
-  // Read back by Control through Cloudflare's SQL API.
-  // SWITCHED OFF until Analytics Engine is enabled once in the dashboard
-  // (Workers & Pages -> Analytics Engine); a deploy with the binding fails with code 10089 until then.
-  // src/index.js skips counting when the binding is absent, so nothing else changes. To turn on:
+  // Read back by Control through Cloudflare's SQL API, and by the growth work's web-stats function
+  // (dataset name confirmed to TG-Mobile-1, 2026-09-30: tourguid_web_events).
+  // Owner's go, 2026-10-01: tried uncommenting this. Confirmed STILL blocked -- deploy failed whole,
+  // atomically, with code 10089 ("You need to enable Analytics Engine"), taking the sitemap/robots/SEO/
+  // handoff-routing/copy changes down with it since Cloudflare deploys the Worker version and its assets
+  // as one transaction. Re-commented so the other three Phase 0 tasks could actually ship. Uncomment
+  // again, alone, once Analytics Engine is confirmed enabled in the dashboard -- this exact line is the
+  // whole rollback either way:
   // "analytics_engine_datasets": [{ "binding": "STATS", "dataset": "tourguid_web_events" }],
 
   "assets": {
