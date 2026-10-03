@@ -479,6 +479,56 @@ function activityResults(payload) {
   });
 }
 
+/**
+ * travel-lookup's `tiqets_search` answers {products, pagination, searchedBy,
+ * nearbyMiles|query} — Tiqets's own product objects, one flat list, no nearby
+ * grouping (it searches coordinates, so there is nothing to group).
+ *
+ * THREE THINGS THAT ARE EASY TO GET WRONG HERE.
+ *
+ * `ratings.average` is out of FIVE, the same scale as Viator's and Google's,
+ * so it goes straight into `rating`. It is NOT LiteAPI's out-of-ten guest
+ * score, which liteapiStays deliberately keeps in its own field and leaves
+ * `rating` null for. Putting a /10 and a /5 in one field is the bug that
+ * separation exists to prevent.
+ *
+ * `price` becomes `fromPrice`, because that is the field asCard reads. It is a
+ * real retail per-ticket price in the requested currency, the same unit as
+ * Viator's fromPrice — not a basket, not a stay total.
+ *
+ * `product_url` already carries our affiliate ids. Do not rewrite it, strip
+ * its query, or append a partner id: unlike GetYourGuide nothing needs adding,
+ * and editing it loses the commission on that tap.
+ */
+function tiqetsResults(payload) {
+  const products = (payload && Array.isArray(payload.products) && payload.products) || [];
+  return products.filter(Boolean).map((product) => {
+    const images = Array.isArray(product.images) ? product.images : [];
+    const first = images[0] || {};
+    const ratings = product.ratings || {};
+    const venue = product.venue || {};
+    // Tiqets reports distance in KILOMETRES. Passing it through as miles would
+    // understate every distance by about 38 percent.
+    const km = typeof product.distance === "number" ? product.distance : null;
+    return {
+      id: product.id ?? null,
+      title: product.title ?? null,
+      // An attraction's venue IS where the traveller goes, so it fills the line
+      // a tour would use for its summary.
+      summary: [venue.name, venue.address].filter(Boolean).join(" · ") || null,
+      photo: first.medium || first.large || first.extra_large || first.small || null,
+      rating: ratings.average ?? null,
+      reviewCount: ratings.total ?? null,
+      fromPrice: typeof product.price === "number" ? product.price : null,
+      currency: product.currency ?? null,
+      url: product.product_url ?? null,
+      city: product.city_name ?? null,
+      country: product.country_name ?? null,
+      distanceMiles: km !== null ? Math.round((km / 1.60934) * 10) / 10 : null,
+    };
+  });
+}
+
 const textOf = (value) => (value && typeof value === "object" ? value.text : value) || null;
 
 /**
@@ -679,7 +729,18 @@ const FEED_PLAN = {
   // nearbyCount does nothing without nearbyMiles: the radius is what turns the
   // neighbouring-destination search on at all.
   activities: [["viator_search", { count: 12, nearbyMiles: 30, nearbyCount: 6 }, "Viator", true]],
-  places: [["google_places_search", { category: "attraction", ...GOOGLE_CARD }, "Google Places", false]],
+  // The sights row prefers TICKETS to the sights over listings of them. Tiqets
+  // sells admission, so its cards carry a real per-ticket price and a tracked
+  // link; Google's answer is a place with an address and no way to act on it.
+  // That is the fallback relationship this array means, and it is honest in
+  // both directions — a city Tiqets has no tickets for still shows its sights.
+  //
+  // `places()` below must keep the SAME order. If one prefers Tiqets and the
+  // other Google, the carousel and the full page disagree about the same city.
+  places: [
+    ["tiqets_search", { count: 12, nearbyMiles: 19 }, "Tiqets", true],
+    ["google_places_search", { category: "attraction", ...GOOGLE_CARD }, "Google Places", false],
+  ],
   food: [["google_places_search", { category: "eat", ...GOOGLE_CARD }, "Google Places", false]],
   hotels: [
     ["duffel_stay_search", {}, "Duffel", true],
@@ -1204,14 +1265,56 @@ async function activities(env, request, params) {
 async function places(env, request, params) {
   const where = contextOf(params);
   if (!where.city) return noDestination();
+  const category = one(params, "category", "attraction");
+
+  // Tickets to the sights before listings of them — the same preference, in the
+  // same order, as FEED_PLAN.places above.
+  //
+  // ONLY FOR ATTRACTIONS. This route also serves the food row (`category=eat`)
+  // and stays (`stay`). Tiqets sells admission to museums and monuments and
+  // nothing else, so asking it for restaurants returns attractions that would
+  // then be presented as places to eat. The category guard is what stops that,
+  // and it is not an optimisation.
+  if (category === "attraction") {
+    const { payload, error } = await askStoreSearch(
+      env,
+      "tiqets_search",
+      { ...where, count: 12, nearbyMiles: 19 },
+      request
+    );
+    // A refusal is NOT fatal here — it falls through to Google, exactly as the
+    // feed's fallback does. Only a non-empty answer wins, so a city Tiqets has
+    // no tickets for still shows its sights.
+    if (!error) {
+      const items = tiqetsResults(payload);
+      if (items.length) {
+        return json({
+          items,
+          source: "Tiqets",
+          priced: true,
+          searchedBy: payload.searchedBy ?? null,
+          nearbyMiles: payload.nearbyMiles ?? null,
+          captchaChecked: payload.captchaChecked ?? null,
+        });
+      }
+    }
+  }
+
   const { payload, error } = await askStoreSearch(
     env,
     "google_places_search",
-    { ...where, category: one(params, "category", "attraction"), pageSize: 12, ...GOOGLE_CARD },
+    { ...where, category, pageSize: 12, ...GOOGLE_CARD },
     request
   );
   if (error) return refuse(error);
-  return json({ items: placeResults(payload), captchaChecked: payload.captchaChecked ?? null });
+  return json({
+    items: placeResults(payload),
+    source: "Google Places",
+    // A Google place is a real place with no bookable price. The page must not
+    // print a price field that isn't there, nor imply one could be paid.
+    priced: false,
+    captchaChecked: payload.captchaChecked ?? null,
+  });
 }
 
 /**
@@ -1311,6 +1414,7 @@ async function buildFeed(env, request, where, destination, wanted, cache, key) {
         let rows;
         if (provider === "viator_search") rows = activityResults(payload);
         else if (provider === "duffel_stay_search") rows = hotelResults(payload);
+        else if (provider === "tiqets_search") rows = tiqetsResults(payload);
         else rows = placeResults(payload);
         if (!rows.length) {
           group.reason = "no_results";
