@@ -3,3 +3,16 @@
 # in other parts of the TourGuid estate (see TourGuid-App's own .gitattributes for the version of this
 # problem that actually bit something). Cheap to apply broadly rather than re-discover per file later.
 public/** text eol=lf
+
+# ...but never for what is not text. `text` on a PNG makes git rewrite the CRLF bytes inside it (its own signature
+# has one) when the file is added, so an innocent `git add` would commit a corrupted image. Later lines win.
+public/**/*.png binary
+public/**/*.jpg binary
+public/**/*.jpeg binary
+public/**/*.webp binary
+public/**/*.gif binary
+public/**/*.ico binary
+public/**/*.woff binary
+public/**/*.woff2 binary
+public/**/*.mp4 binary
+public/**/*.pdf binary
