@@ -27,25 +27,25 @@
   // though every handler here reads the destination correctly.
   const categoryHref=page=>{const url=new URL(`./${page.replace(/\.html$/,'')}`,location.href);for(const key of forwardKeys)if(context.has(key))url.searchParams.set(key,context.get(key));return `${url.pathname.split('/').pop()}${url.search?url.search:''}`};
   const categories={
-    hotels:{page:'hotels.html',name:'Hotels',description:'Browse stays, compare neighborhoods, and open hotel details.',themes:[
+    hotels:{page:'hotels.html',name:'Hotels',type:'Hotel',description:'Browse stays, compare neighborhoods, and open hotel details.',themes:[
       ['Waterfront stays','Find a base close to the coast and open spaces.','visual-water'],
       ['Central city stays','Explore hotels near major sights and transit.','visual-city'],
       ['Family stays','Compare location and room needs for a shared trip.','visual-hotel'],
       ['Design and boutique stays','Browse smaller properties with a distinct setting.','visual-city']
     ]},
-    activities:{page:'activities.html',name:'Experiences',description:'Explore activities by interest, timing, and meeting point.',themes:[
+    activities:{page:'activities.html',name:'Experiences',type:'Activity',description:'Explore activities by interest, timing, and meeting point.',themes:[
       ['Food and culture','Explore guided tastings and local traditions.','visual-food'],
       ['Art and museums','Make space for galleries, collections, and exhibits.','visual-city'],
       ['Walking experiences','Find a route that fits the pace of the day.','visual-activity'],
       ['Outdoor experiences','Browse activities shaped by the destination.','visual-water']
     ]},
-    food:{page:'food.html',name:'Food experiences',description:'Explore dining, tastings, and restaurant planning.',themes:[
+    food:{page:'food.html',name:'Food experiences',type:'Food experience',description:'Explore dining, tastings, and restaurant planning.',themes:[
       ['Markets and tastings','Explore food markets and tasting experiences.','visual-food'],
       ['Dinner near your stay','Plan a meal around your hotel and daily route.','visual-city'],
       ['Local food walks','Browse food-focused neighborhood experiences.','visual-activity'],
       ['Restaurant discovery','Find dining ideas to check with the provider.','visual-food']
     ]},
-    places:{page:'places.html',name:'Places',description:'Browse sights and neighborhoods to shape each Journey day.',themes:[
+    places:{page:'places.html',name:'Places',type:'Place',description:'Browse sights and neighborhoods to shape each Journey day.',themes:[
       ['Historic neighborhoods','Explore streets, squares, and city stories.','visual-city'],
       ['Parks and viewpoints','Build room for open space and city views.','visual-water'],
       ['Arts and architecture','Collect landmarks for a day of discovery.','visual-place'],
@@ -87,10 +87,13 @@
   const buildProductCard=(config,item)=>{
     const card=document.createElement('a');
     card.className='carousel-theme-card carousel-product-card';
-    card.href=item.url||categoryHref(config.page);
-    card.target='_blank';card.rel='noopener';
+    // A supplier's address is never put on the page as it arrived: TourGuidSupplier sends it through /api/store/go (and,
+    // for a bookable item with the sheet on, through the handoff sheet first). With no safe address the card keeps
+    // pointing at its category page, as before. A hotel never takes this path: it opens its own page, below.
+    const hotelPage=item.category==='hotels'&&item.id;
+    if(!hotelPage&&!window.TourGuidSupplier?.bind(card,item.url,{bookable:!!item.bookable,title:item.title,type:config.type})){card.href=categoryHref(config.page);card.target='_blank';card.rel='noopener'}
     // A hotel opens its own page here (photos, reviews, map, contact and, with dates, its price), not Google Maps. Extensionless: a .html redirect drops the query.
-    if(item.category==='hotels'&&item.id){
+    if(hotelPage){
       const q=new URLSearchParams({placeId:item.id});
       if(destination)q.set('destination',destination);
       if(destinationCtx){for(const key of ['region','country','countryCode','lat','lon'])if(destinationCtx[key]!=null&&destinationCtx[key]!=='')q.set(key,destinationCtx[key])}

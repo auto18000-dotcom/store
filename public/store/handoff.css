@@ -1,0 +1,40 @@
+/* The provider handoff sheet ("You are leaving TourGuid"), shown when plan.handoff_sheet is on.
+   Visuals by TG-Web-1A (2026-10-02, Revised Plan); behaviour and copy live in journey-ui.js, which this file never touches.
+   Class names here are the contract with journey-ui.js: rename them in both places or neither.
+   Store design rules: Inter, teal #075d61, 6px controls, light theme. Nothing here uses colour alone to carry a meaning.
+   The "back on the planning tab" notice and the Bookings Needed panel from the same design are NOT here: the site has no
+   trips to return to and no Bookings Needed yet (Revised Plan, held), and nothing is shipped for a feature that is not built.
+   They stay on branch web1a-handoff-visuals (05ac3e3) until those features exist. */
+
+/* ---------------------------------------------------------------- the handoff dialog */
+.journey-dialog-inner.handoff { padding: 28px 28px 24px; }
+.journey-dialog-inner.handoff .kicker { display: flex; align-items: center; gap: 10px; margin: 0 0 2px; color: #075d61; }
+.journey-dialog-inner.handoff .kicker::before { content: ""; flex: none; width: 28px; height: 4px; background: linear-gradient(90deg, #ffae19 0 33.3%, #f33b36 33.3% 66.6%, #4bc653 66.6%); }
+.journey-dialog-inner.handoff h2 { font: 750 1.65rem/1.15 Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; letter-spacing: -.025em; margin: 6px 0 14px; }
+/* The item being taken to the provider: what, in one line, so the person can see it is the thing they chose. */
+.journey-dialog-inner.handoff #handoff-selected { margin: 0 0 14px; padding: 10px 12px; background: #f4faf7; border: 1px solid #d9e2de; border-radius: 6px; color: #123642; font-weight: 650; }
+.journey-dialog-inner.handoff #handoff-selected:empty { display: none; }
+.journey-dialog-inner.handoff p { line-height: 1.5; }
+/* "Not yet verified": the same provisional language as the hotel test prices: amber, dashed, in words. Never styled as success. */
+.journey-dialog-inner.handoff .handoff-notice { margin: 14px 0; padding: 11px 13px; border: 1.5px dashed #d97706; border-radius: 6px; background: repeating-linear-gradient(135deg, #fffaf0 0 9px, #fdf1cf 9px 10px); color: #78350f; font-size: .95rem; font-weight: 700; line-height: 1.4; }
+.journey-dialog-inner.handoff .mini { font-size: .84rem; line-height: 1.45; color: #4f666a; margin: 0 0 4px; }
+/* The acknowledgement is a real, large target and it changes when it is given, so the state is seen as well as read. */
+.journey-dialog-inner.handoff .handoff-ack { display: flex; gap: 12px; align-items: center; margin: 14px 0 4px; padding: 12px 14px; min-height: 48px; border: 1px solid #b8cbc3; border-radius: 6px; background: #fff; font-size: .95rem; font-weight: 650; line-height: 1.35; color: #123642; cursor: pointer; }
+.journey-dialog-inner.handoff .handoff-ack input { flex: none; width: 22px; height: 22px; margin: 0; padding: 0; accent-color: #075d61; }
+.journey-dialog-inner.handoff .handoff-ack:has(input:checked) { background: #e7f5ee; border-color: #138f74; }
+.journey-dialog-inner.handoff .handoff-ack:focus-within { outline: 3px solid #ffae19; outline-offset: 2px; }
+/* The buttons: Continue first and filled, the two ways to stay in TourGuid the same size as each other, none of them small. */
+.journey-dialog-inner.handoff .journey-dialog-actions { gap: 10px; margin-top: 18px; }
+.journey-dialog-inner.handoff .journey-dialog-actions button { min-height: 46px; border-radius: 6px; font-size: .95rem; }
+.journey-dialog-inner.handoff .journey-dialog-actions .primary { flex: 1 1 100%; min-height: 50px; font-size: 1rem; }
+.journey-dialog-inner.handoff .journey-dialog-actions .secondary { flex: 1 1 0; border: 1px solid #89bdb2; }
+.journey-dialog-inner.handoff .journey-dialog-actions .plain { flex: 1 1 0; }
+.journey-dialog-inner.handoff button:disabled { opacity: .5; cursor: not-allowed; background-image: repeating-linear-gradient(135deg, transparent 0 8px, rgba(255, 255, 255, .18) 8px 9px); }
+/* The "not available yet" variant of the same dialog (no Continue button in it): neutral, with no stripe, so it does not look like a way forward. */
+.journey-dialog-inner.handoff:not(:has(#continue-provider)) .kicker { color: #5c7278; }
+.journey-dialog-inner.handoff:not(:has(#continue-provider)) .kicker::before { background: #c9d6d2; }
+@media (max-width: 520px) {
+  .journey-dialog-inner.handoff { padding: 22px 18px 18px; }
+  .journey-dialog-inner.handoff h2 { font-size: 1.4rem; }
+  .journey-dialog-inner.handoff .journey-dialog-actions .secondary, .journey-dialog-inner.handoff .journey-dialog-actions .plain { flex: 1 1 100%; }
+}

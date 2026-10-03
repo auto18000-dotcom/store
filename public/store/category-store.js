@@ -87,7 +87,9 @@
     const facts=document.createElement('p');facts.className='live-facts';facts.textContent=meta.join(' · ');
     const actions=document.createElement('div');actions.className='collection-actions';
     if(category==='hotels'&&item.id){const q=new URLSearchParams({placeId:item.id,destination,name:item.title||''});for(const key of ['region','country','countryCode','lat','lon','from','to','adults'])if(params.get(key))q.set(key,params.get(key));const link=document.createElement('a');link.href=`hotel?${q}`;link.textContent='View hotel details →';actions.append(link)}
-    else if(item.url){const link=document.createElement('a');link.href=item.url;link.target='_blank';link.rel='noopener';link.textContent=item.bookable?`Book on ${item.source} ↗`:'View details ↗';actions.append(link)}
+    // A supplier's address is never put on the page as it arrived: TourGuidSupplier sends it through /api/store/go (and,
+    // for a bookable item with the sheet on, through the handoff sheet first). With no safe address there is no link.
+    else if(item.url){const link=document.createElement('a');link.textContent=item.bookable?`Book on ${item.source} ↗`:'View details ↗';if(window.TourGuidSupplier?.bind(link,item.url,{bookable:!!item.bookable,title:item.title,type:typeLabel}))actions.append(link)}
     body.append(source,name,summary);if(meta.length)body.append(facts);body.append(actions);card.append(art,body);
     window.TourGuidJourney?.addButton(actions,{id:`${category}-live-${item.id||index}`,title:item.title,type:typeLabel,kind:'live',location:destination,source:item.source||provider.supplier});
     return card;
