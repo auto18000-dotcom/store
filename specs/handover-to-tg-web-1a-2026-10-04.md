@@ -1,9 +1,25 @@
 # Handover: TG-Web-1 to TG-Web-1A, then redirected to TG-Mobile-1A, 4 October 2026
 
-**LATEST (4 Oct, owner, in TG-Web-1's chat): "get all remaining work to TG Mobile 1A".** This list now belongs to
-TG-Mobile-1A, the coordinator. Wherever this file says "you", read TG-Mobile-1A. TG-Web-1A keeps only what it is
-already doing in its own chat with the owner (its Plan B and z1 work, and guiding the Search Console export if the
-owner wants that to stay with it); TG-Mobile-1A and the owner decide the rest. The work happens in TWO repos:
+**LATEST (4 Oct, owner, in TG-Web-1's chat): "get all remaining work to TG Mobile 1A that were not otherwise handed over
+to TG web1a".** So the list below is SPLIT. The owner's words do not name the items, so TG-Web-1 drew the line as follows
+(if the owner meant otherwise they will say so, and this table is the only thing to change):
+
+| Item | Now with |
+| --- | --- |
+| W1 baggage-fee notice deploy | TG-Mobile-1A |
+| W2 Cloudflare Analytics Engine | TG-Mobile-1A |
+| W3 Search Console BigQuery export | TG-Web-1A (the owner's explicit handover; it is already guiding the owner) |
+| W4 registry-backed sheet: watch, production flag switch | TG-Mobile-1A (it coordinates the Revised Plan and works with TG-Mobile-1 on the migrations) |
+| W5 Tiqets sequence | TG-Mobile-1A (it wrote the Tiqets Worker commit) |
+| W6 SEO quick wins, page engine, share pages, measurement | TG-Mobile-1A; TG-Web-1A designs the page visuals when asked |
+| W7 KAYAK follow-up | TG-Mobile-1A |
+| W8 crawler check, owner's half | TG-Mobile-1A |
+| W9 missing Pexels key | TG-Mobile-1A |
+| W10 Plan B and z1 builds and deploys | TG-Web-1A (its own commits) |
+| W11 holds; Explore prototype and spec section 7 exports | the holds apply to both; Explore and the section 7 exports stay with TG-Web-1A (owner approved 2 Oct) |
+| W12 trackers | TG-Mobile-1A for the Revised Plan and Morning Package docs; each session for what it owns |
+
+Wherever the text below says "you", read the session named in that table. The work happens in TWO repos:
 `C:\Claude\TourGuid-Web` (tourguid.net, this repo) and `C:\Claude\TourGuid-Z1` (z1). If your session cannot read or write
 them, ask the owner to add the folders.
 
