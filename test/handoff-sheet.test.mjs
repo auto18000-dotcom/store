@@ -109,9 +109,9 @@ test('a verified provider shows labelled facts, never sentences of ours and neve
     'Support phone': '+1 555 0100',
     'Support email': 'help@viator.example',
     'Support page': 'www.viator.com/support',
-    Address: '1 Main St, Anytown',
+    'Support address': '1 Main St, Anytown',
   });
-  assert.deepEqual(Object.keys(facts(dialog)), ['Payment party', 'Terms', 'Cancellation & refunds', 'Support phone', 'Support email', 'Support page', 'Address']);
+  assert.deepEqual(Object.keys(facts(dialog)), ['Payment party', 'Terms', 'Cancellation & refunds', 'Support phone', 'Support email', 'Support page', 'Support address']);
   assert.ok(!/verified/i.test(lines.join(' ')), 'no badge and no warning: the facts are the signal');
   const links = dialog.querySelector('dl').all().filter((node) => node.tag === 'a');
   assert.equal(links[0].href, 'https://www.viator.com/terms');

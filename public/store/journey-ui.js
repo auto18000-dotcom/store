@@ -37,7 +37,8 @@
     if(support.phone&&/^[+0-9][0-9 ()./-]{5,39}$/.test(support.phone)){const a=makeNode('a','',support.phone);a.href='tel:'+support.phone.replace(/[^0-9+]/g,'');row('Support phone',a)}
     if(support.email&&/^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/.test(support.email)){const a=makeNode('a','',support.email);a.href='mailto:'+support.email;row('Support email',a)}
     const supportPage=support.url&&httpsLink(support.url);if(supportPage)row('Support page',supportPage);
-    if(support.address)row('Address',support.address);
+    // "Support address", not "Address" or "Registered address": alone it reads as somewhere to go, and the profile does not say it is registered.
+    if(support.address)row('Support address',support.address);
     return list;
   };
   const sheetHandoff=(raw,url,item,record)=>{
