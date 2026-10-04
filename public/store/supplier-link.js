@@ -45,6 +45,45 @@
     return parsed ? `${GO}?url=${encodeURIComponent(parsed.text)}&page=${encodeURIComponent(location.pathname)}` : null;
   };
 
+  // The provider registry, through the Worker (/api/store/providers). Asked only when a sheet flag is on, once per page.
+  // Any failure, and a tier without the registry, is an empty answer: the sheet then says only where the traveller goes.
+  let registry = null;
+  const warm = () => {
+    if (!registry) {
+      registry = fetch('/api/store/providers', { headers: { Accept: 'application/json' } })
+        .then((response) => (response.ok ? response.json() : null))
+        .then((body) => (body && Array.isArray(body.providers) ? body.providers : []))
+        .catch(() => []);
+    }
+    return registry;
+  };
+
+  // The registry row for an address: the row with the longest allowed domain that the host equals or is a subdomain of
+  // (the rule the registry's own allowed_hosts uses), or null. Waits a short while for the registry, never for long.
+  const record = async (raw) => {
+    const parsed = parse(raw);
+    if (!parsed) return null;
+    let timer;
+    const rows = await Promise.race([
+      warm(),
+      new Promise((resolve) => {
+        timer = setTimeout(() => resolve([]), 2500);
+      }),
+    ]);
+    clearTimeout(timer);
+    let best = null;
+    let bestLength = 0;
+    for (const row of rows) {
+      for (const domain of Array.isArray(row.hosts) ? row.hosts : []) {
+        if (domain.length > bestLength && hostIs(parsed.url.hostname, domain)) {
+          best = row;
+          bestLength = domain.length;
+        }
+      }
+    }
+    return best;
+  };
+
   const flag = (key) => !!(window.TourGuidFlags && window.TourGuidFlags.get(key));
 
   // Make `el` (an <a> the caller created) the link for `raw`. item: { bookable, title, type }. Returns false, leaving
@@ -53,6 +92,7 @@
     const parsed = parse(raw);
     if (!parsed) return false;
     if (item.bookable && (flag('plan.handoff_sheet') || flag('plan.require_verified_provider'))) {
+      warm();
       // The sheet comes first, so the control carries no address that could be opened without it (new tab, copy link).
       el.removeAttribute('href');
       el.removeAttribute('target');
@@ -77,5 +117,5 @@
     return true;
   };
 
-  window.TourGuidSupplier = Object.freeze({ goHref, name, bind });
+  window.TourGuidSupplier = Object.freeze({ goHref, name, bind, record, warm });
 })();

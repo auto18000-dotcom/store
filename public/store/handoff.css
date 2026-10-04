@@ -33,8 +33,16 @@
 /* The "not available yet" variant of the same dialog (no Continue button in it): neutral, with no stripe, so it does not look like a way forward. */
 .journey-dialog-inner.handoff:not(:has(#continue-provider)) .kicker { color: #5c7278; }
 .journey-dialog-inner.handoff:not(:has(#continue-provider)) .kicker::before { background: #c9d6d2; }
+/* The facts of a verified provider, as labelled fields (TG-Mobile-1A and TG-Web-1 agreed: labels, not sentences, no badge).
+   Added by TG-Web-1 for the first version; TG-Web-1A owns the final look. Long addresses wrap rather than push the dialog wide. */
+.journey-dialog-inner.handoff .handoff-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 14px; margin: 14px 0 4px; padding: 12px 14px; border: 1px solid #d9e2de; border-radius: 6px; background: #fff; color: #123642; font-size: .92rem; line-height: 1.4; }
+.journey-dialog-inner.handoff .handoff-facts dt { font-weight: 750; color: #4f666a; }
+.journey-dialog-inner.handoff .handoff-facts dd { margin: 0; overflow-wrap: anywhere; }
+.journey-dialog-inner.handoff .handoff-facts a { color: #075d61; }
 @media (max-width: 520px) {
   .journey-dialog-inner.handoff { padding: 22px 18px 18px; }
   .journey-dialog-inner.handoff h2 { font-size: 1.4rem; }
   .journey-dialog-inner.handoff .journey-dialog-actions .secondary, .journey-dialog-inner.handoff .journey-dialog-actions .plain { flex: 1 1 100%; }
+  .journey-dialog-inner.handoff .handoff-facts { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .journey-dialog-inner.handoff .handoff-facts dd { margin-bottom: 8px; }
 }

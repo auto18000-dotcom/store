@@ -7,7 +7,8 @@ import { FakeEl, load } from './helpers.mjs';
 const VIATOR = 'https://www.viator.com/tours/Paris/Seine-Cruise/d479-1P1?pid=P00012345&mcid=42383&medium=link';
 const PAGE = { pathname: '/store/activities', search: '?destination=Paris&lat=48.8566&lon=2.3522&from=2026-11-01' };
 
-const supplier = (options = {}) => load('supplier-link.js', { location: PAGE, ...options }).TourGuidSupplier;
+// A browser always has fetch; with a sheet flag on, binding a card warms the registry, which asks for it.
+const supplier = (options = {}) => load('supplier-link.js', { location: PAGE, fetch: async () => ({ ok: false }), ...options }).TourGuidSupplier;
 const go = (href) => new URL(href, 'https://tourguid.net');
 
 test('goHref carries the URL exactly as given and only the path of the page', () => {
