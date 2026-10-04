@@ -53,6 +53,18 @@
     });
   }
 
+  // The Search button. The form is a plain GET form, and the site's Content-Security-Policy says form-action 'none', so the browser quietly refused to submit it: from 27 Sep to 4 Oct a
+  // visitor typed a destination, pressed Search and nothing happened (found 2026-10-04 by reading the violation the browser reports). Going to the page from script is not a form
+  // submission, so it works under the same policy, which stays as strict as it was. Every field that has a name goes with it, as the form would have sent it.
+  if (search) {
+    search.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const target = new URL(search.getAttribute('action') || '/store/hotels.html', window.location.href);
+      target.search = new URLSearchParams(new FormData(search)).toString();
+      window.location.assign(target.href);
+    });
+  }
+
   // ---------------------------------------------------------------- consent (Accept / Reject nonessential / Manage)
   const banner = document.getElementById('consent-banner');
   const manageLink = document.getElementById('consent-manage');
