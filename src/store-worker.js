@@ -1531,6 +1531,105 @@ function safePath(value) {
   }
 }
 
+/* ── the provider registry, for the handoff sheet ────────────────────────── */
+
+const PROVIDERS_EDGE_TTL = 300;
+const PROVIDERS_BROWSER_TTL = 60;
+
+/** A string that fits, or null. Too long is refused whole: a clipped payment party is a different claim. */
+function plainText(value, limit) {
+  const text = typeof value === "string" ? value.trim() : "";
+  return text && text.length <= limit ? text : null;
+}
+
+/** An https address with no credentials, exactly as given, or null. */
+function httpsAddress(value) {
+  const text = plainText(value, 500);
+  if (!text || text.includes("\\")) return null;
+  try {
+    const parsed = new URL(text);
+    return parsed.protocol === "https:" && !parsed.username && !parsed.password ? text : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * One registry row as the page may see it: display and routing fields always, and the facts the sheet prints as a
+ * claim (payment party, terms, cancellation, support) ONLY from a row whose profile is verified. The database will not
+ * store a verified profile without a payment-party label, terms and cancellation addresses, so a row that says
+ * "verified" without them is not trusted as verified. Anything that is not a short plain string or an https address is
+ * dropped rather than repaired.
+ */
+function providerRow(row) {
+  if (!row || typeof row !== "object") return null;
+  const key = plainText(row.provider_key, 40);
+  const name = plainText(row.display_name, 80);
+  if (!key || !/^[a-z0-9_-]+$/.test(key) || !name) return null;
+  const hosts = (Array.isArray(row.allowed_hosts) ? row.allowed_hosts : [])
+    .map((host) => (plainText(host, 253) || "").toLowerCase())
+    .filter((host) => /^[a-z0-9]([a-z0-9.-]*[a-z0-9])?$/.test(host))
+    .slice(0, 20);
+  const out = { key, name, handoffEnabled: row.handoff_enabled === true, hosts, verified: false };
+  if (row.verification_state !== "verified") return out;
+
+  const paymentParty = plainText(row.payment_party_label, 200);
+  const termsUrl = httpsAddress(row.terms_url);
+  const cancellationUrl = httpsAddress(row.cancellation_url);
+  if (!paymentParty || !termsUrl || !cancellationUrl) return out;
+
+  out.verified = true;
+  out.paymentParty = paymentParty;
+  out.termsUrl = termsUrl;
+  out.cancellationUrl = cancellationUrl;
+  const fundsRecipient = plainText(row.funds_recipient, 200);
+  const termsVersion = plainText(row.terms_version, 40);
+  const email = plainText(row.support_email, 120);
+  const phone = plainText(row.support_phone, 40);
+  const address = plainText(row.support_address, 300);
+  const supportUrl = httpsAddress(row.support_url);
+  if (fundsRecipient) out.fundsRecipient = fundsRecipient;
+  if (termsVersion) out.termsVersion = termsVersion;
+  const support = {};
+  if (supportUrl) support.url = supportUrl;
+  // No "?", "&" or "=": a mailto address with a query could add a cc, a bcc or a body of someone else's choosing.
+  if (email && /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/.test(email)) support.email = email;
+  if (phone && /^[+0-9][0-9 ()./-]{5,39}$/.test(phone)) support.phone = phone;
+  if (address) support.address = address;
+  if (Object.keys(support).length) out.support = support;
+  return out;
+}
+
+/**
+ * Who the traveller is about to be handed to, from the provider registry (store-search's `transaction_providers`,
+ * migration 391). Asked by the handoff sheet only when a sheet flag is on, so with the flags off nothing here is ever
+ * called. A tier without the registry, or anything else that goes wrong, is not an answer: the page reads a non-200 as
+ * "say only where the traveller is going". Cached five minutes at the edge and one in the browser: the registry
+ * changes by hand and rarely, and a revoked verification must not outlive the cache by long.
+ */
+async function providers(env, request, ctx) {
+  const cache = caches.default;
+  const key = new Request("https://providers.tourguid.invalid/all");
+  const hit = await cache.match(key);
+  if (hit) return json({ ...(await hit.json()), cached: true }, { cache: PROVIDERS_BROWSER_TTL });
+
+  const { payload, error } = await askStoreSearch(env, "transaction_providers", {}, request);
+  if (error) return refuse(error);
+  const rows = ((payload && payload.providers) || []).map(providerRow).filter(Boolean);
+  const answer = { providers: rows, cached: false };
+  if (rows.length) {
+    ctx.waitUntil(
+      cache.put(
+        key,
+        new Response(JSON.stringify(answer), {
+          headers: { "Content-Type": "application/json", "Cache-Control": `max-age=${PROVIDERS_EDGE_TTL}` },
+        })
+      )
+    );
+  }
+  return json(answer, { cache: rows.length ? PROVIDERS_BROWSER_TTL : 0 });
+}
+
 async function heroPhoto(env, params, ctx) {
   const destination = one(params, "destination", "", 100);
   const wanted = Math.min(Math.max(Number(one(params, "count", "6")) || 6, 1), 12);
@@ -1643,7 +1742,11 @@ export default {
     const params = url.searchParams;
 
     const response = await route(path, env, request, params, ctx);
-    logLine(path, params, response.status, startedAt, response.headers.get("x-tourguid-note"));
+    // A click that went through /go says in the log whether it was recorded: the ledger itself is read in a
+    // Supabase session, and this is the only evidence the Worker can leave on its own side.
+    const referral = response.headers.get("x-tourguid-referral");
+    const note = response.headers.get("x-tourguid-note");
+    logLine(path, params, response.status, startedAt, referral ? `referral=${referral}${note ? ` ${note}` : ""}` : note);
     return response;
   },
 };
@@ -1660,7 +1763,7 @@ async function route(path, env, request, params, ctx) {
               ? "configured"
               : "not_configured",
           heroPhoto: (env.PEXELS_API_KEY || "").trim() ? "pexels" : "fallback_only",
-          routes: ["destinations", "suggest", "airports", "flights", "hotels", "activities", "places", "feed", "detail", "go", "hero-photo"],
+          routes: ["destinations", "suggest", "airports", "flights", "hotels", "activities", "places", "feed", "detail", "go", "providers", "hero-photo"],
         });
     case "/api/store/flights":
         return flights(env, request, params);
@@ -1674,6 +1777,8 @@ async function route(path, env, request, params, ctx) {
         return feed(env, request, params, ctx);
     case "/api/store/go":
         return go(env, request, params);
+    case "/api/store/providers":
+        return providers(env, request, ctx);
     case "/api/store/destinations":
         return destinations(env, request, ctx);
     case "/api/store/airports":
