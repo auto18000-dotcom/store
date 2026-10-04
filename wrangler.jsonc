@@ -35,10 +35,14 @@
   // and it is also what took the Phase 0 changes down on 1 October.
   "analytics_engine_datasets": [{ "binding": "STATS", "dataset": "tourguid_web_events" }],
 
+  // not_found_handling "404-page" (2026-10-04): an address that is not a page used to get status 404 with an EMPTY body (Content-Length: 0), a white screen with no way out.
+  // Now Cloudflare answers it with public/404.html, still with status 404, which carries the site's header and footer. The Worker's own routes (/api/store/*) are unaffected: they
+  // are answered by src/ before the assets are asked.
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
-    "run_worker_first": true
+    "run_worker_first": true,
+    "not_found_handling": "404-page"
   },
 
   // Kept explicitly false, for the reason TourGuid-Control's wrangler.jsonc

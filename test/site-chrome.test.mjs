@@ -147,6 +147,18 @@ test('every link, image and script on the real site goes to something that exist
   assert.deepEqual(problems, []);
 });
 
+test('an address that is not a page gets a page: 404.html, root-relative whatever address was mistyped, kept out of search, and the Worker is told to serve it', () => {
+  // Until 2026-10-04 tourguid.net answered such an address with status 404 and an EMPTY body (Content-Length: 0): a white screen with no way out.
+  const html = fs.readFileSync(path.join(PUBLIC, '404.html'), 'utf8');
+  assert.match(html, /<meta name="robots" content="noindex/);
+  assert.equal(count(html, '<a class="tg-brand" href="/">'), 1, 'it carries the shared header');
+  const refs = [...html.matchAll(/\s(?:href|src)="([^"]*)"/g)].map((m) => m[1]);
+  assert.ok(refs.length > 10);
+  for (const ref of refs) assert.match(ref, /^(\/|https:\/\/|mailto:|#)/, `${ref} would break at /store/hotle or /a/b/c`);
+  const config = fs.readFileSync(path.join(PUBLIC, '..', 'wrangler.jsonc'), 'utf8').replace(/^\s*\/\/.*$/gm, '');
+  assert.match(config, /"not_found_handling":\s*"404-page"/);
+});
+
 // ------------------------------------------------------------------------------------------------------------ the destination photos
 
 /** The width and height written in a JPEG file's own header (its first frame marker). */
