@@ -25,9 +25,27 @@
 <link rel="stylesheet" href="./flight-search.css">
 <link rel="stylesheet" href="./destination-gallery.css">
 <script src="./place-autocomplete.js"></script>
-<link rel="stylesheet" href="./handoff.css"></head>
+<link rel="stylesheet" href="./handoff.css"><link rel="stylesheet" href="/site.css">
+</head>
 <body>
-  <header class="top"><div class="wrap top-inner"><a class="brand" href="#top"><img src="./tourguid-mark-on-dark.svg" alt="">TourGuid</a><nav class="nav" aria-label="Main navigation"><a href="./index.html" class="active" aria-current="page">Travel Store</a></nav></div></header>
+  <!-- site:header page="store" -->
+<header class="tg-top">
+  <a class="tg-skip" href="#tg-content">Skip to main content</a>
+  <div class="tg-wrap tg-top-in">
+    <a class="tg-brand" href="/"><img src="/tourguid-mark-on-dark.svg" alt="" width="38" height="38"><span>TourGuid</span></a>
+    <nav class="tg-nav" aria-label="Main">
+      <a href="/store/" aria-current="page">Travel Store</a>
+      <a href="/store/hotels">Hotels</a>
+      <a href="/store/flights">Flights</a>
+      <a href="/store/activities">Activities</a>
+      <a href="/store/food">Food</a>
+      <a href="/store/places">Places</a>
+    </nav>
+    <div class="tg-top-end"><a class="tg-account" href="/under-construction">Sign in</a></div>
+  </div>
+</header>
+<a class="tg-anchor" id="tg-content" tabindex="-1"></a>
+<!-- /site:header -->
   <main id="top">
     <div class="hero" id="explore"><div class="wrap hero-inner"><div class="ms-group"><a class="ms-float" href="https://intro.tourguid.net/" rel="noopener" aria-label="Coming soon: TourGuid Mobile for iOS and Android. Learn more"><span class="ms-kicker">Coming Soon</span><span class="ms-name">TourGuid Mobile</span><span class="ms-os">iOS &amp; Android</span></a><div class="ms-next"><span class="ms-name">Trip Builder</span><span class="ms-os">Web, iOS &amp; Android</span></div></div><div class="eyebrow" id="hero-eyebrow">TourGuid Travel Store · Destination workspace</div><h1>Let's explore and experience this wonderful world!</h1><p>Bring flights, stays, activities, food and favorite places into one Journey. Explore genuine providers, then save what fits your trip.</p><div class="hero-links"><a class="btn btn-light" href="#hotels">Explore stays</a><a class="btn btn-outline" href="#flights">Find flights</a></div><a class="hero-photo-credit" id="hero-photo-credit" href="https://www.pexels.com/" target="_blank" rel="noopener" hidden>Photo on Pexels</a></div></div>
     <div class="wrap journey-shell"><form class="place-date-bar" id="place-date-search" autocomplete="off"><div class="place-date-fields"><label class="place-field-wrap">Place<input id="search-place" name="place" placeholder="City, State, Region or Province" autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="place-suggestions" role="combobox" required><ul id="place-suggestions" class="place-suggestions" role="listbox" hidden></ul></label><label>From<input id="search-from" name="from" type="date" required></label><label>To<input id="search-to" name="to" type="date" required></label></div><button class="btn btn-primary" type="submit">Search</button></form></div><section class="wrap" id="hotels"><div class="section-head"><div><div class="kicker" id="hotels-kicker">Where to stay</div><h2>Hotels for the way you travel</h2><p>Start with a real property showcase. Booking options open with the named provider.</p></div><a href="./hotels.html">Browse all hotels →</a></div><div class="grid"><article class="card"><div class="card-visual visual-city"><span>Trip planning</span></div><div class="card-body"><div class="tag">Journey-ready</div><h3>Keep your stay in context</h3><p>A selected hotel can become a planned stay in your TourGuid Journey, covering the exact nights between your arrival and departure.</p><div class="card-actions"><a class="btn btn-secondary" href="./journey-building.html">See Journey concept ↗</a></div><p class="disclosure">Saving a hotel to a Journey does not reserve a room.</p></div></article></div></section>
@@ -44,7 +62,24 @@
     <section class="wrap" id="journey"><div class="journey"><div><div class="eyebrow">TourGuid Journey Building</div><h2>Give every choice its place.</h2><p>Bring a flight, a hotel candidate, activities and places into one timeline and map. Planned items remain distinct from confirmed bookings.</p></div><div><span class="journey-count" id="journey-count">0 planned items</span><div class="journey-cards" id="journey-items"></div><p class="journey-note">Wireframe preview saved in this browser. A production Journey will use the shared TourGuid backend and verified supplier records.</p></div></div></section>
     <section class="wrap" id="community"><div class="section-head"><div><div class="kicker">Social &amp; Community</div><h2>Travel stories will connect here.</h2><p>Community tools are in development. The Travel Store and Journey planning are the first usable components.</p></div></div></section>
   </main>
-  <footer class="footer"><div class="wrap footer-inner"><span>TourGuid · Travel Store prototype</span><span>Provider links open external sites. Prices and availability are confirmed by the booking provider.</span><a href="#top">Back to top ↑</a></div></footer>
+  <!-- site:footer -->
+<footer class="tg-footer">
+  <div class="tg-wrap">
+    <div class="tg-foot-row">
+      <a class="tg-foot-brand" href="/"><img src="/tourguid-mark-on-dark.svg" alt="" width="30" height="30"><span><b>TourGuid</b><small>Discover. Plan. Share. Travel.</small></span></a>
+      <nav class="tg-foot-nav" aria-label="Footer">
+        <a href="/store/">Travel Store</a>
+        <a href="https://intro.tourguid.net/">TourGuid Mobile</a>
+        <a href="https://app.tourguid.net/privacy">Privacy</a>
+        <a href="https://app.tourguid.net/terms">Terms</a>
+        <a href="https://app.tourguid.net/accessibility">Accessibility</a>
+        <a href="mailto:admin@tourguid.net">Support</a>
+      </nav>
+    </div>
+    <!-- site:footer-extra --><p class="tg-foot-note">Provider links open external sites. Prices and availability are confirmed by the booking provider.</p><!-- /site:footer-extra -->
+  </div>
+</footer>
+<!-- /site:footer -->
   <script>
     const placeDateSearch=document.getElementById('place-date-search');
     const searchParams=new URLSearchParams(location.search);

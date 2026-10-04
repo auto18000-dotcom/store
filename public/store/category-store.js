@@ -135,17 +135,17 @@
     }
   }));
   const foot=document.createElement('div');foot.className='wrap category-store-footer';foot.textContent=`TourGuid can save these ideas to a Journey. A booking is confirmed only by the named provider.`;main.append(foot);
-  document.querySelector('.footer span').textContent=`TourGuid · ${provider.name} store`;
-  for(const link of document.querySelectorAll('a[href^="./"]')){
+  // The links to the Store's other pages carry the destination along: the page's own relative links, and the shared header's main menu (site.css; root-relative, clean URLs).
+  for(const link of document.querySelectorAll('a[href^="./"],.tg-nav a[href^="/store/"]')){
     const url=new URL(link.href,location.href);
-    if(!url.pathname.endsWith('.html'))continue;
-    if(!['index.html','hotels.html','activities.html','food.html','places.html','flights.html'].some(page=>url.pathname.endsWith(page)))continue;
-    for(const key of ['destination','region','country','countryCode','lat','lon','from','to'])if(key==='destination'||params.has(key))url.searchParams.set(key,key==='destination'?destination:params.get(key));
     // Never leave the query string on a '.html' path: this server (and
     // Cloudflare's own default asset handling) redirects that filename to
     // its clean-URL equivalent and drops every query parameter in the
     // process -- silently discarding the destination on the very next click.
-    url.pathname=url.pathname.replace(/\.html$/,'');
+    const page=url.pathname.replace(/\.html$/,'').replace(/\/index$/,'/');
+    if(!['/store/','/store/hotels','/store/activities','/store/food','/store/places','/store/flights'].includes(page))continue;
+    for(const key of ['destination','region','country','countryCode','lat','lon','from','to'])if(key==='destination'||params.has(key))url.searchParams.set(key,key==='destination'?destination:params.get(key));
+    url.pathname=page;
     link.href=url.href;
   }
 })();

@@ -1,5 +1,5 @@
 // Landing page interactions. The page works without this file: the links show, the FAQ is native <details>, and every price is in the HTML already.
-// This file adds: the menu disclosure below 1024 px, the consent banner, analytics event wiring (behind consent), and a runtime check that the
+// This file adds: the search (tabs and the Search button), the consent banner, analytics event wiring (behind consent), and a runtime check that the
 // prices in the page still agree with config.js -- what a real build's "validate production values" step would do, run here for the preview.
 (() => {
   const root = document.documentElement;
@@ -17,28 +17,7 @@
     }
   }
 
-  // ---------------------------------------------------------------- menu disclosure
-  const button = document.querySelector('.menu-btn');
-  const nav = document.getElementById('site-nav');
-  if (button && nav) {
-    const setOpen = (open, restoreFocus) => {
-      button.setAttribute('aria-expanded', String(open));
-      nav.classList.toggle('is-open', open);
-      if (!open && restoreFocus) button.focus();
-    };
-    const isOpen = () => button.getAttribute('aria-expanded') === 'true';
-    button.addEventListener('click', () => setOpen(!isOpen(), false));
-    document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && isOpen()) { event.preventDefault(); setOpen(false, true); } });
-    nav.addEventListener('click', (event) => {
-      const link = event.target.closest('a[href^="#"]');
-      if (!link) return;
-      const section = document.getElementById(link.getAttribute('href').slice(1));
-      const heading = section && section.querySelector('h1, h2');
-      setOpen(false, false);
-      if (heading) { if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1'); window.setTimeout(() => heading.focus({ preventScroll: true }), 0); }
-    });
-    window.matchMedia('(min-width: 1024px)').addEventListener('change', () => setOpen(false, false));
-  }
+  // (There is no menu to open any more: the header is the one in site.css, and its links wrap on a narrow screen instead of hiding behind a button.)
 
   // ---------------------------------------------------------------- search tabs (which Store page the quick-search form targets)
   const search = document.getElementById('quick-search');
@@ -85,10 +64,10 @@
 
   // ---------------------------------------------------------------- analytics event wiring (all gated on consent inside the adapter)
   if (analytics) {
-    for (const a of document.querySelectorAll('.site-nav a, .site-footer a')) {
+    for (const a of document.querySelectorAll('.tg-top a, .tg-footer a')) {
       a.addEventListener('click', () => analytics.track('nav_click', {
         link_id: a.dataset.navId || a.textContent.trim().toLowerCase().replace(/\s+/g, '_'),
-        placement: a.closest('.site-header') ? 'header' : 'footer',
+        placement: a.closest('.tg-top') ? 'header' : 'footer',
         destination_type: a.getAttribute('href').startsWith('#') ? 'anchor' : a.hostname === location.hostname ? 'internal' : 'external',
       }));
     }

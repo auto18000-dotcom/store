@@ -15,7 +15,7 @@
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="The TourGuid three-pennant mark">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#0F2E20">
+<meta name="theme-color" content="#103944">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="./assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="./assets/apple-touch-icon-180.png">
@@ -35,6 +35,7 @@
 <script src="/store/place-autocomplete.js" defer></script>
 <script src="/store/date-range.js" defer></script>
 
+<link rel="stylesheet" href="/site.css">
 </head>
 <body>
 <!-- Rebuilt to the owner's reference image (2026-09-27): a photographic, rounded-corner design that supersedes the earlier square-corner/no-photo
@@ -43,27 +44,25 @@
      "modes" and every [Preview]/"Sample · illustrative" disclaimer were removed outright (owner, 2026-09-27), not hidden -- the Share and
      Trip Builder sample cards below are still illustrative, just no longer labelled as such on the page itself. See ./states-preview.html for
      component states. -->
-<a class="skip" href="#main">Skip to main content</a>
 
-<header class="site-header">
-  <div class="container header-in">
-    <a class="brand" href="./" data-nav-id="logo">
-      <img class="brand-mark" src="./tourguid-mark-on-dark.svg" alt="" width="34" height="34">
-      <span class="brand-text"><span class="brand-word">TourGuid</span><span class="brand-tag">Discover. Plan. Share. Travel.</span></span>
-    </a>
-    <nav id="site-nav" class="site-nav" aria-label="Main">
-      <a href="https://tourguid.net/store/">Store</a>
-      <div class="nav-actions">
-        <a class="btn btn-outline" href="./under-construction">Sign In</a>
-      </div>
+<!-- site:header page="" -->
+<header class="tg-top">
+  <a class="tg-skip" href="#tg-content">Skip to main content</a>
+  <div class="tg-wrap tg-top-in">
+    <a class="tg-brand" href="/"><img src="/tourguid-mark-on-dark.svg" alt="" width="38" height="38"><span>TourGuid</span></a>
+    <nav class="tg-nav" aria-label="Main">
+      <a href="/store/">Travel Store</a>
+      <a href="/store/hotels">Hotels</a>
+      <a href="/store/flights">Flights</a>
+      <a href="/store/activities">Activities</a>
+      <a href="/store/food">Food</a>
+      <a href="/store/places">Places</a>
     </nav>
-    <div class="header-actions">
-      <a class="icon-btn" href="https://tourguid.net/store/" aria-label="Search the Travel Store"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="10.3" cy="10.3" r="6.3"/><path d="M19 19l-4.3-4.3"/></svg></span></a>
-      <a class="btn btn-outline btn-sm" href="./under-construction">Sign In</a>
-    </div>
-    <button class="menu-btn btn btn-outline btn-sm" type="button" aria-expanded="false" aria-controls="site-nav"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg></span><span class="sr">Menu</span></button>
+    <div class="tg-top-end"><a class="tg-account" href="/under-construction">Sign in</a></div>
   </div>
 </header>
+<a class="tg-anchor" id="tg-content" tabindex="-1"></a>
+<!-- /site:header -->
 
 <main id="main">
   <section class="hero" id="top" aria-labelledby="hero-h">
@@ -77,7 +76,7 @@
           <p class="hero-sub">Discover it. Build it. Share it. Take it with you.</p>
           <p class="hero-lead">Explore the world with TourGuid, then turn the places you find into a journey that's ready to go.</p>
           <div class="hero-actions">
-            <a class="btn btn-primary" href="https://tourguid.net/store/" data-cta="explore_travel" data-placement="hero">Explore Travel <span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+            <a class="btn btn-light" href="/store/" data-cta="explore_travel" data-placement="hero">Explore Travel <span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
           </div>
         </div>
       </div>
@@ -115,15 +114,15 @@
     <div class="container">
       <div class="section-head">
         <div><span class="kicker">Explore</span><h2 id="dest-h" tabindex="-1">Explore Popular Destinations</h2></div>
-        <a class="link-arrow" href="https://tourguid.net/store/">See all destinations <span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+        <a class="link-arrow" href="/store/">See all destinations <span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
       </div>
       <div class="dest-grid">
-        <a class="dest-card" href="https://tourguid.net/store/hotels.html?destination=Paris" data-cta="destination_paris" data-placement="destinations"><img src="./assets/photos/dest-paris-480.jpg" alt="Paris" loading="lazy" width="480" height="558"><span>Paris</span></a>
-        <a class="dest-card" href="https://tourguid.net/store/hotels.html?destination=Rome" data-cta="destination_rome" data-placement="destinations"><img src="./assets/photos/dest-rome-480.jpg" alt="Rome" loading="lazy" width="480" height="558"><span>Rome</span></a>
-        <a class="dest-card" href="https://tourguid.net/store/hotels.html?destination=Barcelona" data-cta="destination_barcelona" data-placement="destinations"><img src="./assets/photos/dest-barcelona-480.jpg" alt="Barcelona" loading="lazy" width="480" height="558"><span>Barcelona</span></a>
-        <a class="dest-card" href="https://tourguid.net/store/hotels.html?destination=Tokyo" data-cta="destination_tokyo" data-placement="destinations"><img src="./assets/photos/dest-tokyo-480.jpg" alt="Tokyo" loading="lazy" width="480" height="558"><span>Tokyo</span></a>
-        <a class="dest-card" href="https://tourguid.net/store/hotels.html?destination=New%20York" data-cta="destination_newyork" data-placement="destinations"><img src="./assets/photos/dest-newyork-480.jpg" alt="New York" loading="lazy" width="480" height="559"><span>New York</span></a>
-        <a class="dest-card" href="https://tourguid.net/store/hotels.html?destination=Bangkok" data-cta="destination_bangkok" data-placement="destinations"><img src="./assets/photos/dest-bangkok-480.jpg" alt="Bangkok" loading="lazy" width="480" height="558"><span>Bangkok</span></a>
+        <a class="dest-card dest-paris" href="/store/hotels?destination=Paris" data-cta="destination_paris" data-placement="destinations"><img src="./assets/photos/dest-paris-480.jpg" alt="Paris" loading="lazy" width="480" height="558"><span>Paris</span></a>
+        <a class="dest-card dest-rome" href="/store/hotels?destination=Rome" data-cta="destination_rome" data-placement="destinations"><img src="./assets/photos/dest-rome-480.jpg" alt="Rome" loading="lazy" width="480" height="559"><span>Rome</span></a>
+        <a class="dest-card dest-barcelona" href="/store/hotels?destination=Barcelona" data-cta="destination_barcelona" data-placement="destinations"><img src="./assets/photos/dest-barcelona-480.jpg" alt="Barcelona" loading="lazy" width="480" height="558"><span>Barcelona</span></a>
+        <a class="dest-card dest-tokyo" href="/store/hotels?destination=Tokyo" data-cta="destination_tokyo" data-placement="destinations"><img src="./assets/photos/dest-tokyo-480.jpg" alt="Tokyo" loading="lazy" width="480" height="558"><span>Tokyo</span></a>
+        <a class="dest-card dest-newyork" href="/store/hotels?destination=New%20York" data-cta="destination_newyork" data-placement="destinations"><img src="./assets/photos/dest-newyork-480.jpg" alt="New York" loading="lazy" width="480" height="559"><span>New York</span></a>
+        <a class="dest-card dest-bangkok" href="/store/hotels?destination=Bangkok" data-cta="destination_bangkok" data-placement="destinations"><img src="./assets/photos/dest-bangkok-480.jpg" alt="Bangkok" loading="lazy" width="480" height="558"><span>Bangkok</span></a>
       </div>
     </div>
   </section>
@@ -134,7 +133,7 @@
         <span class="kicker">From discovery to your journey</span>
         <h2 id="cross-h" tabindex="-1">Found something you love? Make it part of your trip.</h2>
         <p class="section-lead mt">Flights, hotels and experiences don't have to live in different tabs. Add the things you choose into one TourGuid journey.</p>
-        <a class="btn btn-dark mt-20" href="https://tourguid.net/store/" data-cta="explore_store" data-placement="cross_sell">Explore the Store</a>
+        <a class="btn btn-dark mt-20" href="/store/" data-cta="explore_store" data-placement="cross_sell">Explore the Store</a>
       </div>
       <div>
         <div class="cross-sample">
@@ -142,9 +141,8 @@
             <div class="ac-photo"><img src="./assets/photos/seine-cruise-520.jpg" alt="A river cruise on the Seine at dusk, Paris" loading="lazy"><span class="fav" aria-hidden="true"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 20s-7-4.4-9.5-9A5.5 5.5 0 0 1 12 6.5 5.5 5.5 0 0 1 21.5 11c-2.5 4.6-9.5 9-9.5 9Z"/></svg></span></span></div>
             <div class="ac-body">
               <h3>Seine Evening Cruise</h3>
-              <p class="ac-meta"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 3.2l2.7 5.5 6 .9-4.4 4.2 1 6-5.3-2.8-5.3 2.8 1-6-4.3-4.2 5.9-.9Z"/></svg></span><b>4.8</b> (2,341)</p>
               <p class="ac-meta"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 21s7-7.6 7-12.2A7 7 0 1 0 5 8.8C5 13.4 12 21 12 21Z"/><circle cx="12" cy="9" r="2.3"/></svg></span>Paris, France</p>
-              <div class="ac-foot"><span class="ac-price">From<b>$89</b></span><a class="btn btn-outline btn-sm" href="https://tourguid.net/store/activities.html?destination=Paris">View Details</a></div>
+              <div class="ac-foot"><a class="btn btn-outline btn-sm" href="/store/activities?destination=Paris">View Details</a></div>
             </div>
           </article>
           <span class="journey-arrow" aria-hidden="true"><span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span>
@@ -170,7 +168,7 @@
           <span class="kicker">TourGuid Trip Builder</span>
           <h2 id="builder-h" tabindex="-1">Turn ideas into a journey that works.</h2>
           <p class="section-lead mt">Start from scratch, let TourGuid help, or take complete control. Build your days while TourGuid keeps places, timing, routes and the rest of your journey together.</p>
-          <a class="btn btn-primary mt-20" href="./under-construction" data-cta="see_trip_builder" data-placement="trip_builder">See Trip Builder <span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+          <a class="btn btn-primary mt-20" href="/under-construction" data-cta="see_trip_builder" data-placement="trip_builder">See Trip Builder <span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
           <p class="builder-note">Included with TourGuid Membership; Trip Builder is in active development.</p>
         </div>
         <div>
@@ -209,11 +207,11 @@
       <h2 id="share-h" tabindex="-1">The best trips don't have to stay private.</h2>
       <p class="section-lead mt">Share your journey with the people going with you. Discover ideas from other travelers, built around destinations, interests and ways of traveling.</p>
       <div class="share-grid mt-20">
-        <article class="share-card"><div class="sc-photo"><img src="./assets/photos/dest-rome-480.jpg" alt="" loading="lazy"></div><div class="sc-body"><h3>Our Italy Adventure</h3><p class="sc-meta">5 travelers &middot; 10 days</p><a class="link-arrow" href="./under-construction">View shared trip <span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a></div></article>
-        <article class="share-card"><div class="sc-photo"><img src="./assets/photos/dest-tokyo-480.jpg" alt="" loading="lazy"></div><div class="sc-body"><h3>10 Days in Japan</h3><p class="sc-meta">A shared journey</p><a class="link-arrow" href="./under-construction">Make it mine <span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a></div></article>
-        <article class="share-card"><div class="sc-photo"><img src="./assets/photos/food-market-520.jpg" alt="" loading="lazy"></div><div class="sc-body"><h3>Food Travelers</h3><p class="sc-meta">A community, coming to TourGuid</p><a class="link-arrow" href="./under-construction">Join community <span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a></div></article>
+        <article class="share-card"><div class="sc-photo"><img src="./assets/photos/dest-rome-480.jpg" alt="" loading="lazy"></div><div class="sc-body"><h3>Our Italy Adventure</h3><p class="sc-meta">5 travelers &middot; 10 days</p><a class="link-arrow" href="/under-construction">View shared trip <span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a></div></article>
+        <article class="share-card"><div class="sc-photo"><img src="./assets/photos/dest-tokyo-480.jpg" alt="" loading="lazy"></div><div class="sc-body"><h3>10 Days in Japan</h3><p class="sc-meta">A shared journey</p><a class="link-arrow" href="/under-construction">Make it mine <span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a></div></article>
+        <article class="share-card"><div class="sc-photo"><img src="./assets/photos/food-market-520.jpg" alt="" loading="lazy"></div><div class="sc-body"><h3>Food Travelers</h3><p class="sc-meta">A community, coming to TourGuid</p><a class="link-arrow" href="/under-construction">Join community <span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a></div></article>
       </div>
-      <a class="btn btn-dark mt-20" href="./under-construction" data-cta="explore_share" data-placement="share">Explore Share</a>
+      <a class="btn btn-dark mt-20" href="/under-construction" data-cta="explore_share" data-placement="share">Explore Share</a>
     </div>
   </section>
 
@@ -224,7 +222,7 @@
           <h2 id="promo-h" tabindex="-1">One membership. More ways to travel.</h2>
         </div>
         <div class="promo-price">
-          <a class="btn btn-primary" href="./under-construction" data-cta="start_free" data-placement="promo_band">Get Started <span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+          <a class="btn btn-light" href="/under-construction" data-cta="start_free" data-placement="promo_band">Get Started <span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
         </div>
       </div>
       <ul class="promo-features">
@@ -238,24 +236,21 @@
   </section>
 </main>
 
-<footer class="site-footer">
-  <div class="container footer-in">
-    <a class="footer-brand" href="./">
-      <img class="brand-mark" src="./tourguid-mark-on-dark.svg" alt="" width="26" height="26">
-      <span><b>TourGuid</b><small>Discover. Plan. Share. Travel.</small></span>
-    </a>
-    <nav class="footer-nav" aria-label="Footer">
-      <a href="https://tourguid.net/store/">Store</a>
-      <a href="#trip-builder">Trip Builder</a>
-      <a href="#share">Share</a>
-      <a href="#membership">Membership</a>
-      <a href="https://app.tourguid.net/privacy.html">Privacy</a>
-      <a href="https://app.tourguid.net/terms.html">Terms</a>
-      <a href="mailto:admin@tourguid.net">Support</a>
-      <a href="#" id="consent-manage">Consent preferences</a>
-    </nav>
-  </div>
-  <div class="container">
+<!-- site:footer -->
+<footer class="tg-footer">
+  <div class="tg-wrap">
+    <div class="tg-foot-row">
+      <a class="tg-foot-brand" href="/"><img src="/tourguid-mark-on-dark.svg" alt="" width="30" height="30"><span><b>TourGuid</b><small>Discover. Plan. Share. Travel.</small></span></a>
+      <nav class="tg-foot-nav" aria-label="Footer">
+        <a href="/store/">Travel Store</a>
+        <a href="https://intro.tourguid.net/">TourGuid Mobile</a>
+        <a href="https://app.tourguid.net/privacy">Privacy</a>
+        <a href="https://app.tourguid.net/terms">Terms</a>
+        <a href="https://app.tourguid.net/accessibility">Accessibility</a>
+        <a href="mailto:admin@tourguid.net">Support</a>
+      </nav>
+    </div>
+    <!-- site:footer-extra --><p class="tg-foot-note"><a href="#" id="consent-manage">Consent preferences</a></p>
 <details class="photo-credits">
   <summary>Photo credits</summary>
   <p>Every photograph on this page is licensed for reuse from Wikimedia Commons, cropped and resized for this page. Full-size originals and licence terms are linked below.</p>
@@ -272,16 +267,17 @@
       <li><a href="https://commons.wikimedia.org/wiki/File:Ponte Sisto Rome.jpg" target="_blank" rel="noopener noreferrer">Ponte Sisto Rome.jpg</a> by Jensens, Public domain, via Wikimedia Commons</li>
       <li><a href="https://commons.wikimedia.org/wiki/File:Fruit Stall in Barcelona Market.jpg" target="_blank" rel="noopener noreferrer">Fruit Stall in Barcelona Market.jpg</a> by Daderot., CC BY-SA 3.0, via Wikimedia Commons</li>
   </ul>
-</details>
-</div>
+</details><!-- /site:footer-extra -->
+  </div>
 </footer>
+<!-- /site:footer -->
 
 <div class="consent-banner" id="consent-banner" role="region" aria-label="Cookie and analytics consent" hidden>
   <div class="container consent-in">
     <p>TourGuid uses non-essential analytics to understand how this page is used. Nothing runs until you choose. Declining still gives you full access to the page and to signing up.</p>
     <div class="consent-actions">
       <button type="button" class="btn btn-outline" data-consent="reject">Reject nonessential</button>
-      <button type="button" class="btn btn-primary" data-consent="accept">Accept</button>
+      <button type="button" class="btn btn-light" data-consent="accept">Accept</button>
     </div>
   </div>
 </div>

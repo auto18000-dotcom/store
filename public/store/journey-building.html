@@ -10,9 +10,27 @@
   <link rel="stylesheet" href="./vendor/leaflet/1.9.4/leaflet.css">
   <link rel="stylesheet" href="./journey-building.css">
   <link rel="stylesheet" href="./profile-questionnaire.css">
-<link rel="stylesheet" href="./place-autocomplete.css"></head>
+<link rel="stylesheet" href="./place-autocomplete.css"><link rel="stylesheet" href="/site.css">
+</head>
 <body id="top">
-  <header class="top"><div class="wrap top-inner"><a class="brand" href="./index.html"><img src="./tourguid-mark-on-dark.svg" alt="">TourGuid</a><nav class="nav" aria-label="Main navigation"><a class="active" aria-current="page" href="./journey-building.html">Journey Building</a><a href="./index.html">Travel Store</a></nav><a class="mobile-soon" href="https://intro.tourguid.net/" rel="noopener">TourGuid Mobile - Android and iOS Soon!</a></div></header>
+  <!-- site:header page="" -->
+<header class="tg-top">
+  <a class="tg-skip" href="#tg-content">Skip to main content</a>
+  <div class="tg-wrap tg-top-in">
+    <a class="tg-brand" href="/"><img src="/tourguid-mark-on-dark.svg" alt="" width="38" height="38"><span>TourGuid</span></a>
+    <nav class="tg-nav" aria-label="Main">
+      <a href="/store/">Travel Store</a>
+      <a href="/store/hotels">Hotels</a>
+      <a href="/store/flights">Flights</a>
+      <a href="/store/activities">Activities</a>
+      <a href="/store/food">Food</a>
+      <a href="/store/places">Places</a>
+    </nav>
+    <div class="tg-top-end"><a class="tg-account" href="/under-construction">Sign in</a></div>
+  </div>
+</header>
+<a class="tg-anchor" id="tg-content" tabindex="-1"></a>
+<!-- /site:header -->
   <main>
     <section class="journey-hero"><div class="wrap hero-grid"><div><div class="eyebrow">TourGuid · Journey Building</div><h1>Make room for every part of the trip.</h1><p>Build the days around your stay, put activities in a sensible order, and keep your travel choices together.</p><div class="hero-actions"><a class="button light" href="#planner">Open your Journey ↓</a><a class="button ghost" href="./index.html">Explore the Travel Store ↗</a></div></div><div class="hero-preview" aria-label="Journey planning overview"><div class="preview-top"><span>YOUR JOURNEY</span><span class="preview-dots">● ● ●</span></div><div class="preview-line"><b>01</b><span><strong>Choose a home base</strong><small>Hotel · dates · neighborhood</small></span></div><div class="preview-line"><b>02</b><span><strong>Shape each day</strong><small>Activities · food · landmarks</small></span></div><div class="preview-line"><b>03</b><span><strong>Check the connections</strong><small>Distance · transit · timing</small></span></div></div></div></section>
     <section class="wrap paths" aria-label="Ways to build a Journey"><div class="path-card selected"><span class="path-number">01 · AVAILABLE IN THIS PREVIEW</span><h2>Help Me Build It</h2><p>Choose your destination and dates, then add and arrange Activity Cards yourself.</p><a href="#setup-title">Start building ↓</a></div><div class="path-card future"><span class="path-number">02 · COMING SOON</span><h2>Do It for Me</h2><p>A generated draft will appear here when TourGuid can produce a real itinerary for your review.</p><span>Coming Soon</span></div></section>
@@ -20,7 +38,24 @@
     <section class="wrap planner" id="planner" aria-labelledby="planner-title"><div class="planner-title"><div><div class="kicker">Build your itinerary</div><h2 id="planner-title">Your Journey, day by day</h2><p>Activity Cards from the Travel Store appear here. Add your own stops and move candidates between days.</p></div><a class="button outline" id="store-link" href="./index.html">Find more for this Journey ↗</a></div><div class="planner-grid"><aside class="day-panel" aria-label="Journey days"><div class="panel-heading"><strong>Trip days</strong><span id="trip-day-count">3 days</span></div><div id="day-list" class="day-list"></div><div class="day-panel-note"><strong>Travel at your pace</strong><p>Group nearby stops and leave room for transfers, meals and unexpected discoveries.</p></div></aside><div class="day-content"><div class="day-content-head"><div><span class="day-overline" id="active-day-label">DAY 01</span><h3 id="active-day-title">The first chapter</h3><p id="active-day-date">Date to be chosen</p></div><span class="day-total" id="active-day-total">0 cards</span></div><div id="activity-list" class="activity-list" aria-live="polite"></div><div class="day-actions"><button class="button dark" type="button" id="add-card">+ Add an Activity Card</button><a class="button soft" id="map-link" href="./index.html#tools">Open Optimization Tools ↗</a></div><div class="day-note-box"><label for="day-note">Notes for this day</label><textarea id="day-note" rows="3" placeholder="A meeting point, a neighborhood to explore, or a reminder for your travel companions"></textarea><span id="note-status" role="status">Notes save as you type.</span></div><div class="context-grid"><div class="map-card"><div class="context-head"><strong>Day map</strong><span id="map-summary">Known locations appear here</span></div><div id="journey-map" aria-label="Map of Activity Cards with known locations"></div><p>Card and marker numbers follow the same day order. Exact routes and travel times require a route service.</p></div><div class="gap-card"><div class="context-head"><strong>Find options</strong><span>From your Journey</span></div><div id="gap-content"></div></div></div></div></div></section>
     <section class="wrap next-steps" aria-labelledby="next-title"><div class="section-intro"><div class="kicker">From idea to travel</div><h2 id="next-title">A clearer path to a complete Journey</h2></div><div class="step-grid"><article><span>01</span><h3>Discover</h3><p>Browse hotels, flights, experiences, dining and places in the Travel Store.</p></article><article><span>02</span><h3>Plan</h3><p>Add Activity Cards to days, then consider where time and distance fit.</p></article><article><span>03</span><h3>Book with confidence</h3><p>Confirm availability, payment and booking terms with the named provider. Only a verified supplier confirmation should turn a planning card into a booked card.</p></article></div><p class="prototype-note">This preview saves plans in this browser. It does not create reservations, charge a Journey fee, or sync with a member account.</p></section>
   </main>
-  <footer class="footer"><div class="wrap footer-inner"><span>TourGuid · Journey Building preview</span><a href="./index.html">Travel Store ↗</a><a href="#top">Back to top ↑</a></div></footer>
+  <!-- site:footer -->
+<footer class="tg-footer">
+  <div class="tg-wrap">
+    <div class="tg-foot-row">
+      <a class="tg-foot-brand" href="/"><img src="/tourguid-mark-on-dark.svg" alt="" width="30" height="30"><span><b>TourGuid</b><small>Discover. Plan. Share. Travel.</small></span></a>
+      <nav class="tg-foot-nav" aria-label="Footer">
+        <a href="/store/">Travel Store</a>
+        <a href="https://intro.tourguid.net/">TourGuid Mobile</a>
+        <a href="https://app.tourguid.net/privacy">Privacy</a>
+        <a href="https://app.tourguid.net/terms">Terms</a>
+        <a href="https://app.tourguid.net/accessibility">Accessibility</a>
+        <a href="mailto:admin@tourguid.net">Support</a>
+      </nav>
+    </div>
+    <!-- site:footer-extra --><!-- /site:footer-extra -->
+  </div>
+</footer>
+<!-- /site:footer -->
   <dialog id="card-dialog" class="card-dialog" aria-labelledby="card-dialog-title"><form id="card-form"><div class="dialog-top"><div><div class="kicker">Activity Card</div><h2 id="card-dialog-title">Add a plan to your day</h2></div><button type="button" class="dialog-close" id="close-card" aria-label="Close">×</button></div><label>What are you planning?<input name="title" maxlength="120" placeholder="e.g. Visit the Gothic Quarter" required></label><div class="dialog-fields"><label>Type<select name="type"><option>Activity</option><option>Hotel</option><option>Flight</option><option>Food experience</option><option>Place</option><option>Transport</option><option>Other</option></select></label><label>Day<select name="day" id="card-day"></select></label></div><label>Location or meeting point<input name="location" maxlength="160" placeholder="Optional"></label><label>Time<input name="time" type="time"></label><p class="dialog-note">New cards are plans. Adding one does not make a booking.</p><div class="dialog-actions"><button type="button" class="button outline" id="cancel-card">Cancel</button><button type="submit" class="button dark">Save Activity Card</button></div></form></dialog>
   <script src="./vendor/leaflet/1.9.4/leaflet.js"></script>
   <script src="./profile-questionnaire.js"></script>

@@ -1,0 +1,74 @@
+/* The ONE header and footer of tourguid.net, in the Store's colours (the owner, 2026-10-04: "The color theme all across the website is that of tourguid.net/store").
+   The markup is stamped into every page by scripts/site-chrome.mjs from site/chrome/, so this file and those two partials are the only places the header and the footer exist.
+   Before this there were 13 headers and 15 footers, no two alike, and the logo on every Store page led to the Store instead of the home page.
+
+   Values are the Store's own (store/index.html and store/typography.css): header gradient 105deg #103944 > #103b43 > #14584a, 72px; brand Inter 850, 1.35rem, -.04em, the flags-only
+   mark at 38px; links #e6f3ee, the current page white with a 2px green rule; footer #103944 with #c5ddda text. The focus ring is coral on the light page and amber on the dark bars,
+   because the Store's own amber ring is 1.8:1 on paper (WCAG 2.2 asks 3:1). Everything is prefixed tg- and sets nothing on a bare element, so it cannot disturb the page it sits in. */
+@font-face { font-family: "Inter"; src: url("/fonts/inter-var.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+
+:root {
+  --tg-ink: #123642;
+  --tg-muted: #5c7278;
+  --tg-deep: #075d61;
+  --tg-deep-hover: #064c4f;
+  --tg-deep-active: #053b3d;
+  --tg-teal: #0c7778;
+  --tg-sea: #138f74;
+  --tg-green: #4cc65d;
+  --tg-paper: #fffdf8;
+  --tg-sand: #f7f1e7;
+  --tg-line: #d9e2de;
+  --tg-pale: #eaf6ef;
+  --tg-coral: #f33b36;
+  --tg-amber: #ffae19;
+  --tg-dark: #103944;
+  --tg-header: linear-gradient(105deg, #103944 0%, #103b43 58%, #14584a 100%);
+  --tg-font: Inter, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.tg-top, .tg-top *, .tg-footer, .tg-footer * { box-sizing: border-box; }
+.tg-top, .tg-footer { font-family: var(--tg-font); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+.tg-wrap { width: min(1180px, calc(100% - 40px)); margin: auto; }
+@media (max-width: 620px) { .tg-wrap { width: min(100% - 28px, 1180px); } }
+
+/* Skip link: first thing a keyboard reaches. It jumps to the empty anchor the header ends with, so it works on every page without the page having to name its main area. */
+.tg-skip { position: absolute; left: 8px; top: -80px; z-index: 100; background: #fff; color: var(--tg-ink); padding: 12px 16px; border: 3px solid var(--tg-coral); border-radius: 4px; font: 700 .9rem/1.2 var(--tg-font); text-decoration: none; }
+.tg-skip:focus { top: 8px; }
+.tg-anchor { display: block; height: 0; overflow: hidden; }
+
+/* Header */
+.tg-top { background: var(--tg-header); color: #fff; }
+.tg-top-in { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 28px; min-height: 72px; padding: 6px 0; }
+.tg-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; color: #fff; text-decoration: none; font-weight: 850; font-size: 1.35rem; letter-spacing: -.04em; white-space: nowrap; order: 1; }
+.tg-brand img { width: 38px; height: 38px; object-fit: contain; display: block; }
+.tg-nav { display: flex; flex-wrap: wrap; gap: 0 22px; order: 2; }
+.tg-nav a { display: inline-flex; align-items: center; min-height: 44px; color: #e6f3ee; text-decoration: none; font-size: .91rem; }
+.tg-nav a:hover { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
+.tg-nav a[aria-current="page"] { color: #fff; box-shadow: inset 0 -2px 0 #58c862; }
+.tg-top-end { margin-left: auto; display: flex; align-items: center; gap: 10px; order: 3; }
+.tg-account { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 11px; color: #fff; text-decoration: none; font-size: .84rem; font-weight: 750; white-space: nowrap; border: 1px solid #ffffff85; border-radius: 5px; background: none; }
+.tg-account:hover { background: #ffffff1c; border-color: #fff; }
+.tg-top a:focus-visible, .tg-footer a:focus-visible { outline: 3px solid var(--tg-amber); outline-offset: 3px; }
+@media (max-width: 860px) {
+  .tg-top-in { row-gap: 0; padding: 8px 0 4px; }
+  .tg-nav { order: 4; flex-basis: 100%; gap: 0 18px; }
+}
+
+/* Footer */
+.tg-footer { background: var(--tg-dark); color: #c5ddda; padding: 28px 0; font-size: .85rem; }
+.tg-foot-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px 28px; }
+.tg-foot-brand { display: inline-flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; }
+.tg-foot-brand img { width: 30px; height: 30px; object-fit: contain; display: block; }
+.tg-foot-brand b { display: block; font-weight: 850; font-size: 1.05rem; letter-spacing: -.03em; line-height: 1.15; }
+.tg-foot-brand small { display: block; font-size: .75rem; color: #a9c8c4; }
+.tg-foot-nav { display: flex; flex-wrap: wrap; gap: 0 20px; }
+.tg-foot-nav a { display: inline-flex; align-items: center; min-height: 44px; color: #fff; text-decoration: none; }
+.tg-foot-nav a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.tg-foot-note { margin: 14px 0 0; max-width: 62em; color: #c5ddda; }
+/* A link in a page's own footer note takes the footer's white and an underline, not whatever colour the page gives its links (the home page's was dark teal on dark teal: found 2026-10-04 on a phone screenshot). */
+.tg-footer .tg-foot-note a { display: inline-block; padding: 8px 0; color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+.tg-footer .tg-foot-note a:hover { text-decoration-thickness: 2px; }
+@media (min-width: 861px) { .tg-foot-nav a { min-height: 32px; } }
+@media (forced-colors: active) { .tg-account { border-color: CanvasText; } .tg-nav a[aria-current="page"] { text-decoration: underline; } }
+@media (prefers-reduced-motion: reduce) { .tg-top *, .tg-footer * { transition: none !important; animation: none !important; } }
