@@ -1,9 +1,15 @@
-# Handover: TG-Web-1 to TG-Web-1A, 4 October 2026
+# Handover: TG-Web-1 to TG-Web-1A, then redirected to TG-Mobile-1A, 4 October 2026
 
-The owner said, in TG-Web-1's own chat: "handover this activity to TGWeb-1A" (the Search Console export) and then
-"Handover all the remaining things you need to do to TGWeb1A". From now you are the web session for tourguid.net
-(this repo) and for z1.tourguid.net (TourGuid-Z1). TG-Web-1 keeps nothing open. This folder (`specs/`) is NOT
-deployed: wrangler ships only `./public`. Never put anything internal under `public/`.
+**LATEST (4 Oct, owner, in TG-Web-1's chat): "get all remaining work to TG Mobile 1A".** This list now belongs to
+TG-Mobile-1A, the coordinator. Wherever this file says "you", read TG-Mobile-1A. TG-Web-1A keeps only what it is
+already doing in its own chat with the owner (its Plan B and z1 work, and guiding the Search Console export if the
+owner wants that to stay with it); TG-Mobile-1A and the owner decide the rest. The work happens in TWO repos:
+`C:\Claude\TourGuid-Web` (tourguid.net, this repo) and `C:\Claude\TourGuid-Z1` (z1). If your session cannot read or write
+them, ask the owner to add the folders.
+
+Earlier the same day the owner said, in TG-Web-1's chat: "handover this activity to TGWeb-1A" (the Search Console export)
+and "Handover all the remaining things you need to do to TGWeb1A". TG-Web-1 keeps nothing open and answers questions only.
+This folder (`specs/`) is NOT deployed: wrangler ships only `./public`. Never put anything internal under `public/`.
 
 Who else matters: TG-Mobile-1A coordinates the Revised Plan (app and web); TG-Mobile-1 owns schema, functions and
 tiers (migrations 391 onward, store-search, the flight gateway server side); the owner decides every publish and
