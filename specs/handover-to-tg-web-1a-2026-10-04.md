@@ -59,7 +59,9 @@ every deploy.
    verified facts come from the registry and only from there. No "Verified" badge, no amber warning.
 7. Review styling (red Plus annotations) never ships: nothing review-ish under `public/`.
 8. Control (control.tourguid.net) is ring-fenced by the owner. Do not touch it.
-9. The Store look rules (Inter, teal palette, dark-teal header, 6px buttons, light theme) apply to all web work.
+9. The Store look rules (Inter, teal palette, dark-teal header, light theme) apply to all web work. Buttons: the owner's standing
+   note says 6px, but `public/store/landing.css` ships `.btn` at 4px, which also matches the mobile app's corner radius
+   (TG-Mobile-1A, 4 Oct). The CSS that ships wins; ask the owner if it matters.
 10. Do not guess menus or error texts. For a dashboard step use the vendor's own page or the exact text in
     `C:\Users\dad\AppData\Roaming\xdg.config\.wrangler\logs\` (that is where I found Cloudflare's own link for the
     Analytics Engine step). The owner rightly rejected my first Search Console instructions as guesses.
