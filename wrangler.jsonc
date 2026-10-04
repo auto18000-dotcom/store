@@ -25,8 +25,15 @@
   // handoff-routing/copy changes down with it since Cloudflare deploys the Worker version and its assets
   // as one transaction. Re-commented so the other three Phase 0 tasks could actually ship. Uncomment
   // again, alone, once Analytics Engine is confirmed enabled in the dashboard -- this exact line is the
-  // whole rollback either way:
-  // "analytics_engine_datasets": [{ "binding": "STATS", "dataset": "tourguid_web_events" }],
+  // whole rollback either way.
+  //
+  // ENABLED 2026-10-04: the owner created the dataset in the dashboard
+  // (Dataset Name tourguid_web_events, Dataset Binding STATS) and Cloudflare
+  // returned exactly this pair. Uncommented alone, nothing else in this deploy.
+  // If Analytics Engine were somehow still off, the deploy fails whole with code
+  // 10089 and the live site is untouched -- that atomicity is the safety net,
+  // and it is also what took the Phase 0 changes down on 1 October.
+  "analytics_engine_datasets": [{ "binding": "STATS", "dataset": "tourguid_web_events" }],
 
   "assets": {
     "directory": "./public",
