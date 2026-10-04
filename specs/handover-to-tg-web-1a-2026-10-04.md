@@ -6,7 +6,7 @@ to TG web1a".** So the list below is SPLIT. The owner's words do not name the it
 
 | Item | Now with |
 | --- | --- |
-| W1 baggage-fee notice deploy | TG-Mobile-1A |
+| W1 baggage-fee notice deploy | TG-Mobile-1A — DONE, deployed 4 Oct (version 3a6ed440) |
 | W2 Cloudflare Analytics Engine | TG-Mobile-1A |
 | W3 Search Console BigQuery export | TG-Web-1A (the owner's explicit handover; it is already guiding the owner) |
 | W4 registry-backed sheet: watch, production flag switch | TG-Mobile-1A (it coordinates the Revised Plan and works with TG-Mobile-1 on the migrations) |
@@ -121,7 +121,22 @@ its README). Verify afterwards that `/trip/` and `/social/` still answer behind 
 
 ## 4. Open work, in priority order
 
-### W1. Deploy the baggage-fee notice (`fbdd736`), owner's word
+### W1. Deploy the baggage-fee notice (`fbdd736`) — **DONE, deployed 4 October 2026**
+
+Deployed by TG-Mobile-1A on the owner's own word ("deploy the baggage fee notice"). Worker version
+`3a6ed440-c350-4c14-9ab5-a490d607fb6d`, built by section 3's recipe from a clean worktree of `f93eb8f` with
+`cc95e7d`'s `src/store-worker.js` plus the `729475c` patch — `grep -c tiqets_search` printed 0, so `5ec2188` stayed out.
+40 tests passed, dry run clean. Verified live afterwards: the notice is on both `flight-search.js` and
+`flight-detail.js`, both assets' sha256 match the deploy copy, `/api/store/health` lists all 12 routes, `/go` still
+answers 302 `not-recorded` for a Google Maps address and 400 for `evil.example`, no `tiqets` anywhere in health, and the
+flags are still off.
+
+**The three legal questions below are NOT closed by this deploy** and still want counsel: the exact wording, whether
+399.84 wants a per-passenger breakdown (we show the total for the searched passengers), and whether 399.85 also wants a
+link per airline. Shipping was the right call because the screen was bare — an imperfect notice beats none — but nobody
+should read "deployed" as "cleared".
+
+Original note:
 Why: the website has shown real Duffel totals since 21 September with no "baggage fees may apply" notice (14 CFR 399.85
 asks for it on the first screen that shows a fare). I added "Baggage fees may apply. Check the airline's own website for
 its baggage fees before you book." as the first banner above the results (`public/store/flight-search.js`) and under the
