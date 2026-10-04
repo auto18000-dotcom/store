@@ -18,6 +18,24 @@
     // The Explore prototype (P2).
     'plan.explore',
   ];
+  // ── The owner's switch, everywhere including production ───────────────────
+  //
+  // A name in this list is ON for every visitor on every host. It is the ONLY
+  // way a flag reaches production: `?tgflags=` and the stored list are preview
+  // conveniences and are ignored on tourguid.net, by design, so that nobody can
+  // turn a traveller-visible change on by sharing a link.
+  //
+  // Changing it is a code change, a commit and a deploy, and that is deliberate:
+  // it means every switch-on is reviewable, attributable and revertible by
+  // redeploying the previous version. The owner decides what goes in; a session
+  // does not add a name on its own.
+  //
+  // EMPTY MEANS NOTHING IS ON, which is the state the Revised Plan requires
+  // until the owner says otherwise. Adding `plan.handoff_sheet` here is what
+  // shows the handoff sheet to the public; `plan.require_verified_provider`
+  // alongside it would refuse EVERY provider, since none is verified yet.
+  const enabled = [];
+
   const previewHost = /^(localhost|127\.0\.0\.1|\[::1\]|[^.]+\.localhost|z1\.tourguid\.net)$/;
   const preview = previewHost.test(location.hostname);
   const asked = new Set();
@@ -37,7 +55,11 @@
       for (const name of list.split(',')) if (names.includes(name.trim())) asked.add(name.trim());
     }
   }
-  const flags = Object.freeze(Object.fromEntries(names.map((name) => [name, asked.has(name)])));
+  // The owner's list OR a preview's asking. `asked` is empty on every
+  // non-preview host, so in production this reduces to the list alone.
+  const flags = Object.freeze(
+    Object.fromEntries(names.map((name) => [name, enabled.includes(name) || asked.has(name)]))
+  );
   window.TourGuidFlags = Object.freeze({
     get: (name) => flags[name] === true,
     all: () => ({ ...flags }),
