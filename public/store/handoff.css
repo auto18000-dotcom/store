@@ -43,7 +43,7 @@
 .journey-dialog-inner.handoff .handoff-facts dt { padding-right: 12px; font-size: .74rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: #5c7278; align-self: start; padding-top: 14px; }
 .journey-dialog-inner.handoff .handoff-facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
 .journey-dialog-inner.handoff .handoff-facts dt:first-child + dd { font-weight: 750; font-size: 1rem; }
-.journey-dialog-inner.handoff .handoff-facts a { display: inline-block; padding: 8px 0; margin: -8px 0; color: #075d61; font-weight: 650; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1.5px; }
+.journey-dialog-inner.handoff .handoff-facts a { display: inline-block; padding: 11px 0; margin: -11px 0; color: #075d61; font-weight: 650; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1.5px; }
 .journey-dialog-inner.handoff .handoff-facts a:hover { background: #eaf7f0; }
 .journey-dialog-inner.handoff .handoff-facts a:focus-visible { outline: 3px solid #ffae19; outline-offset: 2px; border-radius: 2px; }
 @media (max-width: 520px) {
