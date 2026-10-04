@@ -1,16 +1,18 @@
-// One header and one footer for every page of tourguid.net, and a check that every link on the site goes somewhere.
+// One header and one footer for every page of tourguid.net, the navigation through every module and page, and a check that every link on the site goes somewhere.
 //
 //   node scripts/site-chrome.mjs           put the header and the footer (site/chrome/) into every page of public/, and rewrite what differs
-//   node scripts/site-chrome.mjs --check   change nothing; exit 1 if any page's header or footer differs from site/chrome/, or if a link goes nowhere
+//   node scripts/site-chrome.mjs --check   change nothing; exit 1 if any page's header or footer differs from site/chrome/ and site/nav.json, if a page names a menu item that does not exist, or if a link goes nowhere
 //
-// Why this exists: the site had 13 different headers and 15 different footers, no two alike, and the logo on every Store page led to the Store and not to the home page. The pages are
-// static HTML served as they are (no build, no templates), so the shared parts are written INTO each page between markers, and this script is the only thing that edits between them:
+// Why this exists: the site had 13 different headers and 15 different footers, no two alike, the logo on every Store page led to the Store and not to the home page, and no menu led to
+// the modules (Explore, Trip Builder, Share). The pages are static HTML served as they are (no build, no templates), so the shared parts are written INTO each page between markers, and
+// this script is the only thing that edits between them:
 //
-//   <!-- site:header page="hotels" -->   ...the header...   <!-- /site:header -->        page = which item of the main menu is the current one ("" for none)
+//   <!-- site:header page="hotels" -->   ...the header...   <!-- /site:header -->        page = which menu item (a site/nav.json key) this page is; "" for none
 //   <!-- site:footer -->                 ...the footer...   <!-- /site:footer -->
 //   inside the footer, <!-- site:footer-extra -->...<!-- /site:footer-extra --> is the page's OWN part (photo credits, a back link) and is kept as it is.
 //
-// A page with neither marker and an old <header>/<footer> is adopted: the old one is replaced. The main menu is NAV below; the other parts are the two files in site/chrome/.
+// The modules, their sections and the site map are in site/nav.json (one list; React can import it). The two partials are site/chrome/header.html and footer.html.
+// A page with neither marker and an old <header>/<footer> is adopted: the old one is replaced.
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -19,18 +21,44 @@ const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const PUBLIC = join(ROOT, 'public');
 const SITE = 'https://tourguid.net';
 
-/** The main menu. The Store's own sections come after Travel Store, as they did in the Store's header; `key` is what a page's marker names to say "I am this one". */
-export const NAV = [
-  { key: 'store', label: 'Travel Store', href: '/store/' },
-  { key: 'hotels', label: 'Hotels', href: '/store/hotels' },
-  { key: 'flights', label: 'Flights', href: '/store/flights' },
-  { key: 'activities', label: 'Activities', href: '/store/activities' },
-  { key: 'food', label: 'Food', href: '/store/food' },
-  { key: 'places', label: 'Places', href: '/store/places' },
-];
+// ------------------------------------------------------------------------------------------------------------------------------------ the navigation model
+
+const model = JSON.parse(readFileSync(join(ROOT, 'site', 'nav.json'), 'utf8'));
+/** The top-bar modules: { key, label, href, status?, sections? }. */
+export const MODULES = model.modules;
+/** The account button at the right of the top bar, and the account page that stands behind it. */
+export const ACCOUNT = model.account;
+/** What the small label beside a module says. A module with no status is live. */
+export const STATUS_WORD = { soon: 'Soon', preview: 'Preview' };
+
+/** Every menu item that a page's marker may name, with the module it belongs to. */
+const ITEMS = new Map();
+for (const m of MODULES) {
+  ITEMS.set(m.key, { ...m, module: m });
+  for (const s of m.sections ?? []) ITEMS.set(s.key, { ...s, module: m, isSection: true });
+}
+ITEMS.set(ACCOUNT.key, { key: ACCOUNT.key, label: ACCOUNT.label, href: ACCOUNT.href, module: null });
+/** Keys a page may put in its header marker. The empty string is a page that is no menu item (the home page, the 404 page). */
+export const PAGE_KEYS = new Set(['', ...ITEMS.keys()]);
+
+const resolveLink = (link) => {
+  if (!link.ref) return link;
+  if (link.ref === 'account-page') return ACCOUNT.page;
+  const item = ITEMS.get(link.ref);
+  if (!item) throw new Error(`site/nav.json: the footer names "${link.ref}", which is not a menu item`);
+  return { label: item.label, href: item.href, status: item.status };
+};
+/** The footer's site map: [{ title, links: [{ label, href, status? }] }], every { ref } resolved to the menu item it names. */
+export const FOOTER = model.footer.map((g) => ({ title: g.title, links: g.links.map(resolveLink) }));
 
 /** Which menu item is current on a page being adopted. After adoption the page's own marker is the truth. */
-const ADOPT_PAGE = { 'store/index.html': 'store', 'store/hotels.html': 'hotels', 'store/hotel.html': 'hotels', 'store/flights.html': 'flights', 'store/flight-detail.html': 'flights', 'store/activities.html': 'activities', 'store/food.html': 'food', 'store/places.html': 'places' };
+const ADOPT_PAGE = {
+  'store/index.html': 'store', 'store/detail.html': 'store',
+  'store/hotels.html': 'hotels', 'store/hotel.html': 'hotels',
+  'store/flights.html': 'flights', 'store/flight-detail.html': 'flights',
+  'store/activities.html': 'activities', 'store/food.html': 'food', 'store/places.html': 'places', 'store/journey-building.html': 'journey',
+  'store/explore.html': 'explore', 'store/community.html': 'share', 'store/member-account.html': 'account',
+};
 
 /** A page's own footer part when it is adopted: what the old footer held that is not the shared footer's job. Nothing here is a claim the page did not already make. */
 const ADOPT_EXTRA = {
@@ -43,14 +71,42 @@ const FOOTER_RE = /<!-- site:footer -->[\s\S]*?<!-- \/site:footer -->/;
 const EXTRA_RE = /<!-- site:footer-extra -->([\s\S]*?)<!-- \/site:footer-extra -->/;
 
 const partial = (name) => readFileSync(join(ROOT, 'site', 'chrome', name), 'utf8').replace(/\r\n/g, '\n').trimEnd();
+const chip = (item) => (item.status ? `<span class="tg-chip">${STATUS_WORD[item.status]}</span>` : '');
 
+/** The header for a page: the modules with the current one marked and, inside the Travel Store, its sections as a second bar. */
 export function renderHeader(page) {
-  const nav = NAV.map((n) => `      <a href="${n.href}"${n.key === page ? ' aria-current="page"' : ''}>${n.label}</a>`).join('\n');
-  return `<!-- site:header page="${page}" -->\n${partial('header.html').replace('{{NAV}}', () => nav)}\n<!-- /site:header -->`;
+  if (!PAGE_KEYS.has(page)) throw new Error(`"${page}" is not a menu item in site/nav.json`);
+  const here = ITEMS.get(page);
+  const owner = here?.module ?? null;
+  const mark = (key, isModule) => (key === page ? ' aria-current="page"' : isModule && owner?.key === key ? ' aria-current="true"' : '');
+  const nav = MODULES.map((m) => `      <a href="${m.href}"${mark(m.key, true)} data-nav-id="${m.key}">${m.label}${chip(m)}</a>`).join('\n');
+  const account = `<a class="tg-account" href="${ACCOUNT.href}"${page === ACCOUNT.key ? ' aria-current="page"' : ''} data-nav-id="signin">${ACCOUNT.label}</a>`;
+  const sub = owner?.sections
+    ? [
+        '  <div class="tg-sub">',
+        '    <div class="tg-wrap">',
+        `      <nav class="tg-subnav" aria-label="${owner.label} sections">`,
+        ...owner.sections.map((s) => `        <a href="${s.href}"${s.key === page ? ' aria-current="page"' : ''} data-nav-id="${s.key}">${s.short ?? s.label}</a>`),
+        '      </nav>',
+        '    </div>',
+        '  </div>',
+      ].join('\n') + '\n'
+    : '';
+  const html = partial('header.html').replace('{{NAV}}', () => nav).replace('{{ACCOUNT}}', () => account).replace('{{SUBNAV}}\n', () => sub);
+  return `<!-- site:header page="${page}" -->\n${html}\n<!-- /site:header -->`;
 }
 
+/** The footer: the site map of every module and page, then the page's own part. */
 export function renderFooter(extra) {
-  return `<!-- site:footer -->\n${partial('footer.html').replace('{{EXTRA}}', () => extra)}\n<!-- /site:footer -->`;
+  const groups = FOOTER.map((g) => [
+    '      <div class="tg-sm-group">',
+    `        <h2 class="tg-sm-h">${g.title}</h2>`,
+    '        <ul>',
+    ...g.links.map((l) => `          <li><a href="${l.href}">${l.label}${chip(l)}</a></li>`),
+    '        </ul>',
+    '      </div>',
+  ].join('\n')).join('\n');
+  return `<!-- site:footer -->\n${partial('footer.html').replace('{{SITEMAP}}', () => groups).replace('{{EXTRA}}', () => extra)}\n<!-- /site:footer -->`;
 }
 
 /** Puts the shared header and footer into a page and returns the page. Idempotent: stamping a stamped page changes nothing. `rel` is the page's path under public/, with slashes. */
@@ -157,9 +213,11 @@ export function checkLinks(dir = PUBLIC) {
 function main() {
   const check = process.argv.includes('--check');
   let changed = 0;
+  let unknown = 0;
   for (const file of listPages()) {
     const before = readFileSync(file, 'utf8');
-    const after = stampPage(before, rel(file));
+    let after;
+    try { after = stampPage(before, rel(file)); } catch (err) { unknown += 1; console.log(`KEY   ${rel(file)}: ${err.message}`); continue; }
     if (after === before) continue;
     changed += 1;
     if (check) console.log(`differs: ${rel(file)}`);
@@ -168,8 +226,9 @@ function main() {
   const links = checkLinks();
   for (const p of links.problems) console.log(`LINK  ${p}`);
   for (const w of links.warnings) console.log(`warn  ${w}`);
-  console.log(`${check ? 'would change' : 'changed'} ${changed} page(s); ${links.problems.length} link problem(s), ${links.warnings.length} warning(s); ${links.externals.length} other site(s) linked`);
-  if (check && (changed || links.problems.length)) process.exit(1);
+  console.log(`${check ? 'would change' : 'changed'} ${changed} page(s); ${unknown} unknown menu key(s); ${links.problems.length} link problem(s), ${links.warnings.length} warning(s); ${links.externals.length} other site(s) linked`);
+  if (check && (changed || unknown || links.problems.length)) process.exit(1);
+  if (unknown) process.exit(1);
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();

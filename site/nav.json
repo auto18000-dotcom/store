@@ -1,0 +1,46 @@
+{
+  "about": "The one list of TourGuid's modules and pages. scripts/site-chrome.mjs draws the header, the Travel Store menu and the footer site map from it; React (z1 /trip) can import it. A module is a place you can go to from the top bar; its sections are the pages inside it. status: absent = live, preview = works with sample data, soon = a page that says it is not built yet.",
+  "modules": [
+    { "key": "explore", "label": "Explore", "href": "/store/explore", "status": "soon" },
+    {
+      "key": "store",
+      "label": "Travel Store",
+      "href": "/store/",
+      "sections": [
+        { "key": "hotels", "label": "Hotels", "href": "/store/hotels" },
+        { "key": "flights", "label": "Flights", "href": "/store/flights" },
+        { "key": "activities", "label": "Activities", "href": "/store/activities" },
+        { "key": "food", "label": "Food", "href": "/store/food" },
+        { "key": "places", "label": "Places", "href": "/store/places" },
+        { "key": "journey", "label": "Journey Building", "short": "Journey", "href": "/store/journey-building" }
+      ]
+    },
+    { "key": "trip", "label": "Trip Builder", "href": "https://app.tourguid.net/trip/", "status": "preview" },
+    { "key": "share", "label": "Share", "href": "/store/community", "status": "soon" }
+  ],
+  "account": { "key": "account", "label": "Sign in", "href": "/under-construction", "page": { "label": "Member Account", "href": "/store/member-account", "status": "soon" } },
+  "footer": [
+    { "title": "Modules", "links": [{ "ref": "explore" }, { "ref": "store" }, { "ref": "trip" }, { "ref": "share" }] },
+    { "title": "Travel Store", "links": [{ "ref": "hotels" }, { "ref": "flights" }, { "ref": "activities" }, { "ref": "food" }, { "ref": "places" }, { "ref": "journey" }] },
+    {
+      "title": "TourGuid",
+      "links": [
+        { "label": "Home", "href": "/" },
+        { "label": "Sign in", "href": "/under-construction" },
+        { "ref": "account-page" },
+        { "label": "TourGuid Mobile", "href": "https://intro.tourguid.net/" },
+        { "label": "Travel stories", "href": "https://app.tourguid.net/marketing" },
+        { "label": "Documentation", "href": "https://app.tourguid.net/docs" }
+      ]
+    },
+    {
+      "title": "Help and legal",
+      "links": [
+        { "label": "Support", "href": "mailto:admin@tourguid.net" },
+        { "label": "Privacy", "href": "https://app.tourguid.net/privacy" },
+        { "label": "Terms", "href": "https://app.tourguid.net/terms" },
+        { "label": "Accessibility", "href": "https://app.tourguid.net/accessibility" }
+      ]
+    }
+  ]
+}

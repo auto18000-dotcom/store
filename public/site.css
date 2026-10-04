@@ -1,5 +1,6 @@
 /* The ONE header and footer of tourguid.net, in the Store's colours (the owner, 2026-10-04: "The color theme all across the website is that of tourguid.net/store").
-   The markup is stamped into every page by scripts/site-chrome.mjs from site/chrome/, so this file and those two partials are the only places the header and the footer exist.
+   The markup is stamped into every page by scripts/site-chrome.mjs from site/chrome/ and site/nav.json (the one list of modules and pages: the top bar, the Travel Store bar and the footer's
+   site map all come from it), so this file, those two partials and that list are the only places the header and the footer exist.
    Before this there were 13 headers and 15 footers, no two alike, and the logo on every Store page led to the Store instead of the home page.
 
    Values are the Store's own (store/index.html and store/typography.css): header gradient 105deg #103944 > #103b43 > #14584a, 72px; brand Inter 850, 1.35rem, -.04em, the flags-only
@@ -45,7 +46,15 @@
 .tg-nav { display: flex; flex-wrap: wrap; gap: 0 22px; order: 2; }
 .tg-nav a { display: inline-flex; align-items: center; min-height: 44px; color: #e6f3ee; text-decoration: none; font-size: .91rem; }
 .tg-nav a:hover { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
-.tg-nav a[aria-current="page"] { color: #fff; box-shadow: inset 0 -2px 0 #58c862; }
+.tg-nav a[aria-current="page"], .tg-nav a[aria-current="true"] { color: #fff; box-shadow: inset 0 -2px 0 #58c862; }
+/* The small label beside a module that is not finished: Soon = its page says so, Preview = it works with sample data. Words, not colour, carry the meaning. */
+.tg-chip { display: inline-block; margin-left: 7px; padding: 1px 6px; border: 1px solid #ffffff59; border-radius: 3px; color: #d6ebe5; font-size: .625rem; font-weight: 800; letter-spacing: .08em; line-height: 1.5; text-transform: uppercase; vertical-align: .08em; white-space: nowrap; }
+/* The second bar, inside the Travel Store: its own pages. It is part of the header, so it is on every page of the module and says which one you are on. */
+.tg-sub { background: #0000002e; border-top: 1px solid #ffffff1f; }
+.tg-subnav { display: flex; flex-wrap: wrap; gap: 0 20px; }
+.tg-subnav a { display: inline-flex; align-items: center; min-height: 44px; color: #d6ebe5; text-decoration: none; font-size: .84rem; font-weight: 600; }
+.tg-subnav a:hover { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
+.tg-subnav a[aria-current="page"] { color: #fff; box-shadow: inset 0 -2px 0 #58c862; }
 .tg-top-end { margin-left: auto; display: flex; align-items: center; gap: 10px; order: 3; }
 .tg-account { display: inline-flex; align-items: center; min-height: 44px; padding: 8px 11px; color: #fff; text-decoration: none; font-size: .84rem; font-weight: 750; white-space: nowrap; border: 1px solid #ffffff85; border-radius: 5px; background: none; }
 .tg-account:hover { background: #ffffff1c; border-color: #fff; }
@@ -53,6 +62,11 @@
 @media (max-width: 860px) {
   .tg-top-in { row-gap: 0; padding: 8px 0 4px; }
   .tg-nav { order: 4; flex-basis: 100%; gap: 0 18px; }
+}
+/* On a phone the four modules sit in two tidy columns instead of wrapping one stray word onto a third line. */
+@media (max-width: 620px) {
+  .tg-nav { display: grid; grid-template-columns: repeat(2, max-content); justify-content: start; gap: 0 30px; }
+  .tg-subnav { gap: 0 16px; }
 }
 
 /* Footer */
@@ -62,13 +76,17 @@
 .tg-foot-brand img { width: 30px; height: 30px; object-fit: contain; display: block; }
 .tg-foot-brand b { display: block; font-weight: 850; font-size: 1.05rem; letter-spacing: -.03em; line-height: 1.15; }
 .tg-foot-brand small { display: block; font-size: .75rem; color: #a9c8c4; }
-.tg-foot-nav { display: flex; flex-wrap: wrap; gap: 0 20px; }
-.tg-foot-nav a { display: inline-flex; align-items: center; min-height: 44px; color: #fff; text-decoration: none; }
-.tg-foot-nav a:hover { text-decoration: underline; text-underline-offset: 4px; }
+/* The site map: every module and every page, in four groups, on every page. */
+.tg-sitemap { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 20px; margin: 22px 0 6px; padding-top: 22px; border-top: 1px solid #ffffff24; }
+@media (min-width: 760px) { .tg-sitemap { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px 28px; } }
+.tg-footer .tg-sm-h { margin: 0 0 4px; color: #fff; font-size: .8125rem; font-weight: 800; letter-spacing: .1em; line-height: 1.4; text-transform: uppercase; }
+.tg-footer .tg-sitemap ul { margin: 0; padding: 0; list-style: none; }
+.tg-footer .tg-sitemap a { display: inline-flex; align-items: center; min-height: 44px; color: #fff; text-decoration: none; }
+.tg-footer .tg-sitemap a:hover { text-decoration: underline; text-underline-offset: 4px; }
 .tg-foot-note { margin: 14px 0 0; max-width: 62em; color: #c5ddda; }
 /* A link in a page's own footer note takes the footer's white and an underline, not whatever colour the page gives its links (the home page's was dark teal on dark teal: found 2026-10-04 on a phone screenshot). */
 .tg-footer .tg-foot-note a { display: inline-block; padding: 8px 0; color: #fff; text-decoration: underline; text-underline-offset: 3px; }
 .tg-footer .tg-foot-note a:hover { text-decoration-thickness: 2px; }
-@media (min-width: 861px) { .tg-foot-nav a { min-height: 32px; } }
-@media (forced-colors: active) { .tg-account { border-color: CanvasText; } .tg-nav a[aria-current="page"] { text-decoration: underline; } }
+@media (min-width: 861px) { .tg-footer .tg-sitemap a { min-height: 32px; } }
+@media (forced-colors: active) { .tg-account, .tg-chip { border-color: CanvasText; } .tg-nav a[aria-current="page"], .tg-nav a[aria-current="true"], .tg-subnav a[aria-current="page"] { text-decoration: underline; } }
 @media (prefers-reduced-motion: reduce) { .tg-top *, .tg-footer * { transition: none !important; animation: none !important; } }

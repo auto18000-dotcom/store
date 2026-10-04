@@ -1,12 +1,13 @@
-// The one header and footer of every page (scripts/site-chrome.mjs, site/chrome/, public/site.css), the check that every link on the site goes somewhere, and the homepage's destination photos.
+// The one header and footer of every page (scripts/site-chrome.mjs, site/chrome/, site/nav.json, public/site.css), the navigation through every module and page, the check that every link on the
+// site goes somewhere, and the homepage's destination photos.
 //   node --test test/site-chrome.test.mjs
-// Before this the site had 13 different headers and 15 different footers, no two alike, and the logo on every Store page led to the Store instead of the home page.
+// Before this the site had 13 different headers and 15 different footers, no two alike, the logo on every Store page led to the Store instead of the home page, and no menu led to the modules.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { NAV, PUBLIC, checkLinks, listPages, renderFooter, renderHeader, served, stampPage } from '../scripts/site-chrome.mjs';
+import { ACCOUNT, FOOTER, MODULES, PAGE_KEYS, PUBLIC, checkLinks, listPages, renderFooter, renderHeader, served, stampPage } from '../scripts/site-chrome.mjs';
 
 const rel = (file) => path.relative(PUBLIC, file).split(path.sep).join('/');
 const count = (text, needle) => text.split(needle).length - 1;
@@ -39,15 +40,53 @@ test('the logo in the header and in the footer of every page leads to the home p
   }
 });
 
-test('the menu marks the page you are on, and only that one; a page with no place in the menu marks none', () => {
-  for (const item of NAV) {
-    const header = renderHeader(item.key);
-    assert.equal(count(header, 'aria-current="page"'), 1, item.key);
-    assert.match(header, new RegExp(`<a href="${item.href}" aria-current="page">${item.label}</a>`), item.key);
+test('the top bar leads to every module, in the order of the home page, and says which ones are not finished', () => {
+  const header = renderHeader('');
+  assert.deepEqual(MODULES.map((m) => m.label), ['Explore', 'Travel Store', 'Trip Builder', 'Share']);
+  assert.deepEqual(MODULES.map((m) => m.status ?? 'live'), ['soon', 'live', 'preview', 'soon']);
+  for (const m of MODULES) assert.ok(header.includes(`<a href="${m.href}" data-nav-id="${m.key}">${m.label}${m.status ? `<span class="tg-chip">${m.status === 'soon' ? 'Soon' : 'Preview'}</span>` : ''}</a>`), m.key);
+  assert.match(header, /<a class="tg-account" href="\/under-construction" data-nav-id="signin">Sign in<\/a>/, 'there is no account to sign in to yet, so Sign in goes to the page that says so');
+  assert.equal(count(header, 'aria-current'), 0, 'a page that is no menu item marks none');
+  assert.equal(count(header, 'tg-subnav'), 0, 'and has no second bar');
+});
+
+test('the menu marks the page you are on; inside the Travel Store the module is marked as the place and the section as the page, with the section bar shown', () => {
+  for (const m of MODULES) {
+    const header = renderHeader(m.key);
+    assert.equal(count(header, 'aria-current="page"'), 1, m.key);
+    assert.ok(header.includes(`<a href="${m.href}" aria-current="page" data-nav-id="${m.key}">`), `${m.key}: on the module's own page the module is the page`);
+    assert.equal(count(header, '<nav class="tg-subnav"'), m.sections ? 1 : 0, `${m.key}: the section bar is there when the module has sections`);
+    for (const s of m.sections ?? []) {
+      const inside = renderHeader(s.key);
+      assert.equal(count(inside, 'aria-current="page"'), 1, s.key);
+      assert.ok(inside.includes(`<a href="${m.href}" aria-current="true" data-nav-id="${m.key}">`), `${s.key}: the module is the place you are in`);
+      assert.ok(inside.includes(`<a href="${s.href}" aria-current="page" data-nav-id="${s.key}">`), `${s.key}: the section is the page`);
+      assert.equal(count(inside, '<nav class="tg-subnav"'), 1);
+      assert.equal(count(inside, 'data-nav-id'), MODULES.length + m.sections.length + 1, `${s.key}: modules, sections and Sign in`);
+    }
   }
-  assert.equal(count(renderHeader(''), 'aria-current'), 0);
-  assert.deepEqual(NAV.map((n) => n.label), ['Travel Store', 'Hotels', 'Flights', 'Activities', 'Food', 'Places']);
-  assert.match(renderHeader(''), /<a class="tg-account" href="\/under-construction">Sign in<\/a>/, 'there is no account to sign in to yet, so Sign in goes to the page that says so');
+  assert.equal(count(renderHeader('trip'), 'tg-subnav'), 0, 'only the Travel Store has sections');
+  assert.ok(renderHeader('account').includes('<a class="tg-account" href="/under-construction" aria-current="page" data-nav-id="signin">'), 'the account page marks Sign in');
+});
+
+test('a page may name only a menu item that exists', () => {
+  assert.throws(() => renderHeader('hotles'), /not a menu item/);
+  assert.ok(PAGE_KEYS.has('') && PAGE_KEYS.has('journey') && PAGE_KEYS.has('account'));
+  const keys = [...MODULES.flatMap((m) => [m.key, ...(m.sections ?? []).map((s) => s.key)]), ACCOUNT.key];
+  assert.equal(new Set(keys).size, keys.length, 'no two menu items share a key');
+  for (const file of listPages()) {
+    const key = /<!-- site:header page="([a-z-]*)" -->/.exec(fs.readFileSync(file, 'utf8'))?.[1];
+    assert.ok(PAGE_KEYS.has(key), `${rel(file)} names "${key}"`);
+  }
+});
+
+test("each menu item's own page knows it is that item, so the menu marks where you are", () => {
+  const items = [...MODULES.flatMap((m) => [m, ...(m.sections ?? [])]), { key: ACCOUNT.key, href: ACCOUNT.page.href }];
+  for (const item of items) {
+    if (!item.href.startsWith('/')) continue;
+    const file = path.join(PUBLIC, item.href.replace(/\/$/, '/index').replace(/^\//, '') + '.html');
+    assert.equal(/<!-- site:header page="([a-z-]*)" -->/.exec(fs.readFileSync(file, 'utf8'))?.[1], item.key, item.href);
+  }
 });
 
 test('an old page is adopted: its own skip link, header and footer are replaced, the shared ones added once, and a second stamp changes nothing', () => {
@@ -56,7 +95,7 @@ test('an old page is adopted: its own skip link, header and footer are replaced,
   assert.equal(count(once, '<footer'), 1);
   assert.ok(!once.includes('old-head') && !once.includes('old-foot') && !once.includes('class="skip"'), 'nothing of the old chrome is left');
   assert.match(once, /<!-- site:header page="hotels" -->/);
-  assert.ok(once.includes('<a href="/store/hotels" aria-current="page">Hotels</a>'));
+  assert.ok(once.includes('<a href="/store/hotels" aria-current="page" data-nav-id="hotels">Hotels</a>'));
   assert.equal(count(once, 'aria-current="page"'), 1);
   assert.equal(count(once, '<link rel="stylesheet" href="/site.css">'), 1, 'the stylesheet they are drawn with');
   assert.ok(once.includes('<main id="main">Hello</main>'), 'the page itself is untouched');
@@ -78,7 +117,7 @@ test("a page keeps its own part of the footer, and the menu key its marker names
   const again = stampPage(html, 'store/index.html');
   assert.equal(count(again, '<p class="mine">Mine</p>'), 1);
   assert.match(again, /<!-- site:header page="food" -->/, 'the marker is the truth after adoption, not the table of the script');
-  assert.ok(again.includes('<a href="/store/food" aria-current="page">Food</a>'));
+  assert.ok(again.includes('<a href="/store/food" aria-current="page" data-nav-id="food">Food</a>'));
   assert.equal(stampPage(again, 'store/index.html'), again);
 });
 
@@ -89,10 +128,43 @@ test('Windows line endings stay Windows line endings', () => {
   assert.equal(stampPage(once, 'store/food.html'), once);
 });
 
-test('the footer names the same four places everywhere', () => {
+test('the footer is a site map: every module, every Travel Store page, the account pages, the other sites and the legal pages', () => {
   const footer = renderFooter('');
-  for (const href of ['/store/', 'https://intro.tourguid.net/', 'https://app.tourguid.net/privacy', 'https://app.tourguid.net/terms', 'https://app.tourguid.net/accessibility', 'mailto:admin@tourguid.net']) {
-    assert.ok(footer.includes(`href="${href}"`), href);
+  assert.deepEqual(FOOTER.map((g) => g.title), ['Modules', 'Travel Store', 'TourGuid', 'Help and legal']);
+  assert.equal(count(footer, '<nav class="tg-sitemap"'), 1, 'one landmark');
+  assert.equal(count(footer, '<h2 class="tg-sm-h">'), 4);
+  for (const href of [
+    '/store/explore', '/store/', 'https://app.tourguid.net/trip/', '/store/community',
+    '/store/hotels', '/store/flights', '/store/activities', '/store/food', '/store/places', '/store/journey-building',
+    '/', '/under-construction', '/store/member-account', 'https://intro.tourguid.net/', 'https://app.tourguid.net/marketing', 'https://app.tourguid.net/docs',
+    'mailto:admin@tourguid.net', 'https://app.tourguid.net/privacy', 'https://app.tourguid.net/terms', 'https://app.tourguid.net/accessibility',
+  ]) assert.ok(footer.includes(`<a href="${href}">`), href);
+  assert.ok(footer.includes('<a href="/store/community">Share<span class="tg-chip">Soon</span></a>'));
+});
+
+test('every page of the site can be reached from any page: through the top bar, the Travel Store bar or the site map (the listed few are reached from a button or a result)', () => {
+  const REACHED_OTHERWISE = new Set(['404.html', 'under-construction.html', 'store/hotel.html', 'store/flight-detail.html', 'store/detail.html']);
+  const linked = new Set();
+  for (const key of ['', 'store']) for (const m of renderHeader(key).matchAll(/<a [^>]*href="([^"]+)"/g)) linked.add(m[1]);
+  for (const m of renderFooter('').matchAll(/<a href="([^"]+)"/g)) linked.add(m[1]);
+  const orphans = listPages().map(rel).filter((page) => {
+    if (REACHED_OTHERWISE.has(page) || page === 'index.html') return false;
+    const route = '/' + page.replace(/index\.html$/, '').replace(/\.html$/, '');
+    return ![route, route + '/'].some((r) => linked.has(r));
+  });
+  assert.deepEqual(orphans, [], 'add the page to site/nav.json, or to this list with the reason it is reached another way');
+});
+
+test('every address in the navigation that leaves this site is one we know, and a module that says Soon leads to a page that says it is under construction', () => {
+  const KNOWN = [/^https:\/\/app\.tourguid\.net\/(trip\/|marketing|docs|privacy|terms|accessibility)$/, /^https:\/\/intro\.tourguid\.net\/$/, /^mailto:admin@tourguid\.net$/];
+  const all = [...MODULES.flatMap((m) => [m, ...(m.sections ?? [])]), ACCOUNT, ...FOOTER.flatMap((g) => g.links)];
+  for (const item of all) if (!item.href.startsWith('/')) assert.ok(KNOWN.some((re) => re.test(item.href)), item.href);
+  for (const m of MODULES) {
+    if (m.href.startsWith('/')) {
+      const file = path.join(PUBLIC, m.href.replace(/\/$/, '/index').replace(/^\//, '') + '.html');
+      const page = fs.readFileSync(file, 'utf8');
+      assert.equal(/under construction/i.test(page.replace(/<!-- site:[\s\S]*?-->/g, '')), m.status === 'soon', `${m.key}: Soon on the menu, "under construction" on the page, and neither without the other`);
+    }
   }
 });
 

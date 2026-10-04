@@ -51,14 +51,12 @@
   <div class="tg-wrap tg-top-in">
     <a class="tg-brand" href="/"><img src="/tourguid-mark-on-dark.svg" alt="" width="38" height="38"><span>TourGuid</span></a>
     <nav class="tg-nav" aria-label="Main">
-      <a href="/store/">Travel Store</a>
-      <a href="/store/hotels">Hotels</a>
-      <a href="/store/flights">Flights</a>
-      <a href="/store/activities">Activities</a>
-      <a href="/store/food">Food</a>
-      <a href="/store/places">Places</a>
+      <a href="/store/explore" data-nav-id="explore">Explore<span class="tg-chip">Soon</span></a>
+      <a href="/store/" data-nav-id="store">Travel Store</a>
+      <a href="https://app.tourguid.net/trip/" data-nav-id="trip">Trip Builder<span class="tg-chip">Preview</span></a>
+      <a href="/store/community" data-nav-id="share">Share<span class="tg-chip">Soon</span></a>
     </nav>
-    <div class="tg-top-end"><a class="tg-account" href="/under-construction">Sign in</a></div>
+    <div class="tg-top-end"><a class="tg-account" href="/under-construction" data-nav-id="signin">Sign in</a></div>
   </div>
 </header>
 <a class="tg-anchor" id="tg-content" tabindex="-1"></a>
@@ -168,7 +166,7 @@
           <span class="kicker">TourGuid Trip Builder</span>
           <h2 id="builder-h" tabindex="-1">Turn ideas into a journey that works.</h2>
           <p class="section-lead mt">Start from scratch, let TourGuid help, or take complete control. Build your days while TourGuid keeps places, timing, routes and the rest of your journey together.</p>
-          <a class="btn btn-primary mt-20" href="/under-construction" data-cta="see_trip_builder" data-placement="trip_builder">See Trip Builder <span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+          <a class="btn btn-primary mt-20" href="https://app.tourguid.net/trip/" data-cta="see_trip_builder" data-placement="trip_builder">See Trip Builder <span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
           <p class="builder-note">Included with TourGuid Membership; Trip Builder is in active development.</p>
         </div>
         <div>
@@ -211,7 +209,7 @@
         <article class="share-card"><div class="sc-photo"><img src="./assets/photos/dest-tokyo-480.jpg" alt="" loading="lazy"></div><div class="sc-body"><h3>10 Days in Japan</h3><p class="sc-meta">A shared journey</p><a class="link-arrow" href="/under-construction">Make it mine <span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a></div></article>
         <article class="share-card"><div class="sc-photo"><img src="./assets/photos/food-market-520.jpg" alt="" loading="lazy"></div><div class="sc-body"><h3>Food Travelers</h3><p class="sc-meta">A community, coming to TourGuid</p><a class="link-arrow" href="/under-construction">Join community <span class="" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a></div></article>
       </div>
-      <a class="btn btn-dark mt-20" href="/under-construction" data-cta="explore_share" data-placement="share">Explore Share</a>
+      <a class="btn btn-dark mt-20" href="/store/community" data-cta="explore_share" data-placement="share">Explore Share</a>
     </div>
   </section>
 
@@ -241,15 +239,49 @@
   <div class="tg-wrap">
     <div class="tg-foot-row">
       <a class="tg-foot-brand" href="/"><img src="/tourguid-mark-on-dark.svg" alt="" width="30" height="30"><span><b>TourGuid</b><small>Discover. Plan. Share. Travel.</small></span></a>
-      <nav class="tg-foot-nav" aria-label="Footer">
-        <a href="/store/">Travel Store</a>
-        <a href="https://intro.tourguid.net/">TourGuid Mobile</a>
-        <a href="https://app.tourguid.net/privacy">Privacy</a>
-        <a href="https://app.tourguid.net/terms">Terms</a>
-        <a href="https://app.tourguid.net/accessibility">Accessibility</a>
-        <a href="mailto:admin@tourguid.net">Support</a>
-      </nav>
     </div>
+    <nav class="tg-sitemap" aria-label="Site map">
+      <div class="tg-sm-group">
+        <h2 class="tg-sm-h">Modules</h2>
+        <ul>
+          <li><a href="/store/explore">Explore<span class="tg-chip">Soon</span></a></li>
+          <li><a href="/store/">Travel Store</a></li>
+          <li><a href="https://app.tourguid.net/trip/">Trip Builder<span class="tg-chip">Preview</span></a></li>
+          <li><a href="/store/community">Share<span class="tg-chip">Soon</span></a></li>
+        </ul>
+      </div>
+      <div class="tg-sm-group">
+        <h2 class="tg-sm-h">Travel Store</h2>
+        <ul>
+          <li><a href="/store/hotels">Hotels</a></li>
+          <li><a href="/store/flights">Flights</a></li>
+          <li><a href="/store/activities">Activities</a></li>
+          <li><a href="/store/food">Food</a></li>
+          <li><a href="/store/places">Places</a></li>
+          <li><a href="/store/journey-building">Journey Building</a></li>
+        </ul>
+      </div>
+      <div class="tg-sm-group">
+        <h2 class="tg-sm-h">TourGuid</h2>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/under-construction">Sign in</a></li>
+          <li><a href="/store/member-account">Member Account<span class="tg-chip">Soon</span></a></li>
+          <li><a href="https://intro.tourguid.net/">TourGuid Mobile</a></li>
+          <li><a href="https://app.tourguid.net/marketing">Travel stories</a></li>
+          <li><a href="https://app.tourguid.net/docs">Documentation</a></li>
+        </ul>
+      </div>
+      <div class="tg-sm-group">
+        <h2 class="tg-sm-h">Help and legal</h2>
+        <ul>
+          <li><a href="mailto:admin@tourguid.net">Support</a></li>
+          <li><a href="https://app.tourguid.net/privacy">Privacy</a></li>
+          <li><a href="https://app.tourguid.net/terms">Terms</a></li>
+          <li><a href="https://app.tourguid.net/accessibility">Accessibility</a></li>
+        </ul>
+      </div>
+    </nav>
     <!-- site:footer-extra --><p class="tg-foot-note"><a href="#" id="consent-manage">Consent preferences</a></p>
 <details class="photo-credits">
   <summary>Photo credits</summary>

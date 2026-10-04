@@ -135,8 +135,8 @@
     }
   }));
   const foot=document.createElement('div');foot.className='wrap category-store-footer';foot.textContent=`TourGuid can save these ideas to a Journey. A booking is confirmed only by the named provider.`;main.append(foot);
-  // The links to the Store's other pages carry the destination along: the page's own relative links, and the shared header's main menu (site.css; root-relative, clean URLs).
-  for(const link of document.querySelectorAll('a[href^="./"],.tg-nav a[href^="/store/"]')){
+  // The links to the Store's other pages carry the destination along: the page's own relative links, and the shared header's menus and the footer's site map (site.css; root-relative, clean URLs).
+  for(const link of document.querySelectorAll('a[href^="./"],.tg-nav a[href^="/store/"],.tg-subnav a[href^="/store/"],.tg-sitemap a[href^="/store/"]')){
     const url=new URL(link.href,location.href);
     // Never leave the query string on a '.html' path: this server (and
     // Cloudflare's own default asset handling) redirects that filename to
