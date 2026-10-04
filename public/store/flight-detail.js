@@ -67,6 +67,7 @@
 
   const price=el('section','fd-section');
   price.append(el('p','fd-price',offer.totalAmount&&offer.currency?`${offer.currency} ${offer.totalAmount} total`:'Price not available'));
+  price.append(el('p','fd-bag-note',"Baggage fees may apply. Check the airline's own website for its baggage fees before you book."));
   const actions=el('div','fd-actions');
   const add=el('button','btn btn-primary','Add to Trip');add.type='button';add.disabled=true;
   actions.append(add,el('small','','Saving to a trip is coming. Nothing is saved yet.'));

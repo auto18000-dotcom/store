@@ -155,6 +155,9 @@
       if(!payload.offers.length){status.textContent='No flight offers returned for these dates. Try another search.';return}
       const isLive=payload.liveMode===true;
       status.textContent=isLive?`${payload.offers.length} live ${payload.offers.length===1?'offer':'offers'} returned. Confirm price and terms before booking.`:`${payload.offers.length} test ${payload.offers.length===1?'offer':'offers'} returned.`;
+      // The first screen that shows a fare says baggage fees may apply and where to look (14 CFR 399.85). Each offer
+      // carries its own allowance, but the airline's own page is where an extra bag is priced.
+      banner("Baggage fees may apply. Check the airline's own website for its baggage fees before you book.");
       if(!isLive)banner(payload.liveMode===false?'Test data — these fares and airlines are not real.':'Live status not confirmed — treat these fares as provisional.');
       const expected=mode==='multi'?'multi_city':mode==='round'?'round_trip':'one_way';
       if(payload.trip&&payload.trip!==expected)banner(`You asked for ${expected.replace('_',' ')} fares but the results are ${String(payload.trip).replace('_',' ')}. Check the legs before booking.`);
