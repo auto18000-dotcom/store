@@ -33,16 +33,25 @@
 /* The "not available yet" variant of the same dialog (no Continue button in it): neutral, with no stripe, so it does not look like a way forward. */
 .journey-dialog-inner.handoff:not(:has(#continue-provider)) .kicker { color: #5c7278; }
 .journey-dialog-inner.handoff:not(:has(#continue-provider)) .kicker::before { background: #c9d6d2; }
-/* The facts of a verified provider, as labelled fields (TG-Mobile-1A and TG-Web-1 agreed: labels, not sentences, no badge).
-   Added by TG-Web-1 for the first version; TG-Web-1A owns the final look. Long addresses wrap rather than push the dialog wide. */
-.journey-dialog-inner.handoff .handoff-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 6px 14px; margin: 14px 0 4px; padding: 12px 14px; border: 1px solid #d9e2de; border-radius: 6px; background: #fff; color: #123642; font-size: .92rem; line-height: 1.4; }
-.journey-dialog-inner.handoff .handoff-facts dt { font-weight: 750; color: #4f666a; }
-.journey-dialog-inner.handoff .handoff-facts dd { margin: 0; overflow-wrap: anywhere; }
-.journey-dialog-inner.handoff .handoff-facts a { color: #075d61; }
+/* The facts of a verified provider, as labelled rows (TG-Mobile-1A and TG-Web-1 agreed: labels, not sentences, no badge, no warning).
+   Visuals by TG-Web-1A. Neutral on purpose: nothing here is green, ticked or badged, because TourGuid states what it has recorded and does not
+   certify the provider. The first row (who is paid) is set a step heavier because it is what a person most needs to read. Nothing is truncated:
+   long values and addresses wrap. Every link has a tap target of at least 44px high. Rows may be absent, and the list never shows an empty one. */
+.journey-dialog-inner.handoff .handoff-facts { display: grid; grid-template-columns: minmax(120px, 34%) minmax(0, 1fr); margin: 14px 0 6px; padding: 2px 14px; border: 1px solid #d9e2de; border-radius: 6px; background: #fff; color: #123642; font-size: .93rem; line-height: 1.45; }
+.journey-dialog-inner.handoff .handoff-facts dt, .journey-dialog-inner.handoff .handoff-facts dd { padding: 11px 0; border-top: 1px solid #e6eeea; }
+.journey-dialog-inner.handoff .handoff-facts dt:first-child, .journey-dialog-inner.handoff .handoff-facts dt:first-child + dd { border-top: 0; }
+.journey-dialog-inner.handoff .handoff-facts dt { padding-right: 12px; font-size: .74rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: #5c7278; align-self: start; padding-top: 14px; }
+.journey-dialog-inner.handoff .handoff-facts dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.journey-dialog-inner.handoff .handoff-facts dt:first-child + dd { font-weight: 750; font-size: 1rem; }
+.journey-dialog-inner.handoff .handoff-facts a { display: inline-block; padding: 8px 0; margin: -8px 0; color: #075d61; font-weight: 650; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1.5px; }
+.journey-dialog-inner.handoff .handoff-facts a:hover { background: #eaf7f0; }
+.journey-dialog-inner.handoff .handoff-facts a:focus-visible { outline: 3px solid #ffae19; outline-offset: 2px; border-radius: 2px; }
 @media (max-width: 520px) {
   .journey-dialog-inner.handoff { padding: 22px 18px 18px; }
   .journey-dialog-inner.handoff h2 { font-size: 1.4rem; }
   .journey-dialog-inner.handoff .journey-dialog-actions .secondary, .journey-dialog-inner.handoff .journey-dialog-actions .plain { flex: 1 1 100%; }
-  .journey-dialog-inner.handoff .handoff-facts { grid-template-columns: minmax(0, 1fr); gap: 2px; }
-  .journey-dialog-inner.handoff .handoff-facts dd { margin-bottom: 8px; }
+  .journey-dialog-inner.handoff .handoff-facts { grid-template-columns: minmax(0, 1fr); }
+  .journey-dialog-inner.handoff .handoff-facts dt { padding: 12px 0 0; border-top: 1px solid #e6eeea; }
+  .journey-dialog-inner.handoff .handoff-facts dd { padding: 2px 0 12px; border-top: 0; }
+  .journey-dialog-inner.handoff .handoff-facts dt:first-child { border-top: 0; }
 }
