@@ -252,9 +252,14 @@ Security events for blocked Googlebot or Bingbot requests. Follow up with them.
 `public/assets/photos`). Ask the owner whether they have a Pexels API key; they set it themselves with
 `npx wrangler secret put PEXELS_API_KEY` (typed privately, never in chat). No deploy is needed.
 
-### W10. Plan B and z1 deploys, owner's word
-Your commits `b0bb9f4`, `7c3881f`, `3d62e64`. Build, test, deploy as in section 3. Hotel photos wait on the owner's word about
-sources and credits.
+### W10. Plan B and z1 deploys: Plan B pass 2 DONE 3 Oct 2026, 23:27 PDT (reported by TG-Web-1A)
+Worker version `28ae012d-561a-4a30-a4e2-c9c06e40d0dd` = the previous z1 deploy (`5bfe898`) plus ONLY the three Plan B commits
+`b0bb9f4`, `7c3881f`, `3d62e64`, built in a clean worktree on the owner's word ("Deploy the Plan B commits"). NOT shipped:
+TG-Web-1's three "Homepage preview" commits `156c32f`, `306a1a2`, `899edc4` (public/homepage-temp only); they are still
+undeployed on z1 and the live homepage-temp is as TG-Web-1 last deployed it. Ask the owner if they want them out too. The
+z1 working tree's git-ignored `public/app` is stale (built before `7c3881f`): rebuild before any deploy from it. The owner's
+own look at the live pages is the last check (Access sign-in cannot be done by a session). Hotel photos wait on the owner's
+word about sources and credits.
 
 ### W11. Held; do not start
 Web sign-in and account page: hold until email-code sign-in exists in the app (TG-Mobile-1), Production only, per-tier link
