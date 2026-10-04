@@ -145,7 +145,12 @@ Reading the numbers needs the owner's read-only token ("Account Analytics: Read"
 custom; never pasted into chat; TourGuid-Security reviews it). Growth plan row "The read-only Cloudflare token web-stats
 needs" is Not started.
 
-### W3. Search Console BigQuery export
+### W3. Search Console BigQuery export: DONE 3 Oct 2026, 23:15 PDT (reported by TG-Web-1A)
+The export is ACTIVE for the tourguid.net domain property. Cloud project ID `tourguid-search-data`, dataset `searchconsole`,
+location United States (US); the project is linked to the owner's "My Billing Account" (Google required it, though its page
+does not say billing is mandatory). The first export lands within 48 hours, with no backfill. STILL TO DO: verify the tables
+after 48 hours (do not assume their names), and the owner's own sitemap submission (https://tourguid.net/sitemap.xml). The text
+below is kept for the BigQuery reader conditions.
 Already in your hands; you verified the steps against Google's page. Record project ID, dataset, location and start date
 in the Morning Package doc and tell TG-Mobile-1. TG-Mobile-1 added: reading BigQuery from web-stats needs (1) an
 `api_sources` row through the API-library gate, (2) a read-only service account whose key the owner sets as a secret on
