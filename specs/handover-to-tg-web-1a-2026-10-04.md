@@ -7,7 +7,7 @@ to TG web1a".** So the list below is SPLIT. The owner's words do not name the it
 | Item | Now with |
 | --- | --- |
 | W1 baggage-fee notice deploy | TG-Mobile-1A — DONE, deployed 4 Oct (version 3a6ed440) |
-| W2 Cloudflare Analytics Engine | TG-Mobile-1A |
+| W2 Cloudflare Analytics Engine | TG-Mobile-1A — DONE, deployed 4 Oct (version 72fd7b9e) |
 | W3 Search Console BigQuery export | TG-Web-1A (the owner's explicit handover; it is already guiding the owner) |
 | W4 registry-backed sheet: watch, production flag switch | TG-Mobile-1A (it coordinates the Revised Plan and works with TG-Mobile-1 on the migrations) |
 | W5 Tiqets sequence | TG-Mobile-1A (it wrote the Tiqets Worker commit) |
@@ -145,7 +145,21 @@ wireframe). Counsel should confirm the wording, whether 399.84 wants a per-passe
 searched passengers) and whether 399.85 also wants a link per airline. Ask the owner for the deploy word; the exposure is
 live now.
 
-### W2. Cloudflare Analytics Engine
+### W2. Cloudflare Analytics Engine — **DONE, deployed 4 October 2026**
+
+The owner created the dataset in the dashboard (Dataset Name `tourguid_web_events`, Dataset Binding `STATS`) and
+Cloudflare returned exactly the pair `wrangler.jsonc` already named. TG-Mobile-1A uncommented that one line, committed
+it (`5ff7518`) so a later deploy from a clean worktree cannot silently drop it, and deployed alone: Worker version
+`72fd7b9e-a6a3-43a2-beed-4c3526e7f939`. No 10089 this time. The dry run and the deploy both list
+`env.STATS (tourguid_web_events)  Analytics Engine Dataset`.
+
+Verified by driving the live Worker rather than reading the deploy's exit code: `wrangler tail` while requesting
+`/health`, `/destinations` and `/go` showed `[store] destinations status=200` and
+`[store] go status=302 ms=0 referral=not-recorded`, with `"exceptions": []` — so `writeDataPoint` runs and does not
+throw. **What is NOT verified here is that rows are queryable**: Analytics Engine has ingestion latency, and reading
+the data needs the owner's read-only token, which does not exist yet. The owner confirms the dataset on the dashboard.
+
+Original note:
 The owner enables it (their step, instructions already given): https://dash.cloudflare.com/5fc047da9d0ef6fe7b8e8cfe2f939e0e/workers/analytics-engine
 (Cloudflare printed this link in the 10089 error). When they say it is on and say "go": in a deploy copy uncomment exactly
 one line in `wrangler.jsonc`: `"analytics_engine_datasets": [{ "binding": "STATS", "dataset": "tourguid_web_events" }],`,
