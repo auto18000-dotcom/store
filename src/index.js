@@ -11,6 +11,7 @@
 // address, cookies, the raw user-agent, the text someone typed into an autocomplete box, dates, passenger
 // counts, or any identifier that could follow a person from one visit to the next.
 import worker from './store-worker.js';
+import { figmaFrameResponse } from './frame-policy.js';
 
 // Owner, 2026-09-30: "public marketing pages only, never app.tourguid.net" -- restoring analytics now that
 // the token-exposure problem it was a workaround for is being fixed at the source (TGSEC-001, in
@@ -72,7 +73,8 @@ function record(env, request, path, status, startedAt, note) {
 export default {
   async fetch(request, env, ctx) {
     const startedAt = Date.now();
-    const response = await worker.fetch(request, env, ctx);
+    // The page as the Store Worker (and the asset headers in public/_headers) made it; frame-policy.js then lets Figma frame the few public pages on its list and nothing else.
+    const response = figmaFrameResponse(request, await worker.fetch(request, env, ctx));
     const path = new URL(request.url).pathname;
     if (path.startsWith('/api/store/')) {
       record(env, request, path, response.status, startedAt, response.headers.get('x-tourguid-note'));
