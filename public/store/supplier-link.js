@@ -33,7 +33,8 @@
     const parsed = parse(raw);
     if (!parsed) return null;
     const host = parsed.url.hostname.replace(/^www\./, '');
-    if (host === 'maps.google.com' || (host === 'google.com' && parsed.url.pathname.startsWith('/maps'))) return 'Google Maps';
+    const path = parsed.url.pathname;
+    if (host === 'maps.google.com' || (host === 'google.com' && (path === '/maps' || path.startsWith('/maps/')))) return 'Google Maps';
     const known = NAMES.find(([domain]) => hostIs(host, domain));
     return known ? known[1] : host;
   };

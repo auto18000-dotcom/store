@@ -64,7 +64,14 @@ const SUGGEST_MIN_CHARS = 2;
 // Where an outbound click may land. An open redirect on a travel domain is a
 // phishing gift — our name and our padlock on someone else's login page — so
 // the host is matched exactly and anything else is refused.
-const SUPPLIER_HOSTS = {
+//
+// The tables have NO prototype. On a plain object, "constructor" and "__proto__"
+// answer as if they were hosts (TourGuid-Security, 2026-10-08: /api/store/go?url=
+// https://constructor/ was a 302), and supplierOf() could hand back a function
+// instead of a supplier's name. A single-label host cannot be registered, so it
+// was not exploitable, but a lookup that answers for keys nobody put in it is a
+// type confusion waiting for the next place a similar lookup matters.
+const SUPPLIER_HOSTS = Object.assign(Object.create(null), {
   "viator.com": "Viator",
   "www.viator.com": "Viator",
   "expedia.com": "Expedia",
@@ -77,7 +84,26 @@ const SUPPLIER_HOSTS = {
   "links.duffel.com": "Duffel",
   "maps.google.com": "Google Maps",
   "www.google.com": "Google Maps",
-};
+});
+
+// A host that serves more than the supplier's own pages is admitted only under
+// the paths we mean. Google serves Search, Docs, user content and a /url?q=
+// forwarder, so www.google.com is let through for Maps and nothing else
+// (TourGuid-Security, 2026-10-08: /api/store/go?url=https://www.google.com/url?q=
+// https://evil.example/ was answered with a 302 to it, the first link of a chain
+// whose second link is Google's policy and not ours). A path is a whole segment:
+// "/maps" and "/maps/..." but not "/mapsfoo".
+//
+// A RESIDUAL THAT IS ACCEPTED, NOT FORGOTTEN (TourGuid-Security, 2026-10-08): /maps on an
+// allow-listed Google host still includes Google My Maps (/maps/d/...) and other
+// user-made Maps content, so someone could put a link inside a map. That is weaker
+// than a forwarder (a victim has to arrive, read and click again) and it is inherent
+// to allow-listing Maps at all. It is written here so it is not rediscovered and
+// treated as new.
+const SUPPLIER_PATHS = Object.assign(Object.create(null), {
+  "maps.google.com": ["/", "/maps"],
+  "www.google.com": ["/maps"],
+});
 
 // Which suppliers the LEDGER accepts (migration 355 constrains it to these).
 // A provider it does not know is a 400, and a 400 stops the redirect — so a
@@ -86,13 +112,13 @@ const SUPPLIER_HOSTS = {
 // nothing to attribute. Expedia joined in migration 356: the owner's Travel
 // Shop earns up to 4% and there is no Expedia API account, so a recorded click
 // is the ONLY evidence we will ever hold that we sent someone there.
-const LEDGER_PROVIDERS = {
+const LEDGER_PROVIDERS = Object.assign(Object.create(null), {
   Viator: "viator",
   GetYourGuide: "getyourguide",
   Duffel: "duffel",
   OpenTable: "opentable",
   Expedia: "expedia",
-};
+});
 
 const MESSAGES = {
   provider_refused: "This supplier is not available for the store right now.",
@@ -109,7 +135,14 @@ const MESSAGES = {
 };
 const STATUS = { busy: 429, lookups_busy: 429, daily_cap: 429, unavailable: 502, unknown_search: 404, provider_refused: 503 };
 
-/** Only https, never credentials in the host, never a backslash trick. */
+/**
+ * Only https, never credentials in the host, never a backslash trick.
+ *
+ * What TourGuid-Security found right in this redirector on 2026-10-08, so nobody relaxes it: https only; a username or password in the URL refused (that is what kills
+ * https://www.booking.com@evil.com/); a backslash refused; the host matched EXACTLY against a table, never with endsWith, a regex or includes (the three places an open
+ * redirect usually comes from); the URL the ledger hands back checked again here before it becomes the destination, so a confused ledger cannot send anyone anywhere;
+ * and Referrer-Policy no-referrer and Cache-Control no-store on the 302. test/go-allowlist.test.mjs holds each of them.
+ */
 function supplierOf(target) {
   let parsed;
   try {
@@ -120,7 +153,23 @@ function supplierOf(target) {
   if (parsed.protocol !== "https:") return null;
   if (parsed.username || parsed.password) return null;
   if (String(target).includes("\\")) return null;
-  return SUPPLIER_HOSTS[parsed.hostname] || null;
+  const supplier = SUPPLIER_HOSTS[parsed.hostname];
+  if (typeof supplier !== "string") return null;
+  return pathIsOurs(parsed.hostname, parsed.pathname) ? supplier : null;
+}
+
+/**
+ * Whether this path on this host is one we send people to. A host with no rule is
+ * the supplier's own, whole. The URL parser has already removed dot segments
+ * ("/maps/../url" arrives as "/url", "%2e%2e" too); an ENCODED slash is the one
+ * thing it leaves alone, and the supplier's server may read a path the parser
+ * did not, so on a restricted host it is refused outright.
+ */
+function pathIsOurs(host, pathname) {
+  const allowed = SUPPLIER_PATHS[host];
+  if (!allowed) return true;
+  if (/%2f|%5c/i.test(pathname)) return false;
+  return allowed.some((path) => pathname === path || (path !== "/" && pathname.startsWith(`${path}/`)));
 }
 
 function json(body, { status = 200, cache = 0 } = {}) {
