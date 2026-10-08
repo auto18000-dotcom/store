@@ -35,6 +35,11 @@
   // and it is also what took the Phase 0 changes down on 1 October.
   "analytics_engine_datasets": [{ "binding": "STATS", "dataset": "tourguid_web_events" }],
 
+  // The pre-launch password gate (src/gate.js, owner 2026-10-07): at most 10 password tries a minute from one address, counted at each Cloudflare location. The password itself is the
+  // GATE_PASSWORD secret (npx wrangler secret put GATE_PASSWORD); with no secret, or one under 16 characters, the gate refuses everything it guards (503) instead of opening. Taking the gate
+  // off later means deleting this binding together with src/gate.js, its call in src/index.js and the secret.
+  "ratelimits": [{ "name": "GATE_LIMITER", "namespace_id": "1001", "simple": { "limit": 10, "period": 60 } }],
+
   // not_found_handling "404-page" (2026-10-04): an address that is not a page used to get status 404 with an EMPTY body (Content-Length: 0), a white screen with no way out.
   // Now Cloudflare answers it with public/404.html, still with status 404, which carries the site's header and footer. The Worker's own routes (/api/store/*) are unaffected: they
   // are answered by src/ before the assets are asked.

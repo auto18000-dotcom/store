@@ -12,13 +12,15 @@
 // counts, or any identifier that could follow a person from one visit to the next.
 import worker from './store-worker.js';
 import { figmaFrameResponse } from './frame-policy.js';
+import { gated } from './gate.js';
 
 // Owner, 2026-09-30: "public marketing pages only, never app.tourguid.net" -- restoring analytics now that
 // the token-exposure problem it was a workaround for is being fixed at the source (TGSEC-001, in
 // progress) rather than papered over by leaving analytics off. Manual, scoped injection replaces
-// Cloudflare's zone-wide auto-injection, which is the whole point: this repo has no gated or
-// session-bearing page today, so every HTML response it serves is a fair target, and the one class of
-// page this must never reach (app.tourguid.net) isn't reachable from this Worker at all.
+// Cloudflare's zone-wide auto-injection, which is the whole point: this repo has no session-bearing
+// page today (the pre-launch password in src/gate.js only keeps strangers out; it signs no one in), so
+// every HTML response it serves is a fair target, and the one class of page this must never reach
+// (app.tourguid.net) isn't reachable from this Worker at all.
 const CF_BEACON_SNIPPET = `<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "e4bb890710c04bde8cd90c983cfe7db1"}'></script>`;
 
 class HeadInjector {
@@ -70,20 +72,25 @@ function record(env, request, path, status, startedAt, note) {
   }
 }
 
-export default {
-  async fetch(request, env, ctx) {
-    const startedAt = Date.now();
-    // The page as the Store Worker (and the asset headers in public/_headers) made it; frame-policy.js then lets Figma frame the few public pages on its list and nothing else.
-    const response = figmaFrameResponse(request, await worker.fetch(request, env, ctx));
-    const path = new URL(request.url).pathname;
-    if (path.startsWith('/api/store/')) {
-      record(env, request, path, response.status, startedAt, response.headers.get('x-tourguid-note'));
-      return response;
-    }
-    const contentType = response.headers.get('content-type') || '';
-    if (request.method === 'GET' && contentType.startsWith('text/html')) {
-      return analyticsRewriter.transform(response);
-    }
+async function site(request, env, ctx) {
+  const startedAt = Date.now();
+  // The page as the Store Worker (and the asset headers in public/_headers) made it; frame-policy.js then lets Figma frame the few public pages on its list and nothing else.
+  const response = figmaFrameResponse(request, await worker.fetch(request, env, ctx));
+  const path = new URL(request.url).pathname;
+  if (path.startsWith('/api/store/')) {
+    record(env, request, path, response.status, startedAt, response.headers.get('x-tourguid-note'));
     return response;
+  }
+  const contentType = response.headers.get('content-type') || '';
+  if (request.method === 'GET' && contentType.startsWith('text/html')) {
+    return analyticsRewriter.transform(response);
+  }
+  return response;
+}
+
+export default {
+  // Pre-launch (owner, 2026-10-07): everything except the home page asks for a password. src/gate.js stands in front of the whole site; a request it stops never reaches site() at all.
+  fetch(request, env, ctx) {
+    return gated(request, env, () => site(request, env, ctx));
   },
 };

@@ -1,8 +1,9 @@
 // Which tourguid.net pages another site may put in a frame, and which one.
 //
 // Everything on tourguid.net is blocked from framing by default: public/_headers sends X-Frame-Options: DENY and a Content-Security-Policy ending in frame-ancestors 'none' on every
-// page. The owner asked (2026-10-07, relayed by TourGuid-Security) for Figma to be able to embed the PUBLIC pages, so the design work can sit next to the real site. This file is the one
-// place that lets it, and it lets it narrowly:
+// page. The owner asked (2026-10-07, relayed by TourGuid-Security) for Figma to be able to embed the PUBLIC pages, so the design work can sit next to the real site. The same day the owner
+// closed everything but the home page behind a password (src/gate.js), so the home page is now the only public page and the only one listed. This file is the one place that lets framing
+// through, and it lets it narrowly:
 //
 //   * Only the pages listed in FIGMA_FRAMEABLE, one by one. Not a folder, not a pattern: a page added to the site later is blocked until someone adds it here on purpose, and
 //     test/frame-policy.test.mjs fails when a page is in neither list, so the question cannot be skipped.
@@ -18,21 +19,12 @@
 
 export const FIGMA_ORIGINS = ['https://www.figma.com', 'https://figma.com'];
 
-/** The public, read-only pages Figma may frame, by their clean address. */
+/** The public, read-only pages Figma may frame, by their clean address. Since 2026-10-07 only the home page is public (src/gate.js); the Store pages Figma used to frame are behind the password. */
 export const FIGMA_FRAMEABLE = new Set([
   '/',
-  '/store',
-  '/store/explore',
-  '/store/hotels',
-  '/store/flights',
-  '/store/activities',
-  '/store/food',
-  '/store/places',
-  '/store/community',
-  '/store/hotel',
-  '/store/detail',
-  '/store/flight-detail',
 ]);
+
+const BEHIND_THE_GATE = 'behind the pre-launch password (src/gate.js): not public, so not framed by anyone; list it above again only when the gate comes off';
 
 /** Pages that exist and stay blocked on purpose, each with the reason, so a reader (and the test) can tell "decided" from "forgotten". */
 export const NEVER_FRAMEABLE = new Map([
@@ -40,6 +32,17 @@ export const NEVER_FRAMEABLE = new Map([
   ['/under-construction', 'where the sign-up and sign-in buttons lead: the first page here that a real account flow would replace'],
   ['/store/member-account', 'the account route: a placeholder today, a signed-in page later'],
   ['/store/journey-building', 'the planner: takes the traveller\'s own answers and keeps a journey in the browser'],
+  ['/store', BEHIND_THE_GATE],
+  ['/store/explore', BEHIND_THE_GATE],
+  ['/store/hotels', BEHIND_THE_GATE],
+  ['/store/flights', BEHIND_THE_GATE],
+  ['/store/activities', BEHIND_THE_GATE],
+  ['/store/food', BEHIND_THE_GATE],
+  ['/store/places', BEHIND_THE_GATE],
+  ['/store/community', BEHIND_THE_GATE],
+  ['/store/hotel', BEHIND_THE_GATE],
+  ['/store/detail', BEHIND_THE_GATE],
+  ['/store/flight-detail', BEHIND_THE_GATE],
 ]);
 
 /** "/store/hotels.html", "/store/hotels/" and "/store/hotels" are one page; "/store/index.html" is "/store". */
