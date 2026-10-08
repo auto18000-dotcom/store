@@ -29,6 +29,7 @@ const BEHIND_THE_GATE = 'behind the pre-launch password (src/gate.js): not publi
 /** Pages that exist and stay blocked on purpose, each with the reason, so a reader (and the test) can tell "decided" from "forgotten". */
 export const NEVER_FRAMEABLE = new Map([
   ['/404', 'an error page, never a result worth framing'],
+  ['/home', 'the real home page, behind the pre-launch password while the home page (/) is the Coming soon page'],
   ['/under-construction', 'where the sign-up and sign-in buttons lead: the first page here that a real account flow would replace'],
   ['/store/member-account', 'the account route: a placeholder today, a signed-in page later'],
   ['/store/journey-building', 'the planner: takes the traveller\'s own answers and keeps a journey in the browser'],

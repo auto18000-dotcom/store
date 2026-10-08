@@ -67,6 +67,9 @@ const ADOPT_EXTRA = {
 };
 
 const HEADER_RE = /<!-- site:header page="([a-z-]*)" -->[\s\S]*?<!-- \/site:header -->/;
+/** A page marked <!-- site:standalone --> carries no shared header or footer and none is added: the Coming soon home page, a single screen with the logo and two ways in. Nothing else is meant to use this. */
+const STANDALONE_RE = /<!-- site:standalone -->/;
+export const isStandalone = (html) => STANDALONE_RE.test(html);
 const FOOTER_RE = /<!-- site:footer -->[\s\S]*?<!-- \/site:footer -->/;
 const EXTRA_RE = /<!-- site:footer-extra -->([\s\S]*?)<!-- \/site:footer-extra -->/;
 
@@ -111,6 +114,7 @@ export function renderFooter(extra) {
 
 /** Puts the shared header and footer into a page and returns the page. Idempotent: stamping a stamped page changes nothing. `rel` is the page's path under public/, with slashes. */
 export function stampPage(html, rel) {
+  if (isStandalone(html)) return html;
   const crlf = html.includes('\r\n');
   let out = html.replace(/\r\n/g, '\n');
 

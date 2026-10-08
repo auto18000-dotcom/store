@@ -1,4 +1,5 @@
-// The pre-launch gate: tourguid.net is not ready for strangers, so everything on it except the home page asks for a password.
+// The pre-launch gate: tourguid.net is not ready for strangers, so everything on it except the home page asks for a password. The home page is the Coming soon page (public/index.html, with
+// its Log in and Create account links); the real home page is /home, behind the password with the rest.
 //
 // The owner, 2026-10-07: "Only tourguid.net index/home page should be accessible to the public." Real sign-in is the way this ends (Phase 1, item 8) and is being built separately; until it ships
 // this is the lock, and it is meant to come off cleanly: take the one call out of src/index.js and delete this file, its test, and the "behind the gate" lines in src/frame-policy.js.
@@ -25,15 +26,15 @@ export const MAX_AGE = 60 * 60 * 24 * 30;
 export const MIN_PASSWORD_LENGTH = 16;
 const MAX_FORM_BYTES = 4096;
 
-/** The home page, and the page its Sign up and Sign in buttons lead to. */
+/** The home page (the Coming soon page), and the page the Store's Sign in buttons lead to. */
 export const PUBLIC_PAGES = new Set(['/', '/under-construction']);
-/** What those pages load that is not an image or a font: their own scripts and styles, the logo and favicon, the three Store files the home page's search box is built from, and what search engines read. */
+/** What those pages load that is not an image or a font: their styles, the logo and favicon, and what search engines read. Neither page runs a script. The real home page (/home) has scripts and a search box built from three
+ *  Store files; they are behind the password with it, and the visitor who has the password gets them, so none of them is public any more. */
 export const PUBLIC_FILES = new Set([
-  '/landing.css', '/landing.js', '/config.js', '/analytics.js', '/site.css', '/favicon.svg', '/tourguid-mark-on-dark.svg', '/robots.txt', '/sitemap.xml',
-  '/store/date-range.js', '/store/place-autocomplete.js', '/store/place-autocomplete.css',
+  '/landing.css', '/site.css', '/favicon.svg', '/tourguid-mark-on-dark.svg', '/robots.txt', '/sitemap.xml',
 ]);
-/** The two routes the home page's search box asks for suggestions (place-autocomplete.js). Everything else under /api/ is gated. */
-export const PUBLIC_ROUTES = new Set(['/api/store/suggest', '/api/store/airports']);
+/** No API route is open. The two the home page's search box used to ask (suggest and airports) were the only unauthenticated API on the website; with the real home page behind the password they are gated too. */
+export const PUBLIC_ROUTES = new Set();
 /** Photos and icons under /assets/ and the font under /fonts/. By kind, not the whole folder: /assets/ also holds a register and a credits sheet that no page loads. */
 export const PUBLIC_FOLDERS = [
   { prefix: '/assets/', kind: /\.(?:png|jpe?g|svg|webp)$/ },

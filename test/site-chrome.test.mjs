@@ -7,7 +7,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { ACCOUNT, FOOTER, MODULES, PAGE_KEYS, PUBLIC, checkLinks, listPages, renderFooter, renderHeader, served, stampPage } from '../scripts/site-chrome.mjs';
+import { ACCOUNT, FOOTER, MODULES, PAGE_KEYS, PUBLIC, checkLinks, isStandalone, listPages, renderFooter, renderHeader, served, stampPage } from '../scripts/site-chrome.mjs';
 
 const rel = (file) => path.relative(PUBLIC, file).split(path.sep).join('/');
 const count = (text, needle) => text.split(needle).length - 1;
@@ -33,6 +33,7 @@ test('every page of the site carries exactly the shared header and footer, byte 
 test('the logo in the header and in the footer of every page leads to the home page, and there is one of each', () => {
   for (const file of listPages()) {
     const html = fs.readFileSync(file, 'utf8');
+    if (isStandalone(html)) continue;   // the Coming soon home page: one screen, no header, no footer (tested below)
     assert.equal(count(html, '<a class="tg-brand" href="/">'), 1, `${rel(file)}: header logo`);
     assert.equal(count(html, '<a class="tg-foot-brand" href="/">'), 1, `${rel(file)}: footer logo`);
     assert.equal(count(html, '<header'), 1, `${rel(file)}: one header`);
@@ -75,7 +76,9 @@ test('a page may name only a menu item that exists', () => {
   const keys = [...MODULES.flatMap((m) => [m.key, ...(m.sections ?? []).map((s) => s.key)]), ACCOUNT.key];
   assert.equal(new Set(keys).size, keys.length, 'no two menu items share a key');
   for (const file of listPages()) {
-    const key = /<!-- site:header page="([a-z-]*)" -->/.exec(fs.readFileSync(file, 'utf8'))?.[1];
+    const html = fs.readFileSync(file, 'utf8');
+    if (isStandalone(html)) continue;
+    const key = /<!-- site:header page="([a-z-]*)" -->/.exec(html)?.[1];
     assert.ok(PAGE_KEYS.has(key), `${rel(file)} names "${key}"`);
   }
 });
@@ -143,7 +146,7 @@ test('the footer is a site map: every module, every Travel Store page, the accou
 });
 
 test('every page of the site can be reached from any page: through the top bar, the Travel Store bar or the site map (the listed few are reached from a button or a result)', () => {
-  const REACHED_OTHERWISE = new Set(['404.html', 'under-construction.html', 'store/hotel.html', 'store/flight-detail.html', 'store/detail.html']);
+  const REACHED_OTHERWISE = new Set(['404.html', 'under-construction.html', 'home.html', 'store/hotel.html', 'store/flight-detail.html', 'store/detail.html']);   // home.html: the real home page, at /home behind the password while / is the Coming soon page
   const linked = new Set();
   for (const key of ['', 'store']) for (const m of renderHeader(key).matchAll(/<a [^>]*href="([^"]+)"/g)) linked.add(m[1]);
   for (const m of renderFooter('').matchAll(/<a href="([^"]+)"/g)) linked.add(m[1]);
@@ -249,7 +252,7 @@ function jpegSize(file) {
 }
 
 test('the homepage never tells the browser a photo is a different shape from the file: width and height attributes equal the JPEG\'s own', () => {
-  const html = fs.readFileSync(path.join(PUBLIC, 'index.html'), 'utf8');
+  const html = fs.readFileSync(path.join(PUBLIC, 'home.html'), 'utf8');
   const imgs = [...html.matchAll(/<img\b[^>]*>/g)].map((m) => m[0]).filter((tag) => /src="\.\/assets\/photos\/[^"]+\.jpg"/.test(tag));
   const grid = /<div class="dest-grid">([\s\S]*?)<\/div>/.exec(html)?.[1] ?? '';
   const dest = imgs.filter((tag) => grid.includes(tag));
@@ -274,7 +277,27 @@ test('the destination tiles are no taller than they are wide, and the photo fill
   assert.match(photo, /object-fit:\s*cover/);
   assert.match(photo, /width:\s*100%/);
   assert.match(photo, /height:\s*100%/);
-  const html = fs.readFileSync(path.join(PUBLIC, 'index.html'), 'utf8');
+  const html = fs.readFileSync(path.join(PUBLIC, 'home.html'), 'utf8');
   const cards = [...html.matchAll(/<a class="dest-card (dest-[a-z]+)"/g)].map((m) => m[1]);
   assert.deepEqual(cards, ['dest-paris', 'dest-rome', 'dest-barcelona', 'dest-tokyo', 'dest-newyork', 'dest-bangkok']);
+});
+
+test('the Coming soon home page is the one page that stands alone: no header, no footer, no script, no form, and exactly two ways in, each to a place that exists', () => {
+  const standalone = listPages().filter((file) => isStandalone(fs.readFileSync(file, 'utf8'))).map(rel);
+  assert.deepEqual(standalone, ['index.html'], 'the escape hatch is for the home page and nothing else');
+  const html = fs.readFileSync(path.join(PUBLIC, 'index.html'), 'utf8');
+  assert.equal(stampPage(html, 'index.html'), html, 'the generator leaves it alone');
+  assert.doesNotMatch(html, /<header|<footer|<script|<form|<input|\son[a-z]+=/i, 'one screen of markup and styles: the page policy lets nothing be submitted from here, and no script runs');
+  const links = [...html.matchAll(/<a\b[^>]*\shref="([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)].map((m) => [m[1], m[2].replace(/<[^>]+>/g, '').trim()]);
+  assert.deepEqual(links, [
+    ['https://app.tourguid.net/trip/#/trips', 'Log in'],          // the login is kept on app.tourguid.net (its cookie, its rate limits, its security check); a form here could not reach it
+    ['https://intro.tourguid.net/#test', 'Create an account'],    // accounts are made in the app, and this is where a new person signs up to download and test it
+    ['https://app.tourguid.net/privacy', 'Privacy'],
+    ['https://app.tourguid.net/terms', 'Terms'],
+    ['https://app.tourguid.net/accessibility', 'Accessibility'],
+    ['mailto:admin@tourguid.net', 'Support'],
+  ]);
+  assert.match(html, /<h1>COMING SOON!<\/h1>/, 'the page that was the home page before the real one went live, back as it was');
+  assert.match(html, /<link rel="canonical" href="https:\/\/tourguid\.net\/">/);
+  assert.doesNotMatch(html, /robots[^>]*noindex/i, 'the public front page stays indexable');
 });

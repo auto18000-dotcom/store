@@ -74,7 +74,7 @@ test('an empty destination still goes (the Store opens its own gallery), and a m
 });
 
 test('the page keeps its form pointed at this site\'s Store, with no hard-coded host, so a preview or a staging copy follows its own Store', () => {
-  const html = fs.readFileSync(path.join(pub, 'index.html'), 'utf8');
+  const html = fs.readFileSync(path.join(pub, 'home.html'), 'utf8');   // the real home page: /home, behind the password, while / is the Coming soon page
   assert.match(html, /<form class="search-fields" id="quick-search" action="\/store\/hotels\.html" method="get">/);
   const targets = [...html.matchAll(/data-target="([^"]+)"/g)].map((m) => m[1]);
   assert.equal(targets.length, 5);

@@ -43,8 +43,7 @@ function publicFiles() {
 // Written out here on purpose, apart from src/gate.js, so widening the open list there fails this test until it is widened here too, by someone who meant to.
 const OPEN_FILES = new Set([
   '/index.html', '/under-construction.html',
-  '/landing.css', '/landing.js', '/config.js', '/analytics.js', '/site.css', '/favicon.svg', '/tourguid-mark-on-dark.svg', '/robots.txt', '/sitemap.xml',
-  '/store/date-range.js', '/store/place-autocomplete.js', '/store/place-autocomplete.css',
+  '/landing.css', '/site.css', '/favicon.svg', '/tourguid-mark-on-dark.svg', '/robots.txt', '/sitemap.xml',
 ]);
 const isOpenFile = (file) => OPEN_FILES.has(file) || (file.startsWith('/assets/') && /\.(?:png|jpe?g|svg|webp)$/.test(file)) || (file.startsWith('/fonts/') && file.endsWith('.woff2'));
 /** The spellings a file answers to: the file itself, and for a page its clean address. */
@@ -62,16 +61,16 @@ test('every file in public/ is either on the short open list or behind the passw
   }
   for (const file of OPEN_FILES) assert.ok(files.includes(file), `${file} is on the open list but is not a file`);
   assert.deepEqual(open.filter((f) => f.endsWith('.html')), ['/index.html', '/under-construction.html'], 'two pages are open: the home page and the page its sign-in buttons lead to');
-  for (const f of ['/store/index.html', '/store/hotels.html', '/store/flights.html', '/store/member-account.html', '/store/journey-building.html', '/404.html']) assert.ok(files.includes(f) && !isOpenFile(f), f);
-  // Nothing from /assets/ that is not a picture, nothing from /store/ but the three files the home page's search box is built from.
-  for (const f of ['/assets/asset-register.csv', '/assets/photos/CREDITS.tsv', '/store/auth.js', '/store/config.js', '/store/vendor/supabase.min.js', '/store/inter-var.woff2', '/store/tourguid-logo.png', '/_headers']) {
+  for (const f of ['/store/index.html', '/store/hotels.html', '/store/flights.html', '/store/member-account.html', '/store/journey-building.html', '/404.html', '/home.html']) assert.ok(files.includes(f) && !isOpenFile(f), f);
+  // Nothing from /assets/ that is not a picture, nothing from /store/ at all, and none of the real home page's own scripts: it is /home now, behind the password, and so are they.
+  for (const f of ['/assets/asset-register.csv', '/assets/photos/CREDITS.tsv', '/store/auth.js', '/store/config.js', '/store/vendor/supabase.min.js', '/store/inter-var.woff2', '/store/tourguid-logo.png', '/_headers', '/landing.js', '/config.js', '/analytics.js', '/store/date-range.js', '/store/place-autocomplete.js', '/store/place-autocomplete.css']) {
     assert.equal(needsGate(f), true, f);
   }
 });
 
-test('the open API routes are exactly the two the home page\'s search box asks for; the rest of /api asks for the password', () => {
-  assert.deepEqual([...PUBLIC_ROUTES].sort(), ['/api/store/airports', '/api/store/suggest']);
-  for (const p of ['/api/store/health', '/api/store/go', '/api/store/hotels', '/api/store/flights', '/api/store/activities', '/api/store/places', '/api/store/feed', '/api/store/detail', '/api/store/providers', '/api/store/destinations', '/api/store/hero-photo', '/api/store/tiqets', '/api/anything', '/api']) {
+test('no API route is open: the two the old home page\'s search box asked for are behind the password with the real home page, like the rest of /api', () => {
+  assert.deepEqual([...PUBLIC_ROUTES], []);
+  for (const p of ['/api/store/suggest', '/api/store/airports', '/api/store/health', '/api/store/go', '/api/store/hotels', '/api/store/flights', '/api/store/activities', '/api/store/places', '/api/store/feed', '/api/store/detail', '/api/store/providers', '/api/store/destinations', '/api/store/hero-photo', '/api/store/tiqets', '/api/anything', '/api']) {
     assert.equal(needsGate(p), true, p);
   }
 });
@@ -135,22 +134,22 @@ test('everything the open pages load is open: scripts, styles, fonts, pictures, 
     if (file.endsWith('.js')) js(fs.readFileSync(disk, 'utf8'), file);
   }
   assert.deepEqual(problems, []);
-  assert.ok(seen.size >= 20, `looked at ${seen.size} references`);
-  for (const must of ['/landing.css', '/site.css', '/config.js', '/landing.js', '/analytics.js', '/store/place-autocomplete.js', '/store/date-range.js', '/fonts/inter-var.woff2', '/favicon.svg', '/tourguid-mark-on-dark.svg', '/assets/photos/hero-beach-1600.jpg', '/assets/og-1200x630.png', '/api/store/suggest']) {
+  assert.ok(seen.size >= 5, `looked at ${seen.size} references`);
+  for (const must of ['/landing.css', '/site.css', '/fonts/inter-800.woff2', '/favicon.svg', '/tourguid-mark-on-dark.svg']) {
     assert.ok(seen.has(must), `${must} should have been found among what the open pages load (the scan is not looking in the right places)`);
   }
-  // The search box builds /api/store/${airports ? 'airports' : 'suggest'}; the scan above sees only the literal part, so name the two it can ask for.
-  const autocomplete = fs.readFileSync(path.join(publicDir, 'store', 'place-autocomplete.js'), 'utf8');
-  assert.match(autocomplete, /\/api\/store\/\$\{airports\?'airports':'suggest'\}/);
-  assert.match(autocomplete, /\/api\/store\/suggest\?/);
+  // Neither open page runs a script, so nothing they load is one: the real home page's scripts (and the search routes they ask) are behind the password with it.
+  for (const path of seen) assert.doesNotMatch(path, /\.js$/, `${path}: a script loaded by an open page`);
+  assert.equal([...seen].some((p) => p.startsWith('/api/')), false, 'and no open page asks for an API route');
 });
 
 test('the open pages\' own links into the Store are the one thing that leads behind the password, and they go to the password page, not to nothing', () => {
-  const home = fs.readFileSync(path.join(publicDir, 'index.html'), 'utf8');
-  const links = [...home.matchAll(/<a\b[^>]*\shref="(\/store[^"]*)"/g)].map((m) => m[1]);
-  assert.ok(links.length >= 10, `${links.length} links from the home page into the Store`);
+  const stub = fs.readFileSync(path.join(publicDir, 'under-construction.html'), 'utf8');
+  const links = [...stub.matchAll(/<a\b[^>]*\shref="(\/store[^"]*)"/g)].map((m) => m[1]);
+  assert.ok(links.length >= 10, `${links.length} links from the under-construction page into the Store`);
   for (const link of links) assert.equal(needsGate(new URL(link, 'https://tourguid.net').pathname), true, link);
-  assert.match(home, /action="\/store\/hotels\.html"/);
+  const home = fs.readFileSync(path.join(publicDir, 'index.html'), 'utf8');
+  assert.deepEqual([...home.matchAll(/<a\b[^>]*\shref="(\/[^"]*)"/g)].map((m) => m[1]), [], 'the Coming soon page links nowhere on this site: both ways in lead to the apps\' own hosts');
 });
 
 test('robots.txt still lets crawlers in (they must see the 401 and the noindex to drop the old listings), and the sitemap names the home page only', () => {
@@ -219,14 +218,14 @@ test('a HEAD gets the same status and headers as the GET, with no body', async (
 });
 
 test('the open addresses are not touched: the gate lets them through to the site', async () => {
-  for (const p of ['/', '/index.html', '/under-construction', '/under-construction.html', '/landing.css', '/landing.js', '/config.js', '/analytics.js', '/site.css', '/favicon.svg',
-    '/tourguid-mark-on-dark.svg', '/robots.txt', '/sitemap.xml', '/store/date-range.js', '/store/place-autocomplete.js', '/store/place-autocomplete.css',
-    '/assets/photos/hero-beach-1600.jpg', '/assets/og-1200x630.png', '/fonts/inter-var.woff2', '/api/store/suggest?q=par', '/api/store/airports?q=par', '/?booking=success']) {
+  for (const p of ['/', '/index.html', '/under-construction', '/under-construction.html', '/landing.css', '/site.css', '/favicon.svg',
+    '/tourguid-mark-on-dark.svg', '/robots.txt', '/sitemap.xml',
+    '/assets/photos/hero-beach-1600.jpg', '/assets/og-1200x630.png', '/fonts/inter-var.woff2', '/fonts/inter-800.woff2', '/?booking=success']) {
     assert.equal(await gate(at(p, { headers: BROWSER }), env, quick), null, p);
   }
   // Open means open for everybody, with or without a gate that is set up.
   assert.equal(await gate(at('/', { headers: BROWSER }), {}, quick), null);
-  assert.equal(await gate(at('/api/store/suggest?q=par'), { GATE_PASSWORD: 'short' }, quick), null);
+  assert.equal(await gate(at('/under-construction'), { GATE_PASSWORD: 'short' }, quick), null);
 });
 
 // --- fail closed ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -479,8 +478,8 @@ test('the whole Worker: a closed address is stopped at the door and never reache
   assert.match(home.headers.get('content-security-policy'), /frame-ancestors https:\/\/www\.figma\.com https:\/\/figma\.com/, 'and still framed by Figma, and nobody else');
 
   const search = await ask(at('/api/store/suggest', { headers: { accept: 'application/json' } }));
-  assert.equal(search.status, 200, 'the home page\'s search suggestions reach the Store Worker');
-  assert.equal(points.length, 1);
+  assert.equal(search.status, 401, 'the search suggestions are not public any more: the real home page is behind the password, and so is what its search box asks for');
+  assert.deepEqual(points, [], 'and the refusal is not counted');
 
   const login = await ask(loginPost({ next: '/store/hotels' }));
   assert.equal(login.status, 303);
@@ -494,6 +493,8 @@ test('the whole Worker: a closed address is stopped at the door and never reache
   assert.equal(inside.headers.get('x-frame-options'), 'DENY', 'a page behind the password is never framed');
   assert.match(inside.headers.get('content-security-policy'), /frame-ancestors 'none'/);
 
+  const suggest = await ask(withCookie('/api/store/suggest', cookie, { headers: { accept: 'application/json' } }));
+  assert.equal(suggest.status, 200, 'with the cookie the real home page\'s search suggestions reach the Store Worker');
   const insideApi = await ask(withCookie('/api/store/health', cookie));
   assert.equal(insideApi.status, 200, 'with the cookie the request reaches the Store Worker');
   assert.equal((await insideApi.json()).storeSearch, 'not_configured', 'and this is the Store Worker\'s own answer, not the gate\'s');
