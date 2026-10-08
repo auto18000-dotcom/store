@@ -93,6 +93,13 @@ const SUPPLIER_HOSTS = Object.assign(Object.create(null), {
 // https://evil.example/ was answered with a 302 to it, the first link of a chain
 // whose second link is Google's policy and not ours). A path is a whole segment:
 // "/maps" and "/maps/..." but not "/mapsfoo".
+//
+// A RESIDUAL THAT IS ACCEPTED, NOT FORGOTTEN (TourGuid-Security, 2026-10-08): /maps on an
+// allow-listed Google host still includes Google My Maps (/maps/d/...) and other
+// user-made Maps content, so someone could put a link inside a map. That is weaker
+// than a forwarder (a victim has to arrive, read and click again) and it is inherent
+// to allow-listing Maps at all. It is written here so it is not rediscovered and
+// treated as new.
 const SUPPLIER_PATHS = Object.assign(Object.create(null), {
   "maps.google.com": ["/", "/maps"],
   "www.google.com": ["/maps"],
@@ -128,7 +135,14 @@ const MESSAGES = {
 };
 const STATUS = { busy: 429, lookups_busy: 429, daily_cap: 429, unavailable: 502, unknown_search: 404, provider_refused: 503 };
 
-/** Only https, never credentials in the host, never a backslash trick. */
+/**
+ * Only https, never credentials in the host, never a backslash trick.
+ *
+ * What TourGuid-Security found right in this redirector on 2026-10-08, so nobody relaxes it: https only; a username or password in the URL refused (that is what kills
+ * https://www.booking.com@evil.com/); a backslash refused; the host matched EXACTLY against a table, never with endsWith, a regex or includes (the three places an open
+ * redirect usually comes from); the URL the ledger hands back checked again here before it becomes the destination, so a confused ledger cannot send anyone anywhere;
+ * and Referrer-Policy no-referrer and Cache-Control no-store on the 302. test/go-allowlist.test.mjs holds each of them.
+ */
 function supplierOf(target) {
   let parsed;
   try {

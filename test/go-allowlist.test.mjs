@@ -89,3 +89,34 @@ test('the userinfo, backslash and scheme tricks are still refused (the three pla
     '',
   ]) assert.equal((await go(link)).status, 400, link);
 });
+
+/** /api/store/go with store-search configured and answering as given (a fake fetch; restored afterwards). */
+async function goWithLedger(target, answer) {
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(JSON.stringify(answer), { status: 200, headers: { 'content-type': 'application/json' } });
+  try {
+    const env = { STORE_SEARCH_URL: 'https://search.example/functions/v1/store-search', STORE_CALLER_SECRET: 'shh' };
+    return await worker.fetch(new Request(`https://tourguid.net/api/store/go?url=${encodeURIComponent(target)}&page=%2Fstore`), env, { waitUntil() {} });
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+}
+
+test('the address the ledger hands back is checked again before it becomes the destination: a confused ledger cannot send anyone anywhere', async () => {
+  const viator = 'https://www.viator.com/tours/Paris/Seine/d479-1?pid=P1';
+  const kept = await goWithLedger(viator, { url: 'https://www.viator.com/tours/Paris/Seine/d479-1?pid=P1&mcid=42' });
+  assert.equal(kept.headers.get('location'), 'https://www.viator.com/tours/Paris/Seine/d479-1?pid=P1&mcid=42', 'a good address from the ledger is used');
+  assert.equal(kept.headers.get('x-tourguid-referral'), 'recorded');
+  for (const bad of ['https://evil.example.com/x', 'https://www.google.com/url?q=https://evil.example.com/', 'http://www.viator.com/x', 'https://constructor/', 'javascript:alert(1)']) {
+    const answered = await goWithLedger(viator, { url: bad });
+    assert.equal(answered.status, 302, bad);
+    assert.equal(answered.headers.get('location'), viator, `${bad}: the ledger's answer is ignored and the address that passed our own list is kept`);
+  }
+});
+
+test('the 302 is not cached and carries no referrer, so our own address never travels on to the supplier', async () => {
+  const response = await worker.fetch(new Request('https://tourguid.net/api/store/go?url=https%3A%2F%2Fwww.viator.com%2Ftours%2Fx&page=%2Fstore'), {}, { waitUntil() {} });
+  assert.equal(response.status, 302);
+  assert.equal(response.headers.get('referrer-policy'), 'no-referrer');
+  assert.equal(response.headers.get('cache-control'), 'no-store');
+});
