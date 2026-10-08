@@ -516,3 +516,11 @@ test('every page behind the password is also on the "never framed" list, so the 
     if (needsGate(page)) assert.ok(NEVER_FRAMEABLE.has(page), `${page} is behind the password and must be listed as never framed`);
   }
 });
+
+test('the gate rate-limit counter has a number of its own: one namespace_id belongs to one Worker, and these belong to the others', () => {
+  const TAKEN = { 1001: 'TourGuid-Intro SIGNUP_LIMIT', 1002: 'the retired z1 AUTH_LIMIT', 2001: 'TourGuid-App ACCOUNT_LIMIT', 2002: 'TourGuid-App ACCOUNT_SIGNIN_LIMIT' };
+  const config = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'wrangler.jsonc'), 'utf8').replace(/^\s*\/\/.*$/gm, '');
+  const ids = [...config.matchAll(/"namespace_id":\s*"(\d+)"/g)].map((m) => m[1]);
+  assert.deepEqual(ids, ['3001'], 'this Worker has one counter, the gate');
+  for (const id of ids) assert.equal(TAKEN[id], undefined, `${id} is already ${TAKEN[id]}`);
+});
