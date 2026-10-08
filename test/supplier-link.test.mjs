@@ -54,6 +54,7 @@ test('names come from the host, never from a lookalike', () => {
     'https://www.google.com/maps/place/Eiffel+Tower': 'Google Maps',
     'https://maps.google.com/?q=x': 'Google Maps',
     'https://www.google.com/search?q=viator': 'google.com',
+    'https://www.google.com/mapsfoo': 'google.com',
     'https://evilviator.com/x': 'evilviator.com',
     'https://viator.com.evil.example/x': 'viator.com.evil.example',
     'https://something-else.example/x': 'something-else.example',
