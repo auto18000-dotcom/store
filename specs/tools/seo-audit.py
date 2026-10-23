@@ -1,6 +1,13 @@
-import re, sys, urllib.request, html
+import re, sys, urllib.request, urllib.parse, html
+
+# Only ever fetch our own site. The URL list comes from the live sitemap, so a
+# bad or tampered entry must not send this script to another host or scheme.
+ALLOWED_HOST = 'tourguid.net'
 
 def get(url, ua='Mozilla/5.0 (compatible; TourGuidAudit/1.0)'):
+    parts = urllib.parse.urlsplit(url)
+    if parts.scheme != 'https' or parts.hostname != ALLOWED_HOST:
+        raise ValueError(f'refusing to fetch {url!r}: only https://{ALLOWED_HOST}/ is audited')
     req = urllib.request.Request(url, headers={'User-Agent': ua})
     with urllib.request.urlopen(req, timeout=30) as r:
         return r.status, dict(r.headers), r.read().decode('utf-8', 'replace')
